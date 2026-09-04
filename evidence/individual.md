@@ -1,10 +1,37 @@
 # Evidencia individual — completar antes de entregar
 
-- Nombre:
-- Repositorio y commit evaluado:
-- Mi contribución concreta:
-- Decisión técnica que puedo explicar:
+- Nombre: Martin Moreno Libreros
+- Repositorio y commit evaluado:  https://github.com/HilayGM/pwa-inspecciones-Moreno-Libreros-Martin  
+commit: 78d6e89eaa6a618ee8792fa878a62f64628862e7
+
+- Mi contribución concreta: Analicé el problema de inspecciones de mantenimiento, definí usuarios y escenarios, redacté requisitos verificables, comparé cuatro estrategias de aplicación y documenté la selección de una PWA. También comprobé la reproducibilidad del starter y preparé la evidencia de la Semana 1.
+
+- Decisión técnica que puedo explicar: Elegí una PWA porque permite mantener una sola base de código, distribuir la aplicación mediante una URL y agregar capacidades offline progresivamente. Reconozco que tiene limitaciones de navegador y que la sincronización todavía no está implementada.
+
 - Comando o prueba que ejecuté y resultado:
+ Ejecuté `npm.cmd test` y el resultado fue: starter.spec.mjs: PASS.
+  Ejecuté `npm.cmd run verify` y el resultado fue: Starter verificable: PASS.
+  Ejecuté `npm.cmd run build` y el resultado fue:    Creating an optimized production build ...
+ ✓ Compiled successfully
+ ✓ Linting and checking validity of types
+ ✓ Collecting page data    
+ ✓ Generating static pages (4/4)
+ ✓ Collecting build traces    
+ ✓ Finalizing page optimization
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    138 B          87.4 kB
+└ ○ /_not-found                          873 B          88.1 kB
++ First Load JS shared by all            87.2 kB
+  ├ chunks/117-e5476d4bdcce692a.js       31.7 kB
+  ├ chunks/fd9d1056-749e5812300142af.js  53.6 kB
+  └ other shared chunks (total)          1.86 kB
+
+
+○  (Static)  prerendered as static content.
+
 - Limitación o riesgo que encontré:
-- Uso de IA (herramienta, propósito, fragmentos influenciados y validación humana):
+La operación offline y la sincronización todavía no están implementadas. Cuando se incorporen, será necesario evitar pérdida de información, duplicados y conflictos después de recuperar la conexión.
+
+- Uso de IA (herramienta, propósito, fragmentos influenciados y validación humana): Utilicé OpenAI Codex para interpretar la consigna, organizar los requisitos y revisar la comparación de alternativas. Influyó en la estructura y redacción inicial de `docs/requirements.md`, `docs/decision-record.md` y `evidence/individual.md`. Revisé el contenido contra la consigna, adapté las decisiones al proyecto y validaré personalmente los resultados mediante los comandos de prueba y compilación.
 
