@@ -2,7 +2,7 @@
 
 - Nombre: Martin Moreno Libreros
 - Repositorio y commit evaluado:  https://github.com/HilayGM/pwa-inspecciones-Moreno-Libreros-Martin  
-commit: 78d6e89eaa6a618ee8792fa878a62f64628862e7
+commit: 4e479fdf99679746d083bf1e7a2e2a85c3b18424
 
 - Mi contribución concreta: Analicé el problema de inspecciones de mantenimiento, definí usuarios y escenarios, redacté requisitos verificables, comparé cuatro estrategias de aplicación y documenté la selección de una PWA. También comprobé la reproducibilidad del starter y preparé la evidencia de la Semana 1.
 
@@ -39,7 +39,7 @@ La operación offline y la sincronización todavía no están implementadas. Cua
 
 - Estudiante: Oscar Martinez Martinez
 - Commit SHA evaluado:https://github.com/HilayGM/pwa-inspecciones-Moreno-Libreros-Martin
- SHA:78d6e89eaa6a618ee8792fa878a62f64628862e7
+ SHA:4e479fdf99679746d083bf1e7a2e2a85c3b18424
 
 - Mi contribución concreta:
   Revisé la entrega de la Semana 1 contra la consigna y la rúbrica, comprobé la estructura del proyecto y revisé los requisitos y la decisión técnica. También comprobé personalmente la reproducibilidad del starter en Windows mediante la instalación de dependencias, ejecución de la aplicación, pruebas, verificación y compilación.
@@ -86,7 +86,7 @@ La operación offline y la sincronización todavía no están implementadas. Cua
 
 - Estudiante: Felipe Mora Lopez
 - Commit SHA evaluado:https://github.com/HilayGM/pwa-inspecciones-Moreno-Libreros-Martin
- SHA:78d6e89eaa6a618ee8792fa878a62f64628862e7
+ SHA:4e479fdf99679746d083bf1e7a2e2a85c3b18424
 
 
 * **Contribución y enlace:** 
