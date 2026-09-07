@@ -81,3 +81,28 @@ La operación offline y la sincronización todavía no están implementadas. Cua
 
 - Uso declarado de IA (herramienta, propósito, fragmentos influenciados y validación humana):
   Utilicé ChatGPT y OpenAI Codex como apoyo para interpretar la consigna, analizar la estructura del proyecto, revisar los requisitos de la actividad y organizar mi evidencia individual. La IA influyó en la organización y revisión de esta evidencia. Validé personalmente la información contra los archivos del proyecto y ejecuté personalmente `npm ci`, `npm run dev`, `npm test`, `npm run verify` y `npm run build` antes de registrar los resultados.
+
+## Felipe Mora Lopez
+
+- Estudiante: Felipe Mora Lopez
+- Commit SHA evaluado:https://github.com/HilayGM/pwa-inspecciones-Moreno-Libreros-Martin
+ SHA:78d6e89eaa6a618ee8792fa878a62f64628862e7
+
+
+* **Contribución y enlace:** 
+  Me enfoqué en la actualización de la definición del problema, contexto y límites del proyecto para nuestros entregables, documentándolo en `docs/requirements.md`. 
+
+* **Decisión que explica:** 
+  Decidí delimitar estrictamente el alcance del problema para excluir características no solicitadas en esta etapa. Estructuré los escenarios de usuario asegurando que el caso de conectividad intermitente sea realista frente a las restricciones del sistema.
+
+* **Comando o prueba ejecutada y resultado real:** 
+  Ejecuté `npm run verify`. El resultado técnico fue exitoso (`pass`) y compiló correctamente, generando el archivo `reports/verification.json`.
+
+* **Qué comprueba y qué no:** 
+  El comando comprueba la estructura básica de los archivos, ejecuta la prueba proporcionada y valida que el proyecto compile. No comprueba la calidad, coherencia ni el análisis de los documentos redactados, ni certifica la ausencia de secretos o credenciales en el código.
+
+* **Limitación:** 
+  Una limitación de esta verificación es que un *build* verde no garantiza que los escenarios planteados resuelvan el problema real de los usuarios; la calidad de esa lógica depende de nuestra revisión manual.
+
+* **Uso de IA:** 
+  Se utilizó inteligencia artificial (Claude) como asistente de redacción para dar formato y revisar la claridad de la documentación, verificando humanamente que el contenido se ajuste íntegramente a los lineamientos y rúbrica de la actividad.
