@@ -35,3 +35,49 @@ La operación offline y la sincronización todavía no están implementadas. Cua
 
 - Uso de IA (herramienta, propósito, fragmentos influenciados y validación humana): Utilicé OpenAI Codex para interpretar la consigna, organizar los requisitos y revisar la comparación de alternativas. Influyó en la estructura y redacción inicial de `docs/requirements.md`, `docs/decision-record.md` y `evidence/individual.md`. Revisé el contenido contra la consigna, adapté las decisiones al proyecto y validaré personalmente los resultados mediante los comandos de prueba y compilación.
 
+## Oscar Martinez Martinez
+
+- Estudiante: Oscar Martinez Martinez
+- Commit SHA evaluado:https://github.com/HilayGM/pwa-inspecciones-Moreno-Libreros-Martin
+ SHA:
+
+- Mi contribución concreta:
+  Revisé la entrega de la Semana 1 contra la consigna y la rúbrica, comprobé la estructura del proyecto y revisé los requisitos y la decisión técnica. También comprobé personalmente la reproducibilidad del starter en Windows mediante la instalación de dependencias, ejecución de la aplicación, pruebas, verificación y compilación.
+
+- Decisión técnica que puedo explicar:
+  La estrategia PWA es adecuada para el proyecto de inspecciones porque permite mantener una sola base de código, distribuir la aplicación mediante una URL y agregar progresivamente capacidades para trabajar con conectividad intermitente. En la Semana 1 todavía no se implementan el funcionamiento offline ni la sincronización, ya que corresponden a etapas posteriores del proyecto.
+
+- Prueba que ejecuté y resultado:
+
+  Ejecuté `npm test`.
+  Resultado:
+  `starter.spec.mjs: PASS`
+
+  Ejecuté `npm run verify`.
+  Resultado:
+  `Starter verificable: PASS`
+
+  Se generó el reporte:
+  `reports/verification.json`
+  El reporte indicó:
+  `"status": "pass"` y `"missing": []`.
+
+  Ejecuté `npm run build`.
+  Resultado:
+  `Compiled successfully`
+
+  También se completaron correctamente:
+  `Linting and checking validity of types`
+  `Collecting page data`
+  `Generating static pages (4/4)`
+  `Collecting build traces`
+  `Finalizing page optimization`
+
+- Limitación o fallo diagnosticado:
+  La operación offline y la sincronización todavía no están implementadas. Cuando se agreguen será necesario manejar correctamente los reintentos, los registros pendientes, posibles duplicados y conflictos cuando se recupere la conexión.
+
+- Cambio que podría defender o modificar en vivo:
+  Puedo explicar los criterios de aceptación de los requisitos de la Semana 1 y justificar la selección de una PWA frente a una aplicación web tradicional, una aplicación nativa y una solución multiplataforma.
+
+- Uso declarado de IA (herramienta, propósito, fragmentos influenciados y validación humana):
+  Utilicé ChatGPT y OpenAI Codex como apoyo para interpretar la consigna, analizar la estructura del proyecto, revisar los requisitos de la actividad y organizar mi evidencia individual. La IA influyó en la organización y revisión de esta evidencia. Validé personalmente la información contra los archivos del proyecto y ejecuté personalmente `npm ci`, `npm run dev`, `npm test`, `npm run verify` y `npm run build` antes de registrar los resultados.
