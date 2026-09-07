@@ -39,7 +39,7 @@ La operación offline y la sincronización todavía no están implementadas. Cua
 
 - Estudiante: Oscar Martinez Martinez
 - Commit SHA evaluado:https://github.com/HilayGM/pwa-inspecciones-Moreno-Libreros-Martin
- SHA:
+ SHA:78d6e89eaa6a618ee8792fa878a62f64628862e7
 
 - Mi contribución concreta:
   Revisé la entrega de la Semana 1 contra la consigna y la rúbrica, comprobé la estructura del proyecto y revisé los requisitos y la decisión técnica. También comprobé personalmente la reproducibilidad del starter en Windows mediante la instalación de dependencias, ejecución de la aplicación, pruebas, verificación y compilación.
