@@ -2,16 +2,17 @@ import { inspections } from "../lib/data/inspections";
 
 export default function HomePage() {
   return (
-    <main className="page-shell">
-      <header className="hero">
-        <p className="eyebrow">Proyecto base · Semana 1</p>
-        <h1>Inspecciones de laboratorio</h1>
+    <div className="page-shell" style={{ overflowWrap: "anywhere" }}>
+      <section className="hero" aria-labelledby="page-heading">
+        <p className="eyebrow">Semana 02 · Inspecciones de mantenimiento</p>
+        <h1 id="page-heading">Inspecciones de laboratorio</h1>
         <p className="lead">
-          Registro de mantenimiento para trabajar con conectividad intermitente.
-          Los datos mostrados son sintéticos.
+          Consulta revisiones de mantenimiento de laboratorios, su estado y las
+          observaciones que requieren seguimiento. Todos los datos mostrados son
+          sintéticos y se utilizan únicamente con fines académicos.
         </p>
-        <span className="status">Estado del starter: ejecutable · PWA aún no implementada</span>
-      </header>
+        <p className="status">Demostración de consulta · Sin captura ni edición de inspecciones</p>
+      </section>
 
       <section aria-labelledby="inspections-heading" className="content-section">
         <div className="section-heading">
@@ -24,17 +25,25 @@ export default function HomePage() {
 
         <div className="inspection-grid">
           {inspections.map((inspection) => (
-            <article className="inspection-card" key={inspection.id}>
-              <div className="card-topline">
-                <span className={`badge badge-${inspection.status}`}>{inspection.statusLabel}</span>
-                <span className="muted">{inspection.date}</span>
+            <article
+              className="inspection-card"
+              key={inspection.id}
+              aria-labelledby={`${inspection.id}-heading`}
+            >
+              <div className="card-topline" style={{ flexWrap: "wrap" }}>
+                <span className={`badge badge-${inspection.status}`}>
+                  {inspection.statusLabel}
+                </span>
+                <time className="muted" dateTime={inspection.date}>
+                  {inspection.date}
+                </time>
               </div>
-              <h3>{inspection.location}</h3>
+              <h3 id={`${inspection.id}-heading`}>{inspection.location}</h3>
               <p>{inspection.summary}</p>
               <dl>
                 <div>
-                  <dt>Responsable</dt>
-                  <dd>{inspection.inspector}</dd>
+                  <dt>Registro de demostración</dt>
+                  <dd>{inspection.id}</dd>
                 </div>
                 <div>
                   <dt>Hallazgos</dt>
@@ -45,10 +54,6 @@ export default function HomePage() {
           ))}
         </div>
       </section>
-
-      <footer className="footer">
-        <p>Aplicaciones Web Progresivas · Universidad Tecnológica de Tehuacán</p>
-      </footer>
-    </main>
+    </div>
   );
 }

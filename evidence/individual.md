@@ -1,10 +1,12 @@
-# Evidencia individual — completar antes de entregar
+# Evidencia individual — entrega de equipo
+
+- Commit base de integración de la entrega: `39f3914f1ac0730f5ad22338e8ca8f86b58a6337` (merge de las PR #2, #3 y #4 en `main`).
 
 - Nombre: Martin Moreno Libreros
-- Repositorio y commit evaluado:  https://github.com/HilayGM/pwa-inspecciones-Moreno-Libreros-Martin  
-commit: 4e479fdf99679746d083bf1e7a2e2a85c3b18424
+- Repositorio y commit evaluado: https://github.com/HilayGM/pwa-inspecciones
+commit: f668584723a817d6ad39c22a093b2fb49245e94e
 
-- Mi contribución concreta: Analicé el problema de inspecciones de mantenimiento, definí usuarios y escenarios, redacté requisitos verificables, comparé cuatro estrategias de aplicación y documenté la selección de una PWA. También comprobé la reproducibilidad del starter y preparé la evidencia de la Semana 1.
+- Mi contribución concreta: Configuré la base PWA mediante `next-pwa`, agregué `public/manifest.webmanifest` y la prueba inicial `tests/manifest.spec.ts`. Para la entrega integrada se completaron los iconos declarados y la prueba ahora valida que esos recursos existan y tengan las dimensiones correctas.
 
 - Decisión técnica que puedo explicar: Elegí una PWA porque permite mantener una sola base de código, distribuir la aplicación mediante una URL y agregar capacidades offline progresivamente. Reconozco que tiene limitaciones de navegador y que la sincronización todavía no está implementada.
 
@@ -38,11 +40,11 @@ La operación offline y la sincronización todavía no están implementadas. Cua
 ## Oscar Martinez Martinez
 
 - Estudiante: Oscar Martinez Martinez
-- Commit SHA evaluado:https://github.com/HilayGM/pwa-inspecciones-Moreno-Libreros-Martin
- SHA:4e479fdf99679746d083bf1e7a2e2a85c3b18424
+- Commit SHA evaluado: https://github.com/HilayGM/pwa-inspecciones
+ SHA:291bd66bc94d54b96fada542ef9f740d6d9d3568
 
 - Mi contribución concreta:
-  Revisé la entrega de la Semana 1 contra la consigna y la rúbrica, comprobé la estructura del proyecto y revisé los requisitos y la decisión técnica. También comprobé personalmente la reproducibilidad del starter en Windows mediante la instalación de dependencias, ejecución de la aplicación, pruebas, verificación y compilación.
+  Implementé `src/app/page.tsx` con el contenido de demostración de inspecciones y actualicé `README.md` con instalación, ejecución, verificación, arquitectura, limitaciones y evidencia de la Semana 02.
 
 - Decisión técnica que puedo explicar:
   La estrategia PWA es adecuada para el proyecto de inspecciones porque permite mantener una sola base de código, distribuir la aplicación mediante una URL y agregar progresivamente capacidades para trabajar con conectividad intermitente. En la Semana 1 todavía no se implementan el funcionamiento offline ni la sincronización, ya que corresponden a etapas posteriores del proyecto.
@@ -85,12 +87,12 @@ La operación offline y la sincronización todavía no están implementadas. Cua
 ## Felipe Mora Lopez
 
 - Estudiante: Felipe Mora Lopez
-- Commit SHA evaluado:https://github.com/HilayGM/pwa-inspecciones-Moreno-Libreros-Martin
- SHA:4e479fdf99679746d083bf1e7a2e2a85c3b18424
+- Commit SHA evaluado: https://github.com/HilayGM/pwa-inspecciones
+ SHA:5fe55626cafc56c06a6408c420131f465f3ec290
 
 
-* **Contribución y enlace:** 
-  Me enfoqué en la actualización de la definición del problema, contexto y límites del proyecto para nuestros entregables, documentándolo en `docs/requirements.md`. 
+* **Contribución y enlace:**
+  Implementé `src/components/app-shell.tsx` y actualicé `src/app/layout.tsx` para integrar la estructura compartida de la PWA: encabezado, navegación, contenido principal y pie de página.
 
 * **Decisión que explica:** 
   Decidí delimitar estrictamente el alcance del problema para excluir características no solicitadas en esta etapa. Estructuré los escenarios de usuario asegurando que el caso de conectividad intermitente sea realista frente a las restricciones del sistema.
