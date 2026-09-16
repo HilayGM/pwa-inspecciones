@@ -1,93 +1,101 @@
-/**
- * Copyright 2018 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *     http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*
+ * Service worker for the laboratory-inspections PWA.
+ *
+ * Cache policy:
+ * - Navigations: network first, then the cached app shell.
+ * - Next.js static assets: cache first.
+ * - APIs, non-GET requests, and cross-origin requests: never cached here.
  */
 
-// If the loader is already loaded, just stop.
-if (!self.define) {
-  let registry = {};
+const CACHE_PREFIX = "pwa-inspections-";
+const CACHE_NAME = `${CACHE_PREFIX}v1`;
+const APP_SHELL_URL = "/";
+const NEXT_STATIC_PATH = "/_next/static/";
 
-  // Used for `eval` and `importScripts` where we can't get script URL by other means.
-  // In both cases, it's safe to use a global var because those functions are synchronous.
-  let nextDefineUri;
+const isCacheableResponse = (response) => response && response.ok;
 
-  const singleRequire = (uri, parentUri) => {
-    uri = new URL(uri + ".js", parentUri).href;
-    return registry[uri] || (
-      
-        new Promise(resolve => {
-          if ("document" in self) {
-            const script = document.createElement("script");
-            script.src = uri;
-            script.onload = resolve;
-            document.head.appendChild(script);
-          } else {
-            nextDefineUri = uri;
-            importScripts(uri);
-            resolve();
-          }
-        })
-      
-      .then(() => {
-        let promise = registry[uri];
-        if (!promise) {
-          throw new Error(`Module ${uri} didn’t register its module`);
-        }
-        return promise;
-      })
-    );
-  };
+async function cacheResponse(request, response) {
+  if (!isCacheableResponse(response)) {
+    return;
+  }
 
-  self.define = (depsNames, factory) => {
-    const uri = nextDefineUri || ("document" in self ? document.currentScript.src : "") || location.href;
-    if (registry[uri]) {
-      // Module is already loading or loaded.
-      return;
-    }
-    let exports = {};
-    const require = depUri => singleRequire(depUri, uri);
-    const specialDeps = {
-      module: { uri },
-      exports,
-      require
-    };
-    registry[uri] = Promise.all(depsNames.map(
-      depName => specialDeps[depName] || require(depName)
-    )).then(deps => {
-      factory(...deps);
-      return exports;
-    });
-  };
+  const cache = await caches.open(CACHE_NAME);
+  await cache.put(request, response.clone());
 }
-define(['./workbox-7144475a'], (function (workbox) { 'use strict';
 
-  importScripts();
+async function networkFirstNavigation(request) {
+  try {
+    const response = await fetch(request);
+    await cacheResponse(APP_SHELL_URL, response);
+    return response;
+  } catch {
+    const cachedAppShell = await caches.match(APP_SHELL_URL);
+
+    if (cachedAppShell) {
+      return cachedAppShell;
+    }
+
+    return new Response(
+      "<!doctype html><html lang=\"es-MX\"><meta charset=\"utf-8\"><title>Sin conexión</title><body><main><h1>Sin conexión</h1><p>Abre esta aplicación una vez con Internet para usar la pantalla inicial sin conexión.</p></main></body></html>",
+      {
+        status: 503,
+        statusText: "Service Unavailable",
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      },
+    );
+  }
+}
+
+async function cacheFirstStaticAsset(request) {
+  const cachedResponse = await caches.match(request);
+
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+
+  const response = await fetch(request);
+  await cacheResponse(request, response);
+  return response;
+}
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.add(APP_SHELL_URL)),
+  );
   self.skipWaiting();
-  workbox.clientsClaim();
-  workbox.registerRoute("/", new workbox.NetworkFirst({
-    "cacheName": "start-url",
-    plugins: [{
-      cacheWillUpdate: async ({
-        response: e
-      }) => e && "opaqueredirect" === e.type ? new Response(e.body, {
-        status: 200,
-        statusText: "OK",
-        headers: e.headers
-      }) : e
-    }]
-  }), 'GET');
-  workbox.registerRoute(/.*/i, new workbox.NetworkOnly({
-    "cacheName": "dev",
-    plugins: []
-  }), 'GET');
+});
 
-}));
-//# sourceMappingURL=sw.js.map
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) =>
+      Promise.all(
+        cacheNames
+          .filter((cacheName) => cacheName.startsWith(CACHE_PREFIX) && cacheName !== CACHE_NAME)
+          .map((cacheName) => caches.delete(cacheName)),
+      ),
+    ),
+  );
+  self.clients.claim();
+});
+
+self.addEventListener("fetch", (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  if (request.method !== "GET" || url.origin !== self.location.origin) {
+    return;
+  }
+
+  if (url.pathname.startsWith("/api/")) {
+    return;
+  }
+
+  if (request.mode === "navigate") {
+    event.respondWith(networkFirstNavigation(request));
+    return;
+  }
+
+  if (url.pathname.startsWith(NEXT_STATIC_PATH)) {
+    event.respondWith(cacheFirstStaticAsset(request));
+  }
+});

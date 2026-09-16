@@ -1,41 +1,28 @@
 # Evidencia individual — entrega de equipo
 
-- Commit base de integración de la entrega: `39f3914f1ac0730f5ad22338e8ca8f86b58a6337` (merge de las PR #2, #3 y #4 en `main`).
+## Martin Moreno Libreros
 
-- Nombre: Martin Moreno Libreros
-- Repositorio y commit evaluado: https://github.com/HilayGM/pwa-inspecciones
-commit: f668584723a817d6ad39c22a093b2fb49245e94e
+- Repositorio y commit de mi contribución:
+  https://github.com/HilayGM/pwa-inspecciones
+  SHA: `feae1ab3e9425d9753fef686cf08b92b8da6b2c3`
 
-- Mi contribución concreta: Configuré la base PWA mediante `next-pwa`, agregué `public/manifest.webmanifest` y la prueba inicial `tests/manifest.spec.ts`. Para la entrega integrada se completaron los iconos declarados y la prueba ahora valida que esos recursos existan y tengan las dimensiones correctas.
+- Mi contribución concreta:
+  Implementé el service worker manual en `public/sw.js`, configuré la aplicación para evitar que el worker generado por `next-pwa` lo sobrescriba durante el build, retiré los artefactos Workbox ya no utilizados y documenté la estrategia en `docs/cache-strategy.md`.
 
-- Decisión técnica que puedo explicar: Elegí una PWA porque permite mantener una sola base de código, distribuir la aplicación mediante una URL y agregar capacidades offline progresivamente. Reconozco que tiene limitaciones de navegador y que la sincronización todavía no está implementada.
+- Decisión técnica que puedo explicar:
+  Elegí *network first* con respaldo de caché para la navegación y *cache first* para los recursos estáticos de Next.js. Así, con Internet la aplicación intenta obtener una pantalla actualizada; si la conexión falla, muestra la última pantalla inicial disponible. Las solicitudes `POST`, recursos externos y futuras rutas `/api/` quedan excluidos para no guardar datos dinámicos o sensibles como si fueran recursos estáticos.
 
-- Comando o prueba que ejecuté y resultado:
- Ejecuté `npm.cmd test` y el resultado fue: starter.spec.mjs: PASS.
-  Ejecuté `npm.cmd run verify` y el resultado fue: Starter verificable: PASS.
-  Ejecuté `npm.cmd run build` y el resultado fue:    Creating an optimized production build ...
- ✓ Compiled successfully
- ✓ Linting and checking validity of types
- ✓ Collecting page data    
- ✓ Generating static pages (4/4)
- ✓ Collecting build traces    
- ✓ Finalizing page optimization
+- Comandos o pruebas ejecutadas y resultado:
+  - `node --check public/sw.js`: terminó con código 0; la sintaxis del service worker es válida.
+  - `npm.cmd test`: terminó con código 0; `starter.spec.mjs: PASS` y `manifest.spec.ts: PASS`.
+  - `git diff --check`: terminó sin errores de espacios.
+  - `npm.cmd run build`: se inició correctamente, pero no terminó dentro del límite de 120 segundos del entorno de asistencia. La compilación, la prueba real en navegador sin conexión y GitHub Actions deben ejecutarse por el equipo antes de fusionar a `main`.
 
-Route (app)                              Size     First Load JS
-┌ ○ /                                    138 B          87.4 kB
-└ ○ /_not-found                          873 B          88.1 kB
-+ First Load JS shared by all            87.2 kB
-  ├ chunks/117-e5476d4bdcce692a.js       31.7 kB
-  ├ chunks/fd9d1056-749e5812300142af.js  53.6 kB
-  └ other shared chunks (total)          1.86 kB
+- Limitación o riesgo identificado:
+  La primera visita requiere conexión para instalar el worker y guardar el app shell. El funcionamiento offline completo depende de que se integre el registro del service worker y se agreguen las pruebas de navegador. Esta versión no guarda ni sincroniza nuevas inspecciones.
 
-
-○  (Static)  prerendered as static content.
-
-- Limitación o riesgo que encontré:
-La operación offline y la sincronización todavía no están implementadas. Cuando se incorporen, será necesario evitar pérdida de información, duplicados y conflictos después de recuperar la conexión.
-
-- Uso de IA (herramienta, propósito, fragmentos influenciados y validación humana): Utilicé OpenAI Codex para interpretar la consigna, organizar los requisitos y revisar la comparación de alternativas. Influyó en la estructura y redacción inicial de `docs/requirements.md`, `docs/decision-record.md` y `evidence/individual.md`. Revisé el contenido contra la consigna, adapté las decisiones al proyecto y validaré personalmente los resultados mediante los comandos de prueba y compilación.
+- Uso declarado de IA:
+  Utilicé OpenAI Codex para analizar el estado del repositorio, proponer la estrategia de caché, implementar el service worker y redactar la documentación de la decisión. Influyó en `public/sw.js`, `next.config.mjs`, `docs/cache-strategy.md` y este bloque de evidencia. Revisé manualmente la estrategia, confirmé las pruebas y salidas declaradas, y dejé explícitas las validaciones que siguen pendientes.
 
 ## Oscar Martinez Martinez
 
