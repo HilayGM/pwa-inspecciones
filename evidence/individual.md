@@ -106,3 +106,18 @@ La operación offline y la sincronización todavía no están implementadas. Cua
 
 * **Uso de IA:** 
   Se utilizó inteligencia artificial (Claude) como asistente de redacción para dar formato y revisar la claridad de la documentación, verificando humanamente que el contenido se ajuste íntegramente a los lineamientos y rúbrica de la actividad.
+
+##  Registro del Service Worker
+
+- **Estudiante:** Felipe Mora Lopez
+- **Contribución concreta:** Implementé el registro seguro de `/sw.js` en el navegador mediante `src/lib/pwa/register-service-worker.ts`, un componente cliente sin interfaz visible en `src/components/service-worker-registration.tsx` y su integración en el layout global. También documenté la instalación, la prueba offline, la limpieza de caché y los límites conocidos.
+- **Decisión técnica que puedo explicar:** Separé el registro en un módulo que comprueba el entorno del navegador y la disponibilidad de `navigator.serviceWorker`. El componente usa `useEffect` con dependencias vacías para iniciar el registro una sola vez al montarse, captura errores sin interrumpir la aplicación y no renderiza contenido visible.
+- **Pruebas realizadas y resultado:**
+  - `npm run build` — PASS. Compilación, validación de tipos y generación de páginas completadas correctamente; Next.js confirmó `/sw.js` con alcance `/`.
+  - `npm test` — PASS (`starter.spec.mjs: PASS`).
+  - `npm run verify` — PASS (`Starter verificable: PASS`).
+  - DevTools > Application > Service Workers — pendiente de registrar el resultado manual en el navegador.
+  - Prueba con modo Offline — pendiente de registrar el resultado manual en el navegador.
+- **Qué comprueban y qué no:** El build comprueba que la integración compile, que los tipos sean válidos y que la aplicación pueda generarse para producción. Las pruebas existentes comprueban el starter y su verificación estructural. Estas validaciones no certifican que todas las rutas funcionen offline ni sustituyen la comprobación manual en DevTools.
+- **Límites de la función:** El registro no implementa sincronización en segundo plano, persistencia de datos ni garantiza que todas las rutas funcionen sin conexión. La cobertura offline depende de las estrategias de caché definidas en `public/sw.js`; además, el registro requiere un navegador con soporte de Service Workers.
+- **Uso de IA:** Utilicé GitHub Copilot para interpretar la consigna, proponer la estructura del registro del Service Worker y revisar la documentación. La IA influyó en los archivos `src/lib/pwa/register-service-worker.ts`, `src/components/service-worker-registration.tsx`, `src/app/layout.tsx`, `README.md` y esta sección de evidencia. Revisé y adapté el código al proyecto, y validé la implementación mediante `npm run build`, `npm test` y `npm run verify`.

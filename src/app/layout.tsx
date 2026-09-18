@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AppShell } from "../components/app-shell";
+import { ServiceWorkerRegistration } from "../components/service-worker-registration";
 
 export const metadata: Metadata = {
   title: "Inspecciones de laboratorio",
@@ -18,6 +19,7 @@ export default function RootLayout({
   return (
     <html lang="es-MX">
       <body>
+        <ServiceWorkerRegistration />
         <AppShell>{children}</AppShell>
       </body>
     </html>
