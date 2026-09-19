@@ -48,7 +48,7 @@ La aplicación queda disponible normalmente en [http://localhost:3000](http://lo
 npm run build
 ```
 
-Genera la compilación de producción. La configuración existente de `next-pwa` escribe el service worker y sus recursos en `public/`; revisar los archivos generados antes de preparar una entrega. Para validar una contribución restringida a contenido y documentación, usar una copia temporal del proyecto evita alterar esos recursos del equipo.
+Genera la compilación de producción. El service worker de esta actividad es el archivo fuente `public/sw.js`; la generación automática de `next-pwa` está desactivada para evitar que el build lo sobrescriba. Para probar el comportamiento offline, inicia después el servidor de producción.
 
 ## Verificación
 
@@ -76,12 +76,48 @@ Los iconos de instalación se encuentran en `public/icons/`. Si se requiere rege
 powershell -ExecutionPolicy Bypass -File scripts/generate-pwa-icons.ps1
 ```
 
+## Registro del Service Worker
+
+El componente global registra `/sw.js` cuando la aplicación se monta en un
+navegador compatible. El registro no se ejecuta durante el renderizado del
+servidor; si el navegador no soporta Service Workers o el registro falla, la
+interfaz continúa disponible sin interrumpirse.
+
+### Prueba en producción y modo offline
+
+```bash
+npm run build
+npm run start
+```
+
+Abre `http://localhost:3000` con conexión y confirma en **DevTools >
+Application > Service Workers** que `/sw.js` está activo. Recarga una vez con
+conexión, activa **Offline** en **DevTools > Network** y vuelve a recargar la
+ruta inicial. La primera visita requiere red para instalar el worker y poblar
+la caché.
+
+### Limpiar caché y desregistrar
+
+En **DevTools > Application > Storage**, selecciona **Clear site data**. Para
+retirar una versión previa del worker, abre **Service Workers**, pulsa
+**Unregister** y recarga. También se pueden eliminar entradas puntuales desde
+**Cache Storage** durante el diagnóstico.
+
+### Límites del registro
+
+- El registro no implementa sincronización en segundo plano ni persistencia de
+  inspecciones nuevas.
+- La cobertura offline depende de la estrategia definida en `public/sw.js`.
+- No se garantiza que rutas futuras o peticiones dinámicas funcionen sin red.
+
 ## Arquitectura Semana 02
 
 | Archivo | Responsabilidad actual |
 | --- | --- |
 | `public/manifest.webmanifest` | Describe nombre, inicio, presentación `standalone`, colores e iconos para la identidad e instalación. |
 | `src/app/layout.tsx` | Configura HTML en español de México, estilos globales, metadata, enlace al manifest y color del viewport; envuelve la página con AppShell. |
+| `src/lib/pwa/register-service-worker.ts` | Registra `/sw.js` únicamente en navegadores compatibles y maneja fallos sin interrumpir la interfaz. |
+| `src/components/service-worker-registration.tsx` | Componente cliente sin interfaz visible que inicia el registro una sola vez al montarse. |
 | `src/components/app-shell.tsx` | Proporciona header, enlaces a inicio, navegación, un único landmark `main` y footer. |
 | `src/app/page.tsx` | Presenta propósito y tarjetas de inspecciones sintéticas dentro del shell, sin repetir navegación ni landmarks globales. |
 | `tests/manifest.spec.ts` | Verifica propiedades críticas del manifest, configuración PWA e iconos PNG existentes con las dimensiones declaradas. |

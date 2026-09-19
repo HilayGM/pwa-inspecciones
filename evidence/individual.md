@@ -95,3 +95,12 @@
 
 * **Uso de IA:** 
   Se utilizó inteligencia artificial (Claude) como asistente de redacción para dar formato y revisar la claridad de la documentación, verificando humanamente que el contenido se ajuste íntegramente a los lineamientos y rúbrica de la actividad.
+
+### Incremento: registro del Service Worker
+
+- **Commit de mi contribución:** `ebf07ee` en la rama `felipe`.
+- **Contribución concreta:** Implementé el registro seguro de `/sw.js` en el navegador mediante `src/lib/pwa/register-service-worker.ts`, un componente cliente sin interfaz visible en `src/components/service-worker-registration.tsx` y su integración en el layout global. También documenté la instalación, la prueba offline, la limpieza de caché y los límites conocidos.
+- **Decisión técnica que puedo explicar:** Separé el registro en un módulo que comprueba el entorno del navegador y la disponibilidad de `navigator.serviceWorker`. El componente usa `useEffect` con dependencias vacías para iniciar el registro una sola vez al montarse, captura errores sin interrumpir la aplicación y no renderiza contenido visible.
+- **Pruebas realizadas y resultado:** `npm run build`, `npm test` y `npm run verify` fueron reportados por Felipe como exitosos en su rama. La comprobación manual en DevTools y la prueba offline deben validarse nuevamente en el commit de integración antes de fusionar a `main`.
+- **Límites de la función:** El registro no implementa sincronización en segundo plano, persistencia de datos ni garantiza que todas las rutas funcionen sin conexión. La cobertura offline depende de la estrategia de caché de `public/sw.js` y de un navegador compatible.
+- **Uso de IA:** Utilicé GitHub Copilot para interpretar la consigna, proponer la estructura del registro del Service Worker y revisar la documentación. La IA influyó en `src/lib/pwa/register-service-worker.ts`, `src/components/service-worker-registration.tsx`, `src/app/layout.tsx`, `README.md` y esta sección de evidencia. Revisé y adapté el código al proyecto.
