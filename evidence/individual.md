@@ -1,48 +1,37 @@
-# Evidencia individual — completar antes de entregar
+# Evidencia individual — entrega de equipo
 
-- Nombre: Martin Moreno Libreros
-- Repositorio y commit evaluado:  https://github.com/HilayGM/pwa-inspecciones-Moreno-Libreros-Martin  
-commit: 4e479fdf99679746d083bf1e7a2e2a85c3b18424
+## Martin Moreno Libreros
 
-- Mi contribución concreta: Analicé el problema de inspecciones de mantenimiento, definí usuarios y escenarios, redacté requisitos verificables, comparé cuatro estrategias de aplicación y documenté la selección de una PWA. También comprobé la reproducibilidad del starter y preparé la evidencia de la Semana 1.
+- Repositorio y commit de mi contribución:
+  https://github.com/HilayGM/pwa-inspecciones
+  SHA: `feae1ab3e9425d9753fef686cf08b92b8da6b2c3`
 
-- Decisión técnica que puedo explicar: Elegí una PWA porque permite mantener una sola base de código, distribuir la aplicación mediante una URL y agregar capacidades offline progresivamente. Reconozco que tiene limitaciones de navegador y que la sincronización todavía no está implementada.
+- Mi contribución concreta:
+  Implementé el service worker manual en `public/sw.js`, configuré la aplicación para evitar que el worker generado por `next-pwa` lo sobrescriba durante el build, retiré los artefactos Workbox ya no utilizados y documenté la estrategia en `docs/cache-strategy.md`.
 
-- Comando o prueba que ejecuté y resultado:
- Ejecuté `npm.cmd test` y el resultado fue: starter.spec.mjs: PASS.
-  Ejecuté `npm.cmd run verify` y el resultado fue: Starter verificable: PASS.
-  Ejecuté `npm.cmd run build` y el resultado fue:    Creating an optimized production build ...
- ✓ Compiled successfully
- ✓ Linting and checking validity of types
- ✓ Collecting page data    
- ✓ Generating static pages (4/4)
- ✓ Collecting build traces    
- ✓ Finalizing page optimization
+- Decisión técnica que puedo explicar:
+  Elegí *network first* con respaldo de caché para la navegación y *cache first* para los recursos estáticos de Next.js. Así, con Internet la aplicación intenta obtener una pantalla actualizada; si la conexión falla, muestra la última pantalla inicial disponible. Las solicitudes `POST`, recursos externos y futuras rutas `/api/` quedan excluidos para no guardar datos dinámicos o sensibles como si fueran recursos estáticos.
 
-Route (app)                              Size     First Load JS
-┌ ○ /                                    138 B          87.4 kB
-└ ○ /_not-found                          873 B          88.1 kB
-+ First Load JS shared by all            87.2 kB
-  ├ chunks/117-e5476d4bdcce692a.js       31.7 kB
-  ├ chunks/fd9d1056-749e5812300142af.js  53.6 kB
-  └ other shared chunks (total)          1.86 kB
+- Comandos o pruebas ejecutadas y resultado:
+  - `node --check public/sw.js`: terminó con código 0; la sintaxis del service worker es válida.
+  - `npm.cmd test`: terminó con código 0; `starter.spec.mjs: PASS` y `manifest.spec.ts: PASS`.
+  - `git diff --check`: terminó sin errores de espacios.
+  - `npm.cmd run build`: se inició correctamente, pero no terminó dentro del límite de 120 segundos del entorno de asistencia. La compilación, la prueba real en navegador sin conexión y GitHub Actions deben ejecutarse por el equipo antes de fusionar a `main`.
 
+- Limitación o riesgo identificado:
+  La primera visita requiere conexión para instalar el worker y guardar el app shell. El funcionamiento offline completo depende de que se integre el registro del service worker y se agreguen las pruebas de navegador. Esta versión no guarda ni sincroniza nuevas inspecciones.
 
-○  (Static)  prerendered as static content.
-
-- Limitación o riesgo que encontré:
-La operación offline y la sincronización todavía no están implementadas. Cuando se incorporen, será necesario evitar pérdida de información, duplicados y conflictos después de recuperar la conexión.
-
-- Uso de IA (herramienta, propósito, fragmentos influenciados y validación humana): Utilicé OpenAI Codex para interpretar la consigna, organizar los requisitos y revisar la comparación de alternativas. Influyó en la estructura y redacción inicial de `docs/requirements.md`, `docs/decision-record.md` y `evidence/individual.md`. Revisé el contenido contra la consigna, adapté las decisiones al proyecto y validaré personalmente los resultados mediante los comandos de prueba y compilación.
+- Uso declarado de IA:
+  Utilicé OpenAI Codex para analizar el estado del repositorio, proponer la estrategia de caché, implementar el service worker y redactar la documentación de la decisión. Influyó en `public/sw.js`, `next.config.mjs`, `docs/cache-strategy.md` y este bloque de evidencia. Revisé manualmente la estrategia, confirmé las pruebas y salidas declaradas, y dejé explícitas las validaciones que siguen pendientes.
 
 ## Oscar Martinez Martinez
 
 - Estudiante: Oscar Martinez Martinez
-- Commit SHA evaluado:https://github.com/HilayGM/pwa-inspecciones-Moreno-Libreros-Martin
- SHA:4e479fdf99679746d083bf1e7a2e2a85c3b18424
+- Commit SHA evaluado: https://github.com/HilayGM/pwa-inspecciones
+ SHA:291bd66bc94d54b96fada542ef9f740d6d9d3568
 
 - Mi contribución concreta:
-  Revisé la entrega de la Semana 1 contra la consigna y la rúbrica, comprobé la estructura del proyecto y revisé los requisitos y la decisión técnica. También comprobé personalmente la reproducibilidad del starter en Windows mediante la instalación de dependencias, ejecución de la aplicación, pruebas, verificación y compilación.
+  Implementé `src/app/page.tsx` con el contenido de demostración de inspecciones y actualicé `README.md` con instalación, ejecución, verificación, arquitectura, limitaciones y evidencia de la Semana 02.
 
 - Decisión técnica que puedo explicar:
   La estrategia PWA es adecuada para el proyecto de inspecciones porque permite mantener una sola base de código, distribuir la aplicación mediante una URL y agregar progresivamente capacidades para trabajar con conectividad intermitente. En la Semana 1 todavía no se implementan el funcionamiento offline ni la sincronización, ya que corresponden a etapas posteriores del proyecto.
@@ -85,12 +74,12 @@ La operación offline y la sincronización todavía no están implementadas. Cua
 ## Felipe Mora Lopez
 
 - Estudiante: Felipe Mora Lopez
-- Commit SHA evaluado:https://github.com/HilayGM/pwa-inspecciones-Moreno-Libreros-Martin
- SHA:4e479fdf99679746d083bf1e7a2e2a85c3b18424
+- Commit SHA evaluado: https://github.com/HilayGM/pwa-inspecciones
+ SHA:5fe55626cafc56c06a6408c420131f465f3ec290
 
 
-* **Contribución y enlace:** 
-  Me enfoqué en la actualización de la definición del problema, contexto y límites del proyecto para nuestros entregables, documentándolo en `docs/requirements.md`. 
+* **Contribución y enlace:**
+  Implementé `src/components/app-shell.tsx` y actualicé `src/app/layout.tsx` para integrar la estructura compartida de la PWA: encabezado, navegación, contenido principal y pie de página.
 
 * **Decisión que explica:** 
   Decidí delimitar estrictamente el alcance del problema para excluir características no solicitadas en esta etapa. Estructuré los escenarios de usuario asegurando que el caso de conectividad intermitente sea realista frente a las restricciones del sistema.
@@ -107,17 +96,11 @@ La operación offline y la sincronización todavía no están implementadas. Cua
 * **Uso de IA:** 
   Se utilizó inteligencia artificial (Claude) como asistente de redacción para dar formato y revisar la claridad de la documentación, verificando humanamente que el contenido se ajuste íntegramente a los lineamientos y rúbrica de la actividad.
 
-##  Registro del Service Worker
+### Incremento: registro del Service Worker
 
-- **Estudiante:** Felipe Mora Lopez
+- **Commit de mi contribución:** `ebf07ee` en la rama `felipe`.
 - **Contribución concreta:** Implementé el registro seguro de `/sw.js` en el navegador mediante `src/lib/pwa/register-service-worker.ts`, un componente cliente sin interfaz visible en `src/components/service-worker-registration.tsx` y su integración en el layout global. También documenté la instalación, la prueba offline, la limpieza de caché y los límites conocidos.
 - **Decisión técnica que puedo explicar:** Separé el registro en un módulo que comprueba el entorno del navegador y la disponibilidad de `navigator.serviceWorker`. El componente usa `useEffect` con dependencias vacías para iniciar el registro una sola vez al montarse, captura errores sin interrumpir la aplicación y no renderiza contenido visible.
-- **Pruebas realizadas y resultado:**
-  - `npm run build` — PASS. Compilación, validación de tipos y generación de páginas completadas correctamente; Next.js confirmó `/sw.js` con alcance `/`.
-  - `npm test` — PASS (`starter.spec.mjs: PASS`).
-  - `npm run verify` — PASS (`Starter verificable: PASS`).
-  - DevTools > Application > Service Workers — pendiente de registrar el resultado manual en el navegador.
-  - Prueba con modo Offline — pendiente de registrar el resultado manual en el navegador.
-- **Qué comprueban y qué no:** El build comprueba que la integración compile, que los tipos sean válidos y que la aplicación pueda generarse para producción. Las pruebas existentes comprueban el starter y su verificación estructural. Estas validaciones no certifican que todas las rutas funcionen offline ni sustituyen la comprobación manual en DevTools.
-- **Límites de la función:** El registro no implementa sincronización en segundo plano, persistencia de datos ni garantiza que todas las rutas funcionen sin conexión. La cobertura offline depende de las estrategias de caché definidas en `public/sw.js`; además, el registro requiere un navegador con soporte de Service Workers.
-- **Uso de IA:** Utilicé GitHub Copilot para interpretar la consigna, proponer la estructura del registro del Service Worker y revisar la documentación. La IA influyó en los archivos `src/lib/pwa/register-service-worker.ts`, `src/components/service-worker-registration.tsx`, `src/app/layout.tsx`, `README.md` y esta sección de evidencia. Revisé y adapté el código al proyecto, y validé la implementación mediante `npm run build`, `npm test` y `npm run verify`.
+- **Pruebas realizadas y resultado:** `npm run build`, `npm test` y `npm run verify` fueron reportados por Felipe como exitosos en su rama. La comprobación manual en DevTools y la prueba offline deben validarse nuevamente en el commit de integración antes de fusionar a `main`.
+- **Límites de la función:** El registro no implementa sincronización en segundo plano, persistencia de datos ni garantiza que todas las rutas funcionen sin conexión. La cobertura offline depende de la estrategia de caché de `public/sw.js` y de un navegador compatible.
+- **Uso de IA:** Utilicé GitHub Copilot para interpretar la consigna, proponer la estructura del registro del Service Worker y revisar la documentación. La IA influyó en `src/lib/pwa/register-service-worker.ts`, `src/components/service-worker-registration.tsx`, `src/app/layout.tsx`, `README.md` y esta sección de evidencia. Revisé y adapté el código al proyecto.
