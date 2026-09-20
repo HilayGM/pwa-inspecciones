@@ -186,3 +186,98 @@ Lighthouse no se ha ejecutado en esta revisión: generar y conservar su reporte/
 ## Uso de IA
 
 Se utilizó una herramienta de IA como apoyo para el análisis de estructura, la revisión de documentación y la asistencia en implementación. Los resultados históricos de ejecución, build y verificación fueron proporcionados por el integrante; las comprobaciones ejecutadas durante esta contribución se distinguen en «Verificación realizada». La revisión manual final por el integrante, incluida la comprobación visual y la validación de resultados de ejecución, build y pruebas, queda pendiente antes de la entrega. No se atribuyen a la IA pruebas de navegador ni mediciones de Lighthouse que no se realizaron.
+
+## Semana 03 — Service Worker, pruebas offline y CI
+
+### Requisitos
+
+- Node.js 22 para el entorno de pruebas utilizado.
+- npm.
+- Playwright.
+- Chromium para Playwright.
+
+### Instalación
+
+```bash
+npm ci
+```
+
+### Instalar Chromium
+
+```bash
+npx playwright install chromium
+```
+
+### Pruebas existentes
+
+```bash
+npm test
+```
+
+Resultado observado: `PASS`.
+
+### Prueba contractual del Service Worker
+
+```bash
+npm run test:service-worker
+```
+
+Resultado observado: `PASS`.
+
+La prueba lee `public/sw.js` y comprueba la caché versionada, los eventos
+`install`, `activate` y `fetch`, la navegación, `/_next/static/`, la exclusión
+de `/api/`, los métodos distintos de `GET` y la limpieza de cachés antiguas.
+
+### Build
+
+```bash
+npm run build
+```
+
+Resultado observado: `PASS`. Se generaron correctamente los artefactos de
+producción.
+
+### Prueba offline
+
+```bash
+npm run build
+npm run test:offline
+```
+
+La prueba abre la aplicación con red, limpia registros previos del Service
+Worker y cachés al inicio, espera el Service Worker, verifica las tres
+inspecciones, recarga con red, desactiva la conexión, recarga offline y
+verifica nuevamente:
+
+- Laboratorio de Redes
+- Laboratorio de Electrónica
+- Laboratorio de Software
+
+Estado de validación: la prueba offline fue iniciada localmente, pero la
+ejecución no emitió un resultado final PASS o FAIL verificable antes del cierre
+de la sesión.
+
+La automatización de GitHub Actions ejecutará esta prueba nuevamente en
+Chromium.
+
+### Producción manual
+
+```bash
+npm run build
+npm run start
+```
+
+### Limpiar Service Worker y caché
+
+En Chrome DevTools: **Application > Service Workers > Unregister**.
+
+Después, en **Application > Storage > Clear site data**.
+
+### Limitaciones
+
+- La prueba cubre la disponibilidad offline de la pantalla inicial.
+- No valida sincronización offline.
+- No valida escritura offline.
+- No valida APIs offline.
+- Utiliza datos exclusivamente sintéticos.
+- La ejecución local de la prueba E2E offline quedó sin resultado final verificable.

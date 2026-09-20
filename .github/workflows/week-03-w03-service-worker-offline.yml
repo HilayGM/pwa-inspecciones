@@ -1,0 +1,58 @@
+name: Semana 03 - Service Worker y offline
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  service-worker-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Instalar Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verificar estructura
+        run: npm run verify
+
+      - name: Ejecutar pruebas existentes
+        run: npm test
+
+      - name: Probar contrato del Service Worker
+        run: npm run test:service-worker
+
+      - name: Compilar aplicación
+        run: npm run build
+
+      - name: Probar navegación offline
+        run: npm run test:offline
+
+      - name: Check público
+        run: bash public-tests/check.sh
+
+      - name: Publicar resultados
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: week-03-service-worker-offline-results
+          if-no-files-found: ignore
+          path: |
+            test-results/
+            coverage/
+            evaluation-result.json

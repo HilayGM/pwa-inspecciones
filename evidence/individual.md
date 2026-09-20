@@ -104,3 +104,4 @@
 - **Pruebas realizadas y resultado:** `npm run build`, `npm test` y `npm run verify` fueron reportados por Felipe como exitosos en su rama. La comprobación manual en DevTools y la prueba offline deben validarse nuevamente en el commit de integración antes de fusionar a `main`.
 - **Límites de la función:** El registro no implementa sincronización en segundo plano, persistencia de datos ni garantiza que todas las rutas funcionen sin conexión. La cobertura offline depende de la estrategia de caché de `public/sw.js` y de un navegador compatible.
 - **Uso de IA:** Utilicé GitHub Copilot para interpretar la consigna, proponer la estructura del registro del Service Worker y revisar la documentación. La IA influyó en `src/lib/pwa/register-service-worker.ts`, `src/components/service-worker-registration.tsx`, `src/app/layout.tsx`, `README.md` y esta sección de evidencia. Revisé y adapté el código al proyecto.
+
