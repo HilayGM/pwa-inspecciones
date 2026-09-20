@@ -28,48 +28,62 @@
 
 - Estudiante: Oscar Martinez Martinez
 - Commit SHA evaluado: https://github.com/HilayGM/pwa-inspecciones
- SHA:291bd66bc94d54b96fada542ef9f740d6d9d3568
+ SHA:25755e692732e83862c33eec30045fd9e6082d53
 
 - Mi contribución concreta:
-  Implementé `src/app/page.tsx` con el contenido de demostración de inspecciones y actualicé `README.md` con instalación, ejecución, verificación, arquitectura, limitaciones y evidencia de la Semana 02.
+  Implementé las pruebas correspondientes a la Semana 03 para validar el Service Worker y el funcionamiento offline de la PWA. Creé `tests/service-worker.spec.ts` para comprobar los contratos principales de `public/sw.js` y `tests/offline.spec.ts` para realizar la prueba E2E con Chromium mediante Playwright.
+
+  También configuré `playwright.config.ts`, agregué `@playwright/test`, incorporé los scripts `test:service-worker` y `test:offline` en `package.json`, y creé el workflow `.github/workflows/week-03-w03-service-worker-offline.yml` para automatizar la instalación de dependencias, instalación de Chromium, compilación y ejecución de pruebas.
+
+  Además, actualicé `README.md` con los comandos necesarios para ejecutar las pruebas, instalar Chromium, probar el comportamiento offline y limpiar el Service Worker y las cachés.
 
 - Decisión técnica que puedo explicar:
-  La estrategia PWA es adecuada para el proyecto de inspecciones porque permite mantener una sola base de código, distribuir la aplicación mediante una URL y agregar progresivamente capacidades para trabajar con conectividad intermitente. En la Semana 1 todavía no se implementan el funcionamiento offline ni la sincronización, ya que corresponden a etapas posteriores del proyecto.
+
+  Decidí separar la validación del Service Worker en dos tipos de pruebas. La primera es una prueba contractual rápida en `tests/service-worker.spec.ts`, que revisa directamente la estructura de `public/sw.js` y comprueba elementos como la caché versionada, los eventos `install`, `activate` y `fetch`, la estrategia de navegación, el manejo de `/_next/static/` y la exclusión de `/api/` y solicitudes diferentes de `GET`.
+
+  La segunda es una prueba E2E en `tests/offline.spec.ts` ejecutada con Playwright y Chromium. Esta prueba busca comprobar el comportamiento real de la aplicación al cargarla con conexión, esperar la activación del Service Worker, recargarla, desactivar la conexión y verificar que las tres inspecciones sintéticas continúan disponibles.
+
+  Separar ambas pruebas permite detectar tanto regresiones en la implementación del Service Worker como problemas reales de funcionamiento offline.
 
 - Prueba que ejecuté y resultado:
-
   Ejecuté `npm test`.
   Resultado:
-  `starter.spec.mjs: PASS`
+  `PASS`
 
-  Ejecuté `npm run verify`.
+  Ejecuté `npm run test:service-worker`.
   Resultado:
-  `Starter verificable: PASS`
-
-  Se generó el reporte:
-  `reports/verification.json`
-  El reporte indicó:
-  `"status": "pass"` y `"missing": []`.
+  `service-worker.spec.ts: PASS`
 
   Ejecuté `npm run build`.
   Resultado:
-  `Compiled successfully`
+  `PASS`
 
-  También se completaron correctamente:
-  `Linting and checking validity of types`
-  `Collecting page data`
-  `Generating static pages (4/4)`
-  `Collecting build traces`
-  `Finalizing page optimization`
-
+  El build generó correctamente los artefactos de producción de Next.js.
+  También instalé Chromium mediante Playwright.
+  Versión observada:
+  `Chromium 140`
+  Ejecuté `npm run test:offline`.
+  Resultado:
+  La prueba fue iniciada, pero la ejecución no emitió un resultado final `PASS` o `FAIL` verificable antes del cierre de la sesión.
 - Limitación o fallo diagnosticado:
-  La operación offline y la sincronización todavía no están implementadas. Cuando se agreguen será necesario manejar correctamente los reintentos, los registros pendientes, posibles duplicados y conflictos cuando se recupere la conexión.
+
+  La prueba E2E offline quedó implementada y preparada para ejecutarse con Chromium, pero la ejecución local no produjo un resultado final `PASS` o `FAIL` verificable antes de terminar la sesión.
+
+  La prueba valida principalmente la disponibilidad offline de la pantalla inicial y de las tres inspecciones sintéticas: `Laboratorio de Redes`, `Laboratorio de Electrónica` y `Laboratorio de Software`. No valida sincronización de información, escritura offline ni funcionamiento offline de APIs.
 
 - Cambio que podría defender o modificar en vivo:
-  Puedo explicar los criterios de aceptación de los requisitos de la Semana 1 y justificar la selección de una PWA frente a una aplicación web tradicional, una aplicación nativa y una solución multiplataforma.
+
+  Puedo explicar y modificar la prueba contractual del Service Worker, incluyendo las validaciones de caché, eventos y exclusiones de solicitudes. También puedo explicar el flujo de la prueba E2E con Playwright, desde la carga inicial con conexión hasta el cambio a modo offline y la validación de las tres inspecciones.
+
+  Asimismo, puedo explicar la configuración de `playwright.config.ts` y el workflow `.github/workflows/week-03-w03-service-worker-offline.yml`, incluyendo la instalación de Chromium, ejecución de pruebas, build y publicación de resultados.
 
 - Uso declarado de IA (herramienta, propósito, fragmentos influenciados y validación humana):
-  Utilicé ChatGPT y OpenAI Codex como apoyo para interpretar la consigna, analizar la estructura del proyecto, revisar los requisitos de la actividad y organizar mi evidencia individual. La IA influyó en la organización y revisión de esta evidencia. Validé personalmente la información contra los archivos del proyecto y ejecuté personalmente `npm ci`, `npm run dev`, `npm test`, `npm run verify` y `npm run build` antes de registrar los resultados.
+
+  Utilicé ChatGPT y OpenAI Codex como apoyo para interpretar los requisitos de la Semana 03, analizar la estructura existente del proyecto, desarrollar las pruebas automatizadas, configurar Playwright, preparar el workflow de GitHub Actions y organizar la documentación técnica.
+
+  La IA influyó principalmente en `tests/service-worker.spec.ts`, `tests/offline.spec.ts`, `playwright.config.ts`, `.github/workflows/week-03-w03-service-worker-offline.yml` y en la documentación relacionada con las pruebas.
+
+  Validé personalmente la información contra los archivos del proyecto y comprobé localmente `npm test`, `npm run test:service-worker` y `npm run build`. También verifiqué la instalación de Chromium y revisé la ejecución de `npm run test:offline`, dejando documentado que esta última no produjo un resultado final verificable.
 
 ## Felipe Mora Lopez
 
