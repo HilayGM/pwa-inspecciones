@@ -24,6 +24,15 @@
 - Uso declarado de IA:
   Utilicé OpenAI Codex para analizar el estado del repositorio, proponer la estrategia de caché, implementar el service worker y redactar la documentación de la decisión. Influyó en `public/sw.js`, `next.config.mjs`, `docs/cache-strategy.md` y este bloque de evidencia. Revisé manualmente la estrategia, confirmé las pruebas y salidas declaradas, y dejé explícitas las validaciones que siguen pendientes.
 
+### Incremento: listado CSR de inspecciones
+
+- **Commit de mi contribución:** `79a3ddea3e520bad848c9d464eb52905e8cc8a01` en la rama `feat/csr-inspecciones-listado`.
+- **Contribución concreta:** Implementé la ruta cliente `/inspecciones`, la ruta local con datos sintéticos `/api/inspecciones`, el componente reutilizable `LoadingState` y los estilos para carga, error y reintento. El listado genera enlaces hacia `/inspecciones/[id]` para su integración posterior con el detalle SSR.
+- **Decisión técnica que puedo explicar:** Elegí CSR para el listado porque permite mostrar de forma explícita el estado de carga, recuperar una consulta fallida con un reintento y mantener la interacción en el navegador. La ruta consulta una API local que entrega únicamente los registros sintéticos ya existentes.
+- **Pruebas ejecutadas y resultado:** `npm test`, `npm run build` y `npm run verify` terminaron con código 0. El build reconoció `/inspecciones` y `/api/inspecciones` como rutas válidas.
+- **Limitación o riesgo:** El detalle SSR todavía no existe en esta rama y corresponde a otro integrante. Si la consulta falla, el listado muestra un error y permite reintentar, pero no hay persistencia ni edición de inspecciones.
+- **Uso de IA:** Utilicé OpenAI Codex para analizar la estructura existente, proponer el flujo CSR, implementar los archivos del listado y revisar la compilación. La IA influyó en `src/app/inspecciones/page.tsx`, `src/app/api/inspecciones/route.ts`, `src/components/loading-state.tsx`, los estilos asociados y este bloque. Revisé manualmente la lógica y ejecuté las verificaciones declaradas.
+
 ## Oscar Martinez Martinez
 
 - Estudiante: Oscar Martinez Martinez

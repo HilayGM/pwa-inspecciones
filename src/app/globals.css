@@ -49,6 +49,15 @@ dl { border-top: 1px solid var(--line); margin: 18px 0 0; padding-top: 14px; }
 dl div { display: flex; justify-content: space-between; gap: 12px; margin: 7px 0; }
 dt { color: var(--muted); font-size: .82rem; }
 dd { font-size: .82rem; font-weight: 700; margin: 0; text-align: right; }
+.inspection-detail-link { color: var(--accent); display: inline-block; font-weight: 700; margin-top: 18px; }
+.inspection-detail-link:focus-visible, .retry-button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.loading-state { align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; display: flex; gap: 16px; padding: 24px; }
+.loading-state h2 { font-size: 1.15rem; margin-bottom: 8px; }
+.loading-state p { color: var(--muted); margin-bottom: 0; }
+.loading-state-error { border-color: #d0892a; }
+.loading-spinner { animation: spin 1s linear infinite; border: 3px solid var(--accent-soft); border-radius: 50%; border-top-color: var(--accent); height: 30px; min-width: 30px; width: 30px; }
+.retry-button { background: var(--accent); border: 0; border-radius: 8px; color: white; cursor: pointer; font: inherit; font-weight: 700; margin-top: 14px; padding: 9px 13px; }
+@keyframes spin { to { transform: rotate(360deg); } }
 .footer { color: var(--muted); font-size: .85rem; padding: 25px 0 0; }
 
 @media (max-width: 760px) {
