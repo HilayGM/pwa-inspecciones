@@ -35,6 +35,8 @@
 
 ## Oscar Martinez Martinez
 
+### Semana 03 — evidencia histórica
+
 - Estudiante: Oscar Martinez Martinez
 - Commit SHA evaluado: https://github.com/HilayGM/pwa-inspecciones
  SHA:25755e692732e83862c33eec30045fd9e6082d53
@@ -93,6 +95,58 @@
   La IA influyó principalmente en `tests/service-worker.spec.ts`, `tests/offline.spec.ts`, `playwright.config.ts`, `.github/workflows/week-03-w03-service-worker-offline.yml` y en la documentación relacionada con las pruebas.
 
   Validé personalmente la información contra los archivos del proyecto y comprobé localmente `npm test`, `npm run test:service-worker` y `npm run build`. También verifiqué la instalación de Chromium y revisé la ejecución de `npm run test:offline`, dejando documentado que esta última no produjo un resultado final verificable.
+
+### Semana 04 — CSR y SSR
+
+- **Estudiante:** Oscar Martinez Martinez.
+- **Commit SHA evaluado:**
+  PENDIENTE: completar después del commit de implementación
+- **Contribución realizada:** Preparé `docs/rendering-decision.md`, la prueba
+  contractual `tests/rendering.spec.ts` y el workflow
+  `.github/workflows/week-04-w04-csr-ssr.yml`. Agregué `test:rendering` a
+  `package.json`, amplié el README y registré este incremento. No implementé
+  componentes ni rutas funcionales de Martín o Felipe.
+- **Decisión técnica que puedo explicar:** El listado usa CSR para consultar la
+  API y gestionar carga, error y reintento. El detalle acordado es SSR / Server
+  Component con ID de URL y `notFound()`, pendiente de Felipe. Separé los
+  contratos de código fuente de las pruebas de navegador; una prueba de Node
+  no acredita el comportamiento HTTP ni el rendimiento real.
+- **Pruebas preparadas:** Trece contratos deterministas ejecutables mediante
+  `npm run test:rendering`, sin servicios privados ni red. Conservé los scripts
+  anteriores y la invocación `npm run test -- --run`. El CI nuevo ejecuta pruebas
+  existentes, renderizado, Service Worker, build y check público, y conserva
+  los fallos aunque continúe las verificaciones restantes.
+- **Pruebas y resultados de esta contribución:**
+  - `npm ci`: PASS.
+  - `npm run test`: PASS.
+  - `npm run test:rendering`: ejecutó los 13 contratos; 9 aprobaron y 4
+    fallaron. Los únicos fallos son 02, 07, 08 y 09 porque todavía no existe
+    `src/app/inspecciones/[id]/page.tsx`, detalle SSR asignado a Felipe.
+  - Los contratos del listado CSR y los contratos 11, 12 y 13 de carga, error y
+    reintento de `LoadingState` aprobaron. No se omitieron contratos ni se
+    convirtió la dependencia pendiente en un resultado exitoso.
+  - `npm run build`: pendiente de ejecución; no se atribuye todavía un resultado.
+  - Medición de carga, prueba manual de navegador, revisión humana final y
+    validación remota de GitHub Actions: pendientes. No se ejecutó E2E de Semana 04.
+- **Limitación conocida:** Falta `src/app/inspecciones/[id]/page.tsx`, tarea de
+  Felipe. No agregué una E2E incompleta ni omitida permanentemente. Playwright
+  conserva la prueba offline anterior; el flujo listado-detalle-404 queda
+  pendiente de integración. Las comprobaciones por patrones no sustituyen una
+  prueba funcional y deben revisarse ante refactorizaciones equivalentes.
+- **Cambio que puedo defender o modificar en vivo:** Explicar cada contrato,
+  demostrar que un incumplimiento falla, ajustar un patrón a una construcción
+  equivalente sin debilitar la validación y explicar los pasos del workflow y
+  el procedimiento de medición sin atribuir resultados no observados.
+- **Uso declarado de IA:**
+  - **Herramienta:** Codex / ChatGPT.
+  - **Propósito:** análisis, diseño de pruebas, documentación y revisión.
+  - **Fragmentos influenciados:** `docs/rendering-decision.md`,
+    `tests/rendering.spec.ts`, `README.md`, `package.json`,
+    `.github/workflows/week-04-w04-csr-ssr.yml` y exclusivamente este incremento
+    de Oscar en `evidence/individual.md`.
+  - **Validación humana:** pendiente de revisión final de los cambios y resultados
+    por Oscar, además de build y GitHub Actions. Las ejecuciones asistidas que se
+    documenten no sustituyen esa revisión ni acreditan una ejecución de CI.
 
 ## Felipe Mora Lopez
 
