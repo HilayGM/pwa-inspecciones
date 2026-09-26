@@ -100,7 +100,7 @@
 
 - **Estudiante:** Oscar Martinez Martinez.
 - **Commit SHA evaluado:**
-  PENDIENTE: completar después del commit de implementación
+  6b8fb3f7fbae1cd54d4faf28c0ee81e07d504641
 - **Contribución realizada:** Preparé `docs/rendering-decision.md`, la prueba
   contractual `tests/rendering.spec.ts` y el workflow
   `.github/workflows/week-04-w04-csr-ssr.yml`. Agregué `test:rendering` a
