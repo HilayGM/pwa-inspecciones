@@ -128,3 +128,22 @@
 - **Límites de la función:** El registro no implementa sincronización en segundo plano, persistencia de datos ni garantiza que todas las rutas funcionen sin conexión. La cobertura offline depende de la estrategia de caché de `public/sw.js` y de un navegador compatible.
 - **Uso de IA:** Utilicé GitHub Copilot para interpretar la consigna, proponer la estructura del registro del Service Worker y revisar la documentación. La IA influyó en `src/lib/pwa/register-service-worker.ts`, `src/components/service-worker-registration.tsx`, `src/app/layout.tsx`, `README.md` y esta sección de evidencia. Revisé y adapté el código al proyecto.
 
+## Asignación: Detalle SSR y estados de error (Felipe)
+
+**SHA del commit:** `3f57b05f632fe8aa4725a89a23b1331aae837b6f`
+
+**Decisión Técnica (SSR):** 
+Elegí Server-Side Rendering (SSR) para la página de detalles (`page.tsx`) porque permite que la información de la inspección se genere directamente en el servidor. Esto significa que la página no depende de que el navegador descargue JavaScript para hacer fetch de los datos (CSR), lo que mejora el rendimiento inicial y asegura que el contenido esté disponible inmediatamente al cargar la ruta. Por esta razón, omití el uso de `"use client"`.
+
+**Límites de la implementación:**
+Los datos provienen de un archivo estático (`src/lib/data/inspections.ts`). No existe una base de datos real conectada ni se permite la edición o persistencia de nuevos registros en esta fase.
+
+**Pruebas manuales realizadas:**
+- [x] Navegación a `/inspecciones/inspection-001` muestra correctamente los detalles (ej. Redes).
+- [x] Navegación a `/inspecciones/inspection-002` muestra el estado "Requiere atención".
+- [x] Navegación a una ruta inválida `/inspecciones/no-existe` intercepta correctamente y muestra la pantalla 404 (`not-found.tsx`).
+- [x] La navegación cuenta con un enlace funcional para regresar al listado.
+- [x] Las pruebas de build (`npm run build`) pasan sin errores.
+
+**Uso de IA:**
+Se utilizó la IA de Claude como asistente de programación restrictivo para generar únicamente la estructura de los componentes `page.tsx`, `not-found.tsx` y `error.tsx`, asegurando el cumplimiento de las reglas de Next.js App Router.
