@@ -1,0 +1,61 @@
+name: Semana 04 - CSR y SSR
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rendering:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        id: dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Verificar estructura y generar evidencia
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        run: npm run verify
+
+      - name: Ejecutar pruebas existentes con la invocación del kit
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        run: npm run test -- --run
+
+      - name: Probar contratos CSR y SSR
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        run: npm run test:rendering
+
+      - name: Probar contrato del Service Worker
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        run: npm run test:service-worker
+
+      - name: Compilar aplicación
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        run: npm run build
+
+      - name: Check público
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        run: bash public-tests/check.sh
+
+      # No se ejecuta E2E de Semana 04: el detalle de Felipe aún está pendiente.
+      # Los fallos anteriores conservan el job en rojo; no se usa continue-on-error.
+      - name: Guardar evidencia estructural disponible
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: week-04-csr-ssr-reports
+          if-no-files-found: warn
+          path: reports/verification.json

@@ -58,7 +58,7 @@ make verify
 bash public-tests/check.sh
 ```
 
-- `npm run test -- --run` ejecuta `node tests/starter.spec.mjs`. El argumento adicional se acepta pero el script no lo interpreta: no es un ejecutor Vitest. Comprueba el comando de build y dos textos de la página.
+- `npm run test -- --run` ejecuta las pruebas de starter y manifest mediante Node. El argumento adicional llega al script del manifest y no se interpreta: no es un ejecutor Vitest. La prueba del starter comprueba el comando de build y dos textos de la página.
 - `make verify` llama a `npm run verify` y genera `reports/verification.json`. Comprueba la existencia de artefactos del starter; no valida toda la PWA. Sin Make puede ejecutarse `npm run verify`.
 - El check público verifica archivos mínimos y busca patrones de posibles credenciales con `rg`. Requiere que ripgrep esté disponible en Bash; su búsqueda textual puede producir falsos positivos y no sustituye una auditoría.
 
@@ -122,7 +122,7 @@ retirar una versión previa del worker, abre **Service Workers**, pulsa
 | `src/app/page.tsx` | Presenta propósito y tarjetas de inspecciones sintéticas dentro del shell, sin repetir navegación ni landmarks globales. |
 | `tests/manifest.spec.ts` | Verifica propiedades críticas del manifest, configuración PWA e iconos PNG existentes con las dimensiones declaradas. |
 
-`src/lib/data/inspections.ts` conserva los registros sintéticos compartidos. `scripts/verify.mjs` y `tests/starter.spec.mjs` mantienen la verificación de Semana 01. El workflow `.github/workflows/week-01-starter-feedback.yml` instala, verifica estructura, ejecuta la prueba del starter, compila y ejecuta el check público; no ejecuta actualmente la prueba del manifest.
+`src/lib/data/inspections.ts` conserva los registros sintéticos compartidos. `scripts/verify.mjs` y `tests/starter.spec.mjs` mantienen la verificación de Semana 01. El workflow `.github/workflows/week-01-starter-feedback.yml` instala, verifica estructura, ejecuta `npm test` (starter y manifest), compila y ejecuta el check público.
 
 ## Datos sintéticos
 
@@ -173,7 +173,7 @@ La referencia `/icons/icon-192x192.png` sigue presente y su archivo no existe en
 - Faltan `public/icons/icon-192x192.png` y `public/icons/icon-512x512.png`: el integrante responsable del manifest debe aportar los recursos y verificar instalación. Un manifest presente no demuestra que la PWA sea instalable.
 - `src/components/app-shell.tsx` utiliza clases de utilidad que no están definidas en `globals.css`, sin Tailwind instalado. Corresponde al responsable del shell resolver sus estilos; las clases CSS de la página sí existen.
 - El shell actual no implementa estados de carga, error ni vacío. El responsable del shell debe completar y acordar esas demostraciones para la actividad de equipo.
-- `tests/manifest.spec.ts` forma parte de `npm test`; el workflow todavía debe ejecutarla para que la cobertura se aplique también en CI.
+- `tests/manifest.spec.ts` forma parte de `npm test` y los workflows que invocan ese comando también la ejecutan.
 - `public-tests/check.sh` puede imprimir coincidencias y aun finalizar con `PUBLIC_OK`; el responsable de verificación debe corregir el control del resultado de la búsqueda y revisar sus falsos positivos.
 - No hay base de datos, APIs reales, autenticación, captura ni edición. Esta contribución no implementa almacenamiento offline, sincronización ni notificaciones. Existe configuración PWA y archivos generados de service worker del proyecto; su comportamiento offline no se ha verificado aquí.
 
@@ -281,3 +281,122 @@ Después, en **Application > Storage > Clear site data**.
 - No valida APIs offline.
 - Utiliza datos exclusivamente sintéticos.
 - La ejecución local de la prueba E2E offline quedó sin resultado final verificable.
+
+## Semana 04 - CSR y SSR
+
+### Rutas
+
+| Ruta | Contrato y estado |
+| --- | --- |
+| `/inspecciones` | Listado CSR implementado por Martín. |
+| `/api/inspecciones` | API local con los registros sintéticos del proyecto. |
+| `/inspecciones/[id]` | Detalle SSR / Server Component de Felipe, todavía pendiente de integración: no existe su `page.tsx`. |
+
+Oscar aporta decisión técnica, pruebas contractuales, scripts, CI, documentación
+y evidencia. La comparación completa está en
+[`docs/rendering-decision.md`](docs/rendering-decision.md).
+
+### CSR
+
+El listado declara `"use client"` y ejecuta `fetch` hacia `/api/inspecciones`
+desde el navegador. Utiliza `LoadingState` para mostrar carga y error; el botón
+**Reintentar** vuelve a consultar. Cada tarjeta genera un enlace al detalle
+mediante su ID. Los enlaces existen, pero sus destinos aún dependen de Felipe.
+
+### SSR
+
+El contrato esperado es un Server Component sin `"use client"`, que recibe el
+ID desde la URL, lee los registros de `src/lib/data/inspections.ts` y utiliza
+`notFound()` si no encuentra el registro. **El detalle todavía no está
+implementado en este árbol.** Ser Server Component no demuestra por sí solo
+renderizado dinámico por petición; se verificará la política real al integrarlo.
+
+### Cómo probar
+
+Con Node.js 22.6 o superior compatible, desde la raíz:
+
+```bash
+npm ci
+npm run dev
+```
+
+Antes de validar producción, detener el servidor de desarrollo con Ctrl+C para
+que no comparta los artefactos de `.next` con el build. Después, ejecutar:
+
+```bash
+npm run test
+npm run test -- --run
+npm run test:rendering
+npm run test:service-worker
+npm run build
+make verify
+bash public-tests/check.sh
+```
+
+Ejecutar cada comprobación y conservar su salida. `test:rendering` debe fallar
+mientras falte `src/app/inspecciones/[id]/page.tsx`; no hay pruebas omitidas para
+ocultar esa dependencia. `npm test` conserva las pruebas anteriores y no incluye
+el contrato nuevo; el workflow de Semana 04 lo ejecuta por separado.
+
+Sin Make, `npm run verify` genera el mismo reporte estructural. Después de que
+`npm run build` termine correctamente, utilizar `npm run start` si se quiere
+probar el build de producción. La prueba `npm run test:offline` sigue disponible
+para Semana 03 y requiere build y Chromium; no verifica el detalle de Semana 04.
+
+### Cómo probar CSR
+
+Visitar `http://localhost:3000/inspecciones` y verificar los tres laboratorios.
+Para observar carga, activar una conexión lenta en DevTools y recargar. Para
+error, bloquear la petición `/api/inspecciones` mediante Network request blocking
+y recargar; debe aparecer una alerta con **Reintentar**. Desbloquear la petición
+y pulsar el botón para recuperar los registros. Restaurar la configuración de
+red al terminar. Estos pasos son un procedimiento, no resultados ya obtenidos.
+
+### Cómo probar SSR
+
+Cuando Felipe integre el detalle, visitar directamente:
+
+- `http://localhost:3000/inspecciones/inspection-001`
+- `http://localhost:3000/inspecciones/inspection-002`
+- `http://localhost:3000/inspecciones/inspection-003`
+
+Comprobar que cada ruta presenta los datos del registro correcto y que el
+contenido del detalle está en la respuesta del servidor, sin depender de una
+consulta cliente. Repetir con JavaScript deshabilitado para revisar la lectura
+del contenido básico. Todavía no se acredita este comportamiento.
+
+### Error
+
+Cuando se integre el detalle, `/inspecciones/no-existe` debe activar
+`notFound()`. Verificar la pantalla de recurso inexistente y el estado HTTP 404
+en una navegación directa; revisar cualquier efecto de streaming con el
+responsable. Un 404 por la ausencia actual de toda la ruta no demuestra que el
+detalle resuelva correctamente un ID inexistente.
+
+### Límites conocidos
+
+- Datos sintéticos, sin base de datos, persistencia ni autenticación.
+- CSR depende de JavaScript y de la API; el worker no almacena `/api/`.
+- Detalle SSR pendiente de Felipe; la navegación completa aún no se acredita.
+- Las pruebas contractuales leen código, no ejecutan React ni certifican HTTP.
+- No se agregó E2E de Semana 04 mientras falta el detalle. Playwright conserva
+  su configuración offline; una E2E futura requerirá un patrón explícito y no
+  debe descubrir las pruebas de Node.
+- Los resultados reales deben comprobarse mediante pruebas y CI. Los resultados
+  históricos de secciones anteriores no certifican esta entrega.
+
+### Evidencia
+
+Conservar las salidas de `npm run test:rendering`, `npm run test`,
+`npm run test:service-worker`, build y check público, junto con el enlace a la
+ejecución de `.github/workflows/week-04-w04-csr-ssr.yml`. El workflow genera y
+publica `reports/verification.json` mediante `npm run verify`; ese reporte solo
+comprueba la estructura del starter. Los fallos del contrato no se convierten
+en éxito y las demás verificaciones continúan para completar el diagnóstico.
+
+La métrica reproducible de carga de la API, sus cinco repeticiones y la mediana
+están definidas en `docs/rendering-decision.md`. Su medición está pendiente; no
+se atribuyen cifras. Añadir después resultados, condiciones y capturas al
+incremento de Oscar en `evidence/individual.md`, junto con el SHA final y el
+resultado real de Actions. No se generan cobertura ni resultados de evaluación
+ficticios.
