@@ -27,10 +27,11 @@
 ### Incremento: listado CSR de inspecciones
 
 - **Commit de mi contribución:** `79a3ddea3e520bad848c9d464eb52905e8cc8a01` en la rama `feat/csr-inspecciones-listado`.
-- **Contribución concreta:** Implementé la ruta cliente `/inspecciones`, la ruta local con datos sintéticos `/api/inspecciones`, el componente reutilizable `LoadingState` y los estilos para carga, error y reintento. El listado genera enlaces hacia `/inspecciones/[id]` para su integración posterior con el detalle SSR.
+- **SHA de la actualización posterior de evidencia:** `f6bfdf7be27827791ff0b0864a118979a17cc96f`.
+- **Contribución concreta:** Implementé la ruta cliente `/inspecciones`, la ruta local con datos sintéticos `/api/inspecciones`, el componente reutilizable `LoadingState` y los estilos para carga, error y reintento. El listado genera enlaces hacia el detalle SSR ya integrado en `/inspecciones/[id]`.
 - **Decisión técnica que puedo explicar:** Elegí CSR para el listado porque permite mostrar de forma explícita el estado de carga, recuperar una consulta fallida con un reintento y mantener la interacción en el navegador. La ruta consulta una API local que entrega únicamente los registros sintéticos ya existentes.
-- **Pruebas ejecutadas y resultado:** `npm test`, `npm run build` y `npm run verify` terminaron con código 0. El build reconoció `/inspecciones` y `/api/inspecciones` como rutas válidas.
-- **Limitación o riesgo:** El detalle SSR todavía no existe en esta rama y corresponde a otro integrante. Si la consulta falla, el listado muestra un error y permite reintentar, pero no hay persistencia ni edición de inspecciones.
+- **Pruebas ejecutadas y resultado:** `npm test`, `npm run build` y `npm run verify` terminaron con código 0. `npm run test:rendering` aprobó los 13 contratos (13 passed, 0 failed). El build reconoció `/inspecciones` y `/api/inspecciones` como rutas válidas.
+- **Limitación o riesgo:** El listado CSR requiere JavaScript y la disponibilidad de `/api/inspecciones`; el service worker no almacena esa API. Si la consulta falla, muestra un error y permite reintentar, pero no hay persistencia ni edición de inspecciones.
 - **Uso de IA:** Utilicé OpenAI Codex para analizar la estructura existente, proponer el flujo CSR, implementar los archivos del listado y revisar la compilación. La IA influyó en `src/app/inspecciones/page.tsx`, `src/app/api/inspecciones/route.ts`, `src/components/loading-state.tsx`, los estilos asociados y este bloque. Revisé manualmente la lógica y ejecuté las verificaciones declaradas.
 
 ## Oscar Martinez Martinez
@@ -100,7 +101,8 @@
 
 - **Estudiante:** Oscar Martinez Martinez.
 - **Commit SHA evaluado:**
-  6b8fb3f7fbae1cd54d4faf28c0ee81e07d504641
+  `6b8fb3f7fbae1cd54d4faf28c0ee81e07d504641` (implementación) y
+  `98ad89d9d813c7ac79c805b6c488b23a205bfb94` (actualización de evidencia).
 - **Contribución realizada:** Preparé `docs/rendering-decision.md`, la prueba
   contractual `tests/rendering.spec.ts` y el workflow
   `.github/workflows/week-04-w04-csr-ssr.yml`. Agregué `test:rendering` a
@@ -108,7 +110,7 @@
   componentes ni rutas funcionales de Martín o Felipe.
 - **Decisión técnica que puedo explicar:** El listado usa CSR para consultar la
   API y gestionar carga, error y reintento. El detalle acordado es SSR / Server
-  Component con ID de URL y `notFound()`, pendiente de Felipe. Separé los
+  Component con ID de URL y `notFound()`, ya integrado por Felipe. Separé los
   contratos de código fuente de las pruebas de navegador; una prueba de Node
   no acredita el comportamiento HTTP ni el rendimiento real.
 - **Pruebas preparadas:** Trece contratos deterministas ejecutables mediante
@@ -119,20 +121,17 @@
 - **Pruebas y resultados de esta contribución:**
   - `npm ci`: PASS.
   - `npm run test`: PASS.
-  - `npm run test:rendering`: ejecutó los 13 contratos; 9 aprobaron y 4
-    fallaron. Los únicos fallos son 02, 07, 08 y 09 porque todavía no existe
-    `src/app/inspecciones/[id]/page.tsx`, detalle SSR asignado a Felipe.
-  - Los contratos del listado CSR y los contratos 11, 12 y 13 de carga, error y
-    reintento de `LoadingState` aprobaron. No se omitieron contratos ni se
-    convirtió la dependencia pendiente en un resultado exitoso.
-  - `npm run build`: pendiente de ejecución; no se atribuye todavía un resultado.
-  - Medición de carga, prueba manual de navegador, revisión humana final y
-    validación remota de GitHub Actions: pendientes. No se ejecutó E2E de Semana 04.
-- **Limitación conocida:** Falta `src/app/inspecciones/[id]/page.tsx`, tarea de
-  Felipe. No agregué una E2E incompleta ni omitida permanentemente. Playwright
-  conserva la prueba offline anterior; el flujo listado-detalle-404 queda
-  pendiente de integración. Las comprobaciones por patrones no sustituyen una
-  prueba funcional y deben revisarse ante refactorizaciones equivalentes.
+  - `npm run test:rendering`: PASS; ejecutó los 13 contratos, con 13 aprobados,
+    0 fallidos, 0 cancelados y 0 omitidos. Node emitió la advertencia
+    `MODULE_TYPELESS_PACKAGE_JSON`, que no modifica el resultado de la prueba.
+  - `npm run build`: PASS, de acuerdo con la evidencia de integración de Felipe.
+  - La medición de carga, la prueba manual de navegador y la validación remota
+    de GitHub Actions se deben conservar como evidencia final del equipo. No se
+    declara una E2E de Semana 04 que no se haya ejecutado.
+- **Limitación conocida:** La prueba contractual confirma el contrato de las
+  rutas, pero no sustituye una prueba E2E del flujo listado-detalle-404 ni una
+  medición de rendimiento CSR/SSR. Playwright conserva la prueba offline de la
+  semana anterior y una E2E de Semana 04 requerirá un patrón propio.
 - **Cambio que puedo defender o modificar en vivo:** Explicar cada contrato,
   demostrar que un incumplimiento falla, ajustar un patrón a una construcción
   equivalente sin debilitar la validación y explicar los pasos del workflow y
@@ -144,9 +143,9 @@
     `tests/rendering.spec.ts`, `README.md`, `package.json`,
     `.github/workflows/week-04-w04-csr-ssr.yml` y exclusivamente este incremento
     de Oscar en `evidence/individual.md`.
-  - **Validación humana:** pendiente de revisión final de los cambios y resultados
-    por Oscar, además de build y GitHub Actions. Las ejecuciones asistidas que se
-    documenten no sustituyen esa revisión ni acreditan una ejecución de CI.
+  - **Validación humana:** revisé que `npm run test:rendering` terminara con 13
+    contratos aprobados. La corrida verde de GitHub Actions debe verificarse y
+    enlazarse en la entrega final; las ejecuciones asistidas no la sustituyen.
 
 ## Felipe Mora Lopez
 
@@ -184,7 +183,9 @@
 
 ## Asignación: Detalle SSR y estados de error (Felipe)
 
-**SHA del commit:** `3f57b05f632fe8aa4725a89a23b1331aae837b6f`
+**SHA del commit de implementación:** `3f57b05f632fe8aa4725a89a23b1331aae837b6f`
+
+**SHA de la actualización posterior de evidencia:** `e7a7b6fa810344dd691eb679e4f769b777d08243`
 
 **Decisión Técnica (SSR):** 
 Elegí Server-Side Rendering (SSR) para la página de detalles (`page.tsx`) porque permite que la información de la inspección se genere directamente en el servidor. Esto significa que la página no depende de que el navegador descargue JavaScript para hacer fetch de los datos (CSR), lo que mejora el rendimiento inicial y asegura que el contenido esté disponible inmediatamente al cargar la ruta. Por esta razón, omití el uso de `"use client"`.
@@ -198,6 +199,8 @@ Los datos provienen de un archivo estático (`src/lib/data/inspections.ts`). No 
 - [x] Navegación a una ruta inválida `/inspecciones/no-existe` intercepta correctamente y muestra la pantalla 404 (`not-found.tsx`).
 - [x] La navegación cuenta con un enlace funcional para regresar al listado.
 - [x] Las pruebas de build (`npm run build`) pasan sin errores.
+- [x] `npm run test:rendering` aprobó los 13 contratos (13 passed, 0 failed).
+  La advertencia `MODULE_TYPELESS_PACKAGE_JSON` de Node no cambió el resultado.
 
 **Uso de IA:**
 Se utilizó la IA de Claude como asistente de programación restrictivo para generar únicamente la estructura de los componentes `page.tsx`, `not-found.tsx` y `error.tsx`, asegurando el cumplimiento de las reglas de Next.js App Router.

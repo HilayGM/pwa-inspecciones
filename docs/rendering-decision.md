@@ -15,10 +15,10 @@ decisión técnica que pueda comprobarse sin servicios privados.
   funcional de Felipe. Debe recibir el ID de la URL, consultar los datos
   sintéticos compartidos y llamar `notFound()` cuando no exista el registro,
   sin declarar `"use client"`.
-- **Estado de integración:** `src/app/inspecciones/[id]/page.tsx` todavía no
-  existe en el árbol revisado. Esta decisión describe su contrato esperado;
-  no acredita una ruta SSR implementada. Oscar prepara pruebas, documentación,
-  scripts, CI y evidencia, sin implementar el detalle.
+- **Estado de integración:** las dos rutas están implementadas. El detalle es
+  un Server Component que obtiene `params.id`, busca el registro sintético y
+  llama `notFound()` ante un ID inexistente. Oscar aportó la prueba contractual,
+  la documentación y el workflow de integración continua.
 
 Un Server Component no demuestra por sí solo SSR dinámico en cada petición:
 puede intervenir prerenderizado o caché. Al integrar el detalle habrá que
@@ -27,14 +27,14 @@ impone una configuración funcional de renderizado al responsable del detalle.
 
 ## Comparación CSR vs SSR
 
-| Aspecto | Listado CSR actual | Detalle SSR / Server Component previsto |
+| Aspecto | Listado CSR | Detalle SSR / Server Component |
 | --- | --- | --- |
 | Dónde se obtiene la información | El navegador hace `fetch` a `/api/inspecciones`; la API entrega datos sintéticos locales. | El servidor lee los datos sintéticos compartidos según el ID de ruta. |
 | Dónde se renderiza | Las tarjetas se completan en el navegador después de la consulta; puede existir HTML inicial del shell y de carga. | El contenido del registro se prepara en servidor; la política efectiva de prerenderizado/caché queda por verificar. |
 | Cuándo aparece el contenido | Después de ejecutar JavaScript y resolver la API. | Se espera contenido del detalle en la respuesta inicial, sin esperar una consulta cliente del registro. |
 | Dependencia de JavaScript | Necesario para consultar y mostrar los registros y reintentar. | El contenido básico del registro debe ser legible sin JavaScript; la navegación mejorada y otros componentes cliente pueden usarlo. |
-| Carga | Estado inicial explícito con `LoadingState`, `role=status` y `aria-busy`. | Espera de navegación/respuesta del servidor; no se presupone una pantalla de carga aún inexistente. |
-| Error | Respuesta HTTP fallida o consulta inválida muestra alerta y reintento. | Un ID inexistente debe pasar por `notFound()`; otros fallos requieren una decisión del responsable. |
+| Carga | Estado inicial explícito con `LoadingState`, `role=status` y `aria-busy`. | La página entrega el detalle desde el servidor; no añade un estado de carga visual propio. |
+| Error | Respuesta HTTP fallida o consulta inválida muestra alerta y reintento. | Un ID inexistente llama `notFound()` y existe un límite de error de ruta para errores inesperados. |
 | Ventajas | Interacción y reintento local sin recargar toda la página. | Lectura directa por URL y contenido inicial preparado en servidor. |
 | Costos | JavaScript, hidratación, petición adicional y coordinación de estados. | Trabajo en servidor y espera de respuesta; despliegue y caché deben ser coherentes. |
 | Accesibilidad | Estados anunciados y botón nativo; requieren revisión de teclado y lector de pantalla. | HTML semántico disponible inicialmente; estructura, navegación y estado inexistente deben verificarse al integrarse. |
@@ -54,13 +54,14 @@ impone una configuración funcional de renderizado al responsable del detalle.
 ## Límites
 
 - CSR depende de JavaScript y de `/api/inspecciones`.
-- SSR todavía no usa una fuente de datos dinámica real: su integración está
-  pendiente y el contrato previsto utiliza el arreglo sintético local.
+- El detalle SSR usa un arreglo sintético local; no representa una fuente de
+  datos dinámica, una base de datos ni una política de caché de producción.
 - No hay persistencia, autenticación, captura, edición ni sincronización.
 - El worker excluye `/api/`; la prueba offline de la página inicial no demuestra
   que el listado CSR funcione sin conexión.
-- Los enlaces al detalle están presentes, pero el flujo completo no puede
-  acreditarse mientras falte la página de Felipe.
+- El flujo listado-detalle y el 404 de ID inexistente se cubren por contratos
+  de código; falta una E2E específica que compruebe el comportamiento HTTP y
+  visual en un navegador real.
 - Las pruebas contractuales inspeccionan código fuente mediante patrones y
   descartan comentarios. No son análisis semántico completo: una refactorización
   equivalente puede requerir adaptar patrones manteniendo los contratos. No
@@ -109,31 +110,32 @@ Procedimiento reproducible:
    fecha, revisión evaluada, versiones, condiciones y captura/exportación de
    Network. Registrar después esta evidencia en el incremento de Oscar.
 
-No establecer un umbral de aprobación sin una línea base. El detalle podrá
-medirse posteriormente con un procedimiento específico cuando esté integrado;
-no atribuirle ahora mediciones ni resultados.
+No establecer un umbral de aprobación sin una línea base. La comparación de
+tiempos CSR/SSR sigue pendiente: esta evidencia no atribuye mediciones ni
+superioridad de rendimiento a una estrategia.
 
 ## Validación
 
 - `tests/rendering.spec.ts`, ejecutado con `npm run test:rendering`, comprueba
   13 contratos: archivos, directiva cliente, consulta API, uso de LoadingState,
   enlaces por ID, detalle servidor, parámetros, `notFound()` y estados/reintento.
-  La ausencia del detalle es un fallo real, sin omisiones ni éxito artificial.
+  En la revisión integrada, los 13 contratos aprobaron (13 passed, 0 failed).
+  Node puede mostrar `MODULE_TYPELESS_PACKAGE_JSON`; es una advertencia de
+  rendimiento al interpretar el archivo como módulo y no afecta el resultado.
 - `npm run test` conserva starter y manifest; `npm run test -- --run` sigue
   siendo compatible. `npm run test:service-worker` mantiene el contrato previo.
-- `npm run build` comprueba la compilación de las rutas que existen; por sí solo
-  puede pasar aunque falte el detalle. No sustituye `test:rendering`.
+- `npm run build` comprueba la compilación de las rutas, pero no sustituye
+  `test:rendering` ni una prueba de navegador.
 - `make verify` genera `reports/verification.json` sobre la estructura del
   starter; no certifica los contratos de Semana 04.
 - `.github/workflows/week-04-w04-csr-ssr.yml` ejecuta estas verificaciones y el
   check público, publica el reporte estructural y conserva cualquier fallo.
   Las salidas de pruebas/build quedan en los logs de Actions.
-- **E2E de Semana 04 no implementada:** falta el detalle de Felipe. La E2E futura
-  deberá visitar el listado, esperar los tres registros, abrir `inspection-001`,
-  verificar sus datos y comprobar el estado HTTP y la pantalla de
-  `/inspecciones/no-existe`. La implementación de `notFound()` y su respuesta
-  efectiva deberán contrastarse en navegador, incluida la posible transmisión
-  progresiva de la respuesta.
+- **Límite de automatización:** no existe una E2E específica de Semana 04. Una
+  futura E2E deberá visitar el listado, esperar los tres registros, abrir
+  `inspection-001`, verificar sus datos y comprobar el estado HTTP y la pantalla
+  de `/inspecciones/no-existe`. Los contratos actuales no sustituyen esa
+  validación visual ni de respuesta HTTP.
 - Se conserva Playwright para la E2E offline de Semana 03. Al agregar una E2E
   real de Semana 04 se incorporará un archivo y patrón explícitos, sin descubrir
   las pruebas contractuales de Node como pruebas Playwright. No existe todavía

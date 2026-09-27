@@ -290,7 +290,7 @@ Después, en **Application > Storage > Clear site data**.
 | --- | --- |
 | `/inspecciones` | Listado CSR implementado por Martín. |
 | `/api/inspecciones` | API local con los registros sintéticos del proyecto. |
-| `/inspecciones/[id]` | Detalle SSR / Server Component de Felipe, todavía pendiente de integración: no existe su `page.tsx`. |
+| `/inspecciones/[id]` | Detalle SSR / Server Component de Felipe, implementado con búsqueda por ID, `notFound()` y límite de error de ruta. |
 
 Oscar aporta decisión técnica, pruebas contractuales, scripts, CI, documentación
 y evidencia. La comparación completa está en
@@ -301,15 +301,15 @@ y evidencia. La comparación completa está en
 El listado declara `"use client"` y ejecuta `fetch` hacia `/api/inspecciones`
 desde el navegador. Utiliza `LoadingState` para mostrar carga y error; el botón
 **Reintentar** vuelve a consultar. Cada tarjeta genera un enlace al detalle
-mediante su ID. Los enlaces existen, pero sus destinos aún dependen de Felipe.
+mediante su ID.
 
 ### SSR
 
-El contrato esperado es un Server Component sin `"use client"`, que recibe el
-ID desde la URL, lee los registros de `src/lib/data/inspections.ts` y utiliza
-`notFound()` si no encuentra el registro. **El detalle todavía no está
-implementado en este árbol.** Ser Server Component no demuestra por sí solo
-renderizado dinámico por petición; se verificará la política real al integrarlo.
+El detalle es un Server Component sin `"use client"`: recibe el ID desde la
+URL, lee los registros de `src/lib/data/inspections.ts` y utiliza `notFound()`
+si no encuentra el registro. Ser Server Component no demuestra por sí solo
+renderizado dinámico por petición; no se atribuye una ventaja de rendimiento sin
+una medición reproducible.
 
 ### Cómo probar
 
@@ -333,10 +333,12 @@ make verify
 bash public-tests/check.sh
 ```
 
-Ejecutar cada comprobación y conservar su salida. `test:rendering` debe fallar
-mientras falte `src/app/inspecciones/[id]/page.tsx`; no hay pruebas omitidas para
-ocultar esa dependencia. `npm test` conserva las pruebas anteriores y no incluye
-el contrato nuevo; el workflow de Semana 04 lo ejecuta por separado.
+Ejecutar cada comprobación y conservar su salida. En la integración actual,
+`npm run test:rendering` aprueba los 13 contratos (13 passed, 0 failed). Node
+puede advertir `MODULE_TYPELESS_PACKAGE_JSON`; es una advertencia de rendimiento
+al interpretar la prueba como módulo y no cambia el resultado. `npm test`
+conserva las pruebas anteriores y no incluye el contrato nuevo; el workflow de
+Semana 04 lo ejecuta por separado.
 
 Sin Make, `npm run verify` genera el mismo reporte estructural. Después de que
 `npm run build` termine correctamente, utilizar `npm run start` si se quiere
@@ -354,7 +356,7 @@ red al terminar. Estos pasos son un procedimiento, no resultados ya obtenidos.
 
 ### Cómo probar SSR
 
-Cuando Felipe integre el detalle, visitar directamente:
+Visitar directamente:
 
 - `http://localhost:3000/inspecciones/inspection-001`
 - `http://localhost:3000/inspecciones/inspection-002`
@@ -363,24 +365,24 @@ Cuando Felipe integre el detalle, visitar directamente:
 Comprobar que cada ruta presenta los datos del registro correcto y que el
 contenido del detalle está en la respuesta del servidor, sin depender de una
 consulta cliente. Repetir con JavaScript deshabilitado para revisar la lectura
-del contenido básico. Todavía no se acredita este comportamiento.
+del contenido básico; esta última es una comprobación manual pendiente.
 
 ### Error
 
-Cuando se integre el detalle, `/inspecciones/no-existe` debe activar
-`notFound()`. Verificar la pantalla de recurso inexistente y el estado HTTP 404
-en una navegación directa; revisar cualquier efecto de streaming con el
-responsable. Un 404 por la ausencia actual de toda la ruta no demuestra que el
-detalle resuelva correctamente un ID inexistente.
+`/inspecciones/no-existe` activa `notFound()`. Verificar la pantalla de recurso
+inexistente y el estado HTTP 404 en una navegación directa; revisar cualquier
+efecto de streaming con el responsable. La prueba contractual verifica que la
+llamada esté en la rama de ausencia, pero no sustituye esta comprobación HTTP.
 
 ### Límites conocidos
 
 - Datos sintéticos, sin base de datos, persistencia ni autenticación.
 - CSR depende de JavaScript y de la API; el worker no almacena `/api/`.
-- Detalle SSR pendiente de Felipe; la navegación completa aún no se acredita.
+- El detalle SSR usa datos locales estáticos: no hay base de datos, caché de
+  producción ni garantía de SSR dinámico por petición.
 - Las pruebas contractuales leen código, no ejecutan React ni certifican HTTP.
-- No se agregó E2E de Semana 04 mientras falta el detalle. Playwright conserva
-  su configuración offline; una E2E futura requerirá un patrón explícito y no
+- No se agregó una E2E específica de Semana 04. Playwright conserva su
+  configuración offline; una E2E futura deberá tener un patrón explícito y no
   debe descubrir las pruebas de Node.
 - Los resultados reales deben comprobarse mediante pruebas y CI. Los resultados
   históricos de secciones anteriores no certifican esta entrega.
@@ -391,12 +393,11 @@ Conservar las salidas de `npm run test:rendering`, `npm run test`,
 `npm run test:service-worker`, build y check público, junto con el enlace a la
 ejecución de `.github/workflows/week-04-w04-csr-ssr.yml`. El workflow genera y
 publica `reports/verification.json` mediante `npm run verify`; ese reporte solo
-comprueba la estructura del starter. Los fallos del contrato no se convierten
-en éxito y las demás verificaciones continúan para completar el diagnóstico.
+comprueba la estructura del starter. La ejecución documentada de
+`npm run test:rendering` aprobó sus 13 contratos.
 
 La métrica reproducible de carga de la API, sus cinco repeticiones y la mediana
 están definidas en `docs/rendering-decision.md`. Su medición está pendiente; no
-se atribuyen cifras. Añadir después resultados, condiciones y capturas al
-incremento de Oscar en `evidence/individual.md`, junto con el SHA final y el
-resultado real de Actions. No se generan cobertura ni resultados de evaluación
-ficticios.
+se atribuyen cifras. Conservar resultados, condiciones y capturas, junto con el
+SHA final y el resultado real de Actions. No se generan cobertura ni resultados
+de evaluación ficticios.
