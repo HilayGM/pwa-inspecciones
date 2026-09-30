@@ -34,6 +34,35 @@
 - **Limitación o riesgo:** El listado CSR requiere JavaScript y la disponibilidad de `/api/inspecciones`; el service worker no almacena esa API. Si la consulta falla, muestra un error y permite reintentar, pero no hay persistencia ni edición de inspecciones.
 - **Uso de IA:** Utilicé OpenAI Codex para analizar la estructura existente, proponer el flujo CSR, implementar los archivos del listado y revisar la compilación. La IA influyó en `src/app/inspecciones/page.tsx`, `src/app/api/inspecciones/route.ts`, `src/components/loading-state.tsx`, los estilos asociados y este bloque. Revisé manualmente la lógica y ejecuté las verificaciones declaradas.
 
+### Incremento: almacenamiento offline y cola de sincronización
+
+- **Commit de implementación:** `0ecce9b40f6c7a016eaecd8dc7f9587e11cc729c` en la rama `dev-hilay`.
+- **Contribución concreta:** Implementé `src/lib/storage/schema.ts` y
+  `src/lib/sync/queue.ts`. El esquema crea almacenes IndexedDB para inspecciones,
+  operaciones pendientes y recibos procesados. La cola guarda cambios de forma
+  atómica, identifica duplicados, conserva tombstones para eliminaciones,
+  selecciona operaciones vencidas y procesa éxitos o fallos con reintentos.
+- **Decisión técnica que puedo explicar:** Usé una clave de idempotencia formada
+  por inspección, operación e identificador de mutación del cliente. Un índice
+  único evita duplicados pendientes y los recibos evitan repetir una operación
+  ya confirmada. Los fallos usan backoff exponencial de 1, 2, 4, 8 y 16 segundos,
+  con máximo configurable de cinco intentos y tope general de 60 segundos.
+- **Pruebas ejecutadas y resultado:** `npx tsc --noEmit --incremental false`,
+  `npm test`, `npm run test:rendering`, `npm run verify` y `npm run build`
+  terminaron con código 0. La prueba de renderizado conservó sus 13 contratos
+  aprobados y la verificación generó `reports/verification.json`.
+- **Limitación o riesgo:** IndexedDB solo está disponible en navegador y puede
+  ser borrado por el usuario o por políticas de almacenamiento. La cola expone
+  un `SyncSender`, pero la conexión con una API real y la resolución de
+  conflictos corresponden a la integración del equipo. Los recibos todavía no
+  tienen una política de limpieza y todos los datos usados deben seguir siendo
+  sintéticos.
+- **Uso declarado de IA:** Utilicé OpenAI Codex para revisar la arquitectura,
+  implementar el esquema y la cola, detectar riesgos de duplicación y validar
+  tipos, pruebas y build. La IA influyó en `src/lib/storage/schema.ts`,
+  `src/lib/sync/queue.ts` y esta sección. Revisé los contratos, confirmé que no
+  se añadieran datos reales y ejecuté personalmente los comandos declarados.
+
 ## Oscar Martinez Martinez
 
 ### Semana 03 — evidencia histórica
