@@ -233,3 +233,16 @@ Los datos provienen de un archivo estático (`src/lib/data/inspections.ts`). No 
 
 **Uso de IA:**
 Se utilizó la IA de Claude como asistente de programación restrictivo para generar únicamente la estructura de los componentes `page.tsx`, `not-found.tsx` y `error.tsx`, asegurando el cumplimiento de las reglas de Next.js App Router.
+
+### Incremento: política de conflictos de sincronización
+
+- **Contribución concreta:** Creé `src/lib/sync/conflict-policy.ts` con una
+  función pura para decidir entre aceptar el cambio local, conservar el registro
+  del servidor o indicar que no hay una resolución automática. También redacté
+  `docs/sync-policy.md` para documentar el flujo offline-first, almacenamiento,
+  idempotencia, reintentos, conflictos, supuestos y riesgos.
+- **Decisión técnica que puedo explicar:** La resolución recibe todas las
+  versiones explícitamente, no consulta IndexedDB ni la red y devuelve la razón
+  junto con una copia del registro local para diagnóstico. Ante una versión
+  más reciente del servidor, conserva ese registro para evitar sobrescribir
+  información confirmada.
