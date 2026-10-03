@@ -401,3 +401,87 @@ están definidas en `docs/rendering-decision.md`. Su medición está pendiente; 
 se atribuyen cifras. Conservar resultados, condiciones y capturas, junto con el
 SHA final y el resultado real de Actions. No se generan cobertura ni resultados
 de evaluación ficticios.
+
+## Semana 05 — persistencia local y sincronización idempotente
+
+Oscar aporta `tests/sync.spec.ts`, el script `test:sync`, el workflow
+`.github/workflows/week-05-sync.yml` y esta documentación. Las 16 pruebas
+consumen las APIs existentes de almacenamiento y cola de Martín y la política
+de conflictos de Felipe. Utilizan únicamente datos sintéticos, sin red, API
+real ni autenticación real.
+
+### Instalación y ejecución
+
+Con Node.js 22 compatible, desde la raíz del repositorio:
+
+```bash
+npm ci
+npm run test:sync
+```
+
+`fake-indexeddb` proporciona IndexedDB en Node. `tsx` ejecuta los tests
+TypeScript con `node:test` y permite consumir los módulos existentes con sus
+imports actuales. Las aserciones verifican comportamiento y registros
+persistidos; no dependen de búsquedas textuales del código fuente.
+
+### Aislamiento y reintentos reproducibles
+
+Antes y después de cada prueba se cierran las conexiones de los helpers y se
+elimina completamente `pwa-inspecciones-sync`, esperando el resultado de
+`deleteDatabase`. La suite desactiva la concurrencia para evitar compartir la
+base entre pruebas. Cada caso prepara sus propios datos.
+
+Las fechas son constantes explícitas y se inyectan como `Date` en las APIs.
+Para los reintentos se avanza el reloj manualmente, sin `setTimeout` ni esperas
+de segundos reales. Se comprueban los retrasos de 1, 2, 4, 8 y 16 segundos;
+el escenario de 16 segundos usa explícitamente `maxAttempts: 6`.
+
+El máximo predeterminado es de cinco intentos: los cuatro primeros fallos
+programan 1, 2, 4 y 8 segundos; el quinto deja la entrada en `exhausted`, sin
+programar una espera de 16 segundos. Las entradas agotadas quedan fuera de
+`getDueQueueEntries` y no se envían automáticamente. `calculateRetryDelay`
+tiene un tope predeterminado de 60000 ms por retraso; no es un límite de tiempo
+acumulado y el helper permite configurar otro `maximumDelayMs`.
+
+### Cobertura y límites
+
+Las pruebas verifican las stores `inspections`, `syncQueue` y `syncReceipts`,
+sus keyPaths e índices de cola, el guardado offline y las operaciones pendientes.
+La idempotencia se comprueba tanto con una mutación pendiente como después de
+confirmarla: los recibos permiten detectar una repetición sin crear otra
+operación. Un envío sintético exitoso elimina el pendiente, deja recibo y marca
+la inspección como `synced`.
+
+Una eliminación conserva un tombstone (`deleted: true`) físicamente en
+IndexedDB y lo oculta del listado offline. Después de confirmar el delete,
+desaparecen el tombstone y el pendiente y permanece el recibo.
+
+Las pruebas de `resolveSyncConflict` comprueban que versiones iguales aceptan
+el cambio local y que una versión servidor más reciente gana, incluso frente a
+una eliminación local. La política devuelve una decisión y no está conectada
+automáticamente a la persistencia: estas pruebas no acreditan restauración de
+datos servidor en IndexedDB. Tampoco hay API ni autenticación reales; el sender
+usado en las pruebas es sintético. IndexedDB simulado no sustituye una prueba
+de integración en navegador ni demuestra idempotencia de un servidor real.
+
+### Verificación de Semana 05
+
+Ejecutar en este orden y conservar los resultados reales:
+
+```bash
+npm ci
+npm test
+npm run test:rendering
+npm run test:service-worker
+npm run test:sync
+npm run build
+npm run verify
+bash public-tests/check.sh
+```
+
+El workflow utiliza Ubuntu y Node 22 y ejecuta la misma secuencia. No instala
+Chromium porque no ejecuta `test:offline`. Publica `reports/verification.json`
+cuando está disponible; ese reporte solo valida la estructura del starter.
+Los comandos build y verify generan artefactos locales. El check público
+requiere Bash y ripgrep. No se atribuyen resultados remotos de Actions hasta
+verificar una ejecución real.
