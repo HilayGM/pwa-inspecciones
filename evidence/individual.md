@@ -176,6 +176,8 @@
     contratos aprobados. La corrida verde de GitHub Actions debe verificarse y
     enlazarse en la entrega final; las ejecuciones asistidas no la sustituyen.
 
+### Semana 05 — Persistencia local y sincronización idempotente
+
 ## Felipe Mora Lopez
 
 - Estudiante: Felipe Mora Lopez
@@ -246,3 +248,109 @@ Se utilizó la IA de Claude como asistente de programación restrictivo para gen
   junto con una copia del registro local para diagnóstico. Ante una versión
   más reciente del servidor, conserva ese registro para evitar sobrescribir
   información confirmada.
+
+
+- Estudiante: Oscar Martinez Martinez
+- Commit SHA evaluado: https://github.com/HilayGM/pwa-inspecciones
+ SHA:08bd75ffeafe5c6395f6498ad2aa1d5b827f5b47
+
+- **Contribución realizada:** Implementé 16 pruebas reproducibles en
+  `tests/sync.spec.ts` para validar persistencia local con IndexedDB, cola de
+  sincronización, idempotencia, recibos, reintentos exponenciales, agotamiento
+  de intentos, tombstones y política de resolución de conflictos. También
+  preparé la automatización de CI y la documentación de Semana 05.
+
+- **Archivos creados o modificados:** `tests/sync.spec.ts`, `README.md`,
+  `package.json`, `package-lock.json` y `.github/workflows/week-05-sync.yml`.
+  Consumí las APIs de `src/lib/storage/schema.ts`, `src/lib/sync/queue.ts` y
+  `src/lib/sync/conflict-policy.ts`, y consulté `docs/sync-policy.md`, sin
+  modificar esos archivos de Martín y Felipe.
+
+- **Decisión técnica que puedo explicar:** Utilicé `fake-indexeddb` para
+  simular IndexedDB en Node y `tsx` para ejecutar los tests TypeScript con
+  `node:test`. Las pruebas usan fechas explícitas y deterministas, eliminan
+  completamente la base IndexedDB antes de cada caso y esperan que termine
+  la eliminación. Los helpers cierran sus conexiones y la suite evita la
+  ejecución concurrente. Utilicé únicamente datos sintéticos, sin red, API
+  ni autenticación reales. Esta estrategia permite probar el comportamiento
+  de sincronización sin depender de un navegador real ni esperar físicamente
+  los tiempos de reintento.
+
+- **Pruebas preparadas:** Los 16 casos comprueban:
+  1. Creación de las stores `inspections`, `syncQueue` y `syncReceipts`, sus
+     keyPaths e índices de cola.
+  2. Guardado offline de una inspección pendiente.
+  3. Persistencia de una operación en la cola.
+  4. Prevención de duplicados pendientes con la misma clave de idempotencia.
+  5. Creación de un recibo al confirmar una operación.
+  6. Detección de una mutación ya confirmada sin volver a encolarla.
+  7. Programación del primer reintento exactamente un segundo después.
+  8. Secuencia de reintentos de 1, 2, 4, 8 y 16 segundos con `maxAttempts: 6`.
+  9. Tope predeterminado de 60000 ms de `calculateRetryDelay`.
+  10. Estado `exhausted` al alcanzar el máximo de intentos y exclusión de
+      futuros envíos automáticos.
+  11. Eliminación del pendiente, recibo e inspección `synced` tras un envío
+      sintético exitoso.
+  12. Tombstone físico para delete, oculto del listado offline.
+  13. Eliminación física del tombstone y del pendiente después de sincronizar,
+      conservando el recibo.
+  14. Decisión `accept-local` cuando las versiones coinciden.
+  15. Decisión `accept-server` cuando la versión del servidor es más reciente.
+  16. Decisión `accept-server` ante una eliminación local conflictiva, sin
+      autorizar el borrado silencioso de información más reciente.
+
+- **Matiz de los reintentos:** `DEFAULT_MAX_SYNC_ATTEMPTS = 5`. Con ese máximo,
+  los fallos 1, 2, 3 y 4 programan respectivamente 1, 2, 4 y 8 segundos; el
+  quinto fallo deja la entrada en `exhausted`. No se programa una espera de
+  16 segundos con los cinco intentos predeterminados. Para comprobar ese
+  retraso utilicé explícitamente `maxAttempts: 6` y avancé las fechas
+  manualmente, sin temporizadores reales. El tope de 60 segundos corresponde
+  al cálculo predeterminado por retraso, no al tiempo acumulado; el helper
+  permite configurar otro máximo.
+
+- **Pruebas y resultados de esta contribución:**
+  - `npm test`: PASS — starter y manifest.
+  - `npm run test:rendering`: PASS — 13/13.
+  - `npm run test:service-worker`: PASS.
+  - `npm run test:sync`: PASS — 16/16.
+  - `npm run build`: PASS.
+  - `npm run verify`: PASS.
+  - `bash public-tests/check.sh`: PASS — código 0 y `PUBLIC_OK`.
+  - Validación de tipos de `tests/sync.spec.ts`: PASS.
+  - `git diff --check`: PASS.
+
+- **Automatización de CI:** Creé `.github/workflows/week-05-sync.yml` con
+  Node 22 y ejecución, en este orden, de `npm ci`, `npm test`,
+  `npm run test:rendering`, `npm run test:service-worker`, `npm run test:sync`,
+  `npm run build`, `npm run verify` y `bash public-tests/check.sh`. El workflow
+  todavía no ha sido validado en GitHub Actions al momento de esta evidencia
+  local; su ejecución remota queda pendiente.
+
+- **Limitaciones conocidas:** `fake-indexeddb` no sustituye pruebas reales en
+  navegador y las pruebas no demuestran idempotencia de un servidor real.
+  La política de Felipe se valida como función pura, pero no está integrada
+  automáticamente con la persistencia. No existe API ni autenticación reales.
+  La secuencia que incluye 16 segundos requiere `maxAttempts: 6`. GitHub
+  Actions todavía debe ejecutarse remotamente. npm reportó vulnerabilidades
+  en dependencias durante la instalación; no ejecuté correcciones automáticas
+  porque estaban fuera del alcance. El check público imprimió coincidencias
+  textuales aunque terminó con `PUBLIC_OK`; ese resultado no certifica por
+  sí solo ausencia de credenciales.
+
+- **Cambio que puedo defender o modificar en vivo:** Explicar la limpieza de
+  IndexedDB, verificar registros persistidos y recibos, avanzar el reloj de
+  los reintentos sin esperas y distinguir una decisión de conflictos de su
+  aplicación real sobre los datos. También puedo explicar el orden del CI y
+  sus límites sin atribuir resultados remotos no observados.
+- **Uso declarado de IA:**
+  - **Herramienta:** ChatGPT / Codex.
+  - **Propósito:** análisis del repositorio, diseño de casos de prueba, apoyo
+    para implementar tests, configuración de CI y documentación técnica.
+  - **Fragmentos influenciados:** `tests/sync.spec.ts`, `README.md`,
+    `package.json`, `package-lock.json`, `.github/workflows/week-05-sync.yml`
+    y exclusivamente este incremento de Oscar en `evidence/individual.md`.
+    
+  - **Validación humana:** revisé los cambios, ejecuté las pruebas localmente
+    y verifiqué manualmente los resultados antes del commit. La IA se utilizó
+    como apoyo; la revisión y validación de la contribución fueron realizadas
+    por mí. La ejecución remota de GitHub Actions todavía debe comprobarse.
