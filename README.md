@@ -160,7 +160,10 @@ Validación del 13 de septiembre de 2026 con Node.js 22.23.2 instalado localment
 
 No se repitieron `npm ci` ni `npm run dev`, ni se realizaron pruebas visuales, de instalación o Lighthouse durante esta contribución. El build temporal produjo HTML estático, pero no sustituye esas comprobaciones de navegador.
 
-La referencia `/icons/icon-192x192.png` sigue presente y su archivo no existe en `public/`. También falta el icono de 512 px. Esto confirma que la causa del 404 histórico sigue sin resolverse en el árbol actual; no se ha repetido una solicitud HTTP en esta revisión.
+Los archivos `public/icons/icon-192x192.png` y
+`public/icons/icon-512x512.png` existen y coinciden con las referencias del
+manifest. La prueba automatizada valida su formato y dimensiones; la instalación
+visual de la PWA sigue siendo una comprobación manual de navegador.
 
 ## Supuestos
 
@@ -170,7 +173,8 @@ La referencia `/icons/icon-192x192.png` sigue presente y su archivo no existe en
 
 ## Limitaciones conocidas
 
-- Faltan `public/icons/icon-192x192.png` y `public/icons/icon-512x512.png`: el integrante responsable del manifest debe aportar los recursos y verificar instalación. Un manifest presente no demuestra que la PWA sea instalable.
+- Los iconos de 192 y 512 px están presentes y se validan automáticamente. Esto
+  no sustituye la comprobación manual de instalación en un navegador compatible.
 - `src/components/app-shell.tsx` utiliza clases de utilidad que no están definidas en `globals.css`, sin Tailwind instalado. Corresponde al responsable del shell resolver sus estilos; las clases CSS de la página sí existen.
 - El shell actual no implementa estados de carga, error ni vacío. El responsable del shell debe completar y acordar esas demostraciones para la actividad de equipo.
 - `tests/manifest.spec.ts` forma parte de `npm test` y los workflows que invocan ese comando también la ejecutan.
@@ -185,7 +189,12 @@ Lighthouse no se ha ejecutado en esta revisión: generar y conservar su reporte/
 
 ## Uso de IA
 
-Se utilizó una herramienta de IA como apoyo para el análisis de estructura, la revisión de documentación y la asistencia en implementación. Los resultados históricos de ejecución, build y verificación fueron proporcionados por el integrante; las comprobaciones ejecutadas durante esta contribución se distinguen en «Verificación realizada». La revisión manual final por el integrante, incluida la comprobación visual y la validación de resultados de ejecución, build y pruebas, queda pendiente antes de la entrega. No se atribuyen a la IA pruebas de navegador ni mediciones de Lighthouse que no se realizaron.
+Se utilizó una herramienta de IA como apoyo para el análisis de estructura, la
+revisión de documentación y la asistencia en implementación. Los resultados
+históricos y las comprobaciones actuales se distinguen en «Verificación
+realizada». Las pruebas automatizadas y GitHub Actions están documentadas con
+sus resultados reales; no se atribuyen a la IA comprobaciones visuales ni
+mediciones de Lighthouse que no se realizaron.
 
 ## Semana 03 — Service Worker, pruebas offline y CI
 
@@ -253,12 +262,11 @@ verifica nuevamente:
 - Laboratorio de Electrónica
 - Laboratorio de Software
 
-Estado de validación: la prueba offline fue iniciada localmente, pero la
-ejecución no emitió un resultado final PASS o FAIL verificable antes del cierre
-de la sesión.
-
-La automatización de GitHub Actions ejecutará esta prueba nuevamente en
-Chromium.
+Estado de validación: `PASS` en GitHub Actions con Chromium para el commit
+`2ab0a8644d00d2a9843eedcdc8585ecbe20941c2`. La corrida instaló dependencias y
+Chromium, verificó la estructura, ejecutó las pruebas existentes y del Service
+Worker, compiló la aplicación, reprodujo la navegación offline y ejecutó el
+check público: [Semana 03 — corrida verde](https://github.com/HilayGM/pwa-inspecciones/actions/runs/37236555541).
 
 ### Producción manual
 
@@ -280,7 +288,8 @@ Después, en **Application > Storage > Clear site data**.
 - No valida escritura offline.
 - No valida APIs offline.
 - Utiliza datos exclusivamente sintéticos.
-- La ejecución local de la prueba E2E offline quedó sin resultado final verificable.
+- La prueba E2E offline pasó en GitHub Actions; su alcance sigue limitado a la
+  pantalla inicial y no demuestra escritura ni sincronización de APIs offline.
 
 ## Semana 04 - CSR y SSR
 

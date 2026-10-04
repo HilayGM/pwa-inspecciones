@@ -16,10 +16,16 @@
   - `node --check public/sw.js`: terminó con código 0; la sintaxis del service worker es válida.
   - `npm.cmd test`: terminó con código 0; `starter.spec.mjs: PASS` y `manifest.spec.ts: PASS`.
   - `git diff --check`: terminó sin errores de espacios.
-  - `npm.cmd run build`: se inició correctamente, pero no terminó dentro del límite de 120 segundos del entorno de asistencia. La compilación, la prueba real en navegador sin conexión y GitHub Actions deben ejecutarse por el equipo antes de fusionar a `main`.
+  - `npm.cmd run build`: la ejecución inicial no terminó dentro del límite del
+    entorno de asistencia. La versión integrada fue validada posteriormente en
+    GitHub Actions: build, prueba contractual y navegación offline terminaron
+    correctamente en la corrida verde documentada abajo.
 
 - Limitación o riesgo identificado:
-  La primera visita requiere conexión para instalar el worker y guardar el app shell. El funcionamiento offline completo depende de que se integre el registro del service worker y se agreguen las pruebas de navegador. Esta versión no guarda ni sincroniza nuevas inspecciones.
+  La primera visita requiere conexión para instalar el worker y guardar el app
+  shell. El registro y las pruebas de navegador ya están integrados; la estrategia
+  de esta semana cubre la pantalla inicial y no pretende almacenar respuestas de
+  API ni demostrar por sí sola la sincronización incorporada en semanas posteriores.
 
 - Uso declarado de IA:
   Utilicé OpenAI Codex para analizar el estado del repositorio, proponer la estrategia de caché, implementar el service worker y redactar la documentación de la decisión. Influyó en `public/sw.js`, `next.config.mjs`, `docs/cache-strategy.md` y este bloque de evidencia. Revisé manualmente la estrategia, confirmé las pruebas y salidas declaradas, y dejé explícitas las validaciones que siguen pendientes.
@@ -105,10 +111,11 @@
   `Chromium 140`
   Ejecuté `npm run test:offline`.
   Resultado:
-  La prueba fue iniciada, pero la ejecución no emitió un resultado final `PASS` o `FAIL` verificable antes del cierre de la sesión.
+  `PASS` en la validación integrada de GitHub Actions con Chromium.
 - Limitación o fallo diagnosticado:
 
-  La prueba E2E offline quedó implementada y preparada para ejecutarse con Chromium, pero la ejecución local no produjo un resultado final `PASS` o `FAIL` verificable antes de terminar la sesión.
+  La prueba E2E pasó en Chromium dentro de GitHub Actions para el commit integrado
+  `2ab0a8644d00d2a9843eedcdc8585ecbe20941c2`.
 
   La prueba valida principalmente la disponibilidad offline de la pantalla inicial y de las tres inspecciones sintéticas: `Laboratorio de Redes`, `Laboratorio de Electrónica` y `Laboratorio de Software`. No valida sincronización de información, escritura offline ni funcionamiento offline de APIs.
 
@@ -124,7 +131,11 @@
 
   La IA influyó principalmente en `tests/service-worker.spec.ts`, `tests/offline.spec.ts`, `playwright.config.ts`, `.github/workflows/week-03-w03-service-worker-offline.yml` y en la documentación relacionada con las pruebas.
 
-  Validé personalmente la información contra los archivos del proyecto y comprobé localmente `npm test`, `npm run test:service-worker` y `npm run build`. También verifiqué la instalación de Chromium y revisé la ejecución de `npm run test:offline`, dejando documentado que esta última no produjo un resultado final verificable.
+  Validé personalmente la información contra los archivos del proyecto y comprobé
+  localmente `npm test`, `npm run test:service-worker` y `npm run build`. La
+  validación integrada de `npm run test:offline` quedó registrada en la
+  [corrida verde de Semana 03](https://github.com/HilayGM/pwa-inspecciones/actions/runs/37236555541),
+  que también ejecutó build y check público.
 
 ### Semana 04 — CSR y SSR
 
@@ -205,10 +216,14 @@
 
 ### Incremento: registro del Service Worker
 
-- **Commit de mi contribución:** `ebf07ee` en la rama `felipe`.
+- **Commit de mi contribución:** `ebf07ee8c4b27dd7652ae534f62440a3cb97241f` en la rama `felipe`.
 - **Contribución concreta:** Implementé el registro seguro de `/sw.js` en el navegador mediante `src/lib/pwa/register-service-worker.ts`, un componente cliente sin interfaz visible en `src/components/service-worker-registration.tsx` y su integración en el layout global. También documenté la instalación, la prueba offline, la limpieza de caché y los límites conocidos.
 - **Decisión técnica que puedo explicar:** Separé el registro en un módulo que comprueba el entorno del navegador y la disponibilidad de `navigator.serviceWorker`. El componente usa `useEffect` con dependencias vacías para iniciar el registro una sola vez al montarse, captura errores sin interrumpir la aplicación y no renderiza contenido visible.
-- **Pruebas realizadas y resultado:** `npm run build`, `npm test` y `npm run verify` fueron reportados por Felipe como exitosos en su rama. La comprobación manual en DevTools y la prueba offline deben validarse nuevamente en el commit de integración antes de fusionar a `main`.
+- **Pruebas realizadas y resultado:** `npm run build`, `npm test` y
+  `npm run verify` fueron exitosos en su rama. En la integración final, GitHub
+  Actions también aprobó el contrato del Service Worker y la prueba E2E offline
+  con Chromium. La comprobación manual en DevTools sigue siendo evidencia
+  complementaria y no se atribuye como realizada si no existe captura.
 - **Límites de la función:** El registro no implementa sincronización en segundo plano, persistencia de datos ni garantiza que todas las rutas funcionen sin conexión. La cobertura offline depende de la estrategia de caché de `public/sw.js` y de un navegador compatible.
 - **Uso de IA:** Utilicé GitHub Copilot para interpretar la consigna, proponer la estructura del registro del Service Worker y revisar la documentación. La IA influyó en `src/lib/pwa/register-service-worker.ts`, `src/components/service-worker-registration.tsx`, `src/app/layout.tsx`, `README.md` y esta sección de evidencia. Revisé y adapté el código al proyecto.
 
