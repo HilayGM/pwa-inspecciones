@@ -26,6 +26,9 @@ export const DEFAULT_GEOLOCATION_OPTIONS: PositionOptions = {
 };
 
 const COORDINATE_DECIMALS = 3;
+const PERMISSION_DENIED = 1;
+const POSITION_UNAVAILABLE = 2;
+const TIMEOUT = 3;
 
 function roundCoordinate(value: number): number {
   const multiplier = 10 ** COORDINATE_DECIMALS;
@@ -43,7 +46,7 @@ function getGeolocation(): Geolocation | undefined {
 function getGeolocationFailure(
   error: GeolocationPositionError,
 ): Omit<Extract<GeolocationRequestResult, { ok: false }>, "ok"> {
-  if (error.code === error.PERMISSION_DENIED) {
+  if (error.code === PERMISSION_DENIED) {
     return {
       reason: "permission-denied",
       message:
@@ -51,7 +54,7 @@ function getGeolocationFailure(
     };
   }
 
-  if (error.code === error.TIMEOUT) {
+  if (error.code === TIMEOUT) {
     return {
       reason: "timeout",
       message:
@@ -59,7 +62,7 @@ function getGeolocationFailure(
     };
   }
 
-  if (error.code === error.POSITION_UNAVAILABLE) {
+  if (error.code === POSITION_UNAVAILABLE) {
     return {
       reason: "unavailable",
       message:
