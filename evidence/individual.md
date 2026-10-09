@@ -2,8 +2,8 @@
 
 ## Martin Moreno Libreros — Semana 06
 
-- **Commit SHA evaluado:** se completará después de confirmar la implementación
-  de cámara y geolocalización en `dev-martin`.
+- **Commit SHA evaluado:** `ebd3d50c3c6a24ad769017fcfa4a329e74c5336c`
+  en la rama `dev-martin`.
 - **Contribución concreta:** Implementé `src/lib/device/camera.ts` y
   `src/lib/device/geolocation.ts` como adaptadores de navegador sin efectos al
   importarse. Solo solicitan una capacidad cuando la interfaz invoca su función,
@@ -13,9 +13,11 @@
   precisión y redondea coordenadas a tres decimales; no usa observación continua
   ni conserva fecha o ubicación. Esto reduce permisos, datos recolectados y
   exposición de privacidad.
-- **Prueba que ejecutaré y resultado:** `npm test`, `npm run build` y la suite
-  de capacidades cuando Oscar la integre. El resultado real se actualizará antes
-  de fusionar el PR.
+- **Prueba ejecutada y resultado:** `npx tsc --noEmit --incremental false`,
+  `npm test`, `npm run test:sync`, `npm run verify` y `npm run build`
+  terminaron con código 0.
+  La suite específica `npm run test:capabilities` corresponde a Oscar y deberá
+  ejecutarse antes de fusionar el PR final del equipo.
 - **Limitación o fallo diagnosticado:** Las APIs dependen del navegador, origen
   seguro y permiso explícito. La captura de imagen y el uso posterior de la
   ubicación deben permanecer opcionales; el fallback permite continuar sin ellas.
