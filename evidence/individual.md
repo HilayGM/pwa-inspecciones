@@ -29,7 +29,7 @@
   y no se introduzcan datos reales, secretos ni PII persistida.
 
 ## Evidencia de Implementación - Felipe Mora López
-- **SHA Completo del commit:** [Pegar SHA aquí]
+- **SHA Completo del commit:** c8969c743f350dde5e2531ce28c3f195581b1a1d
 - **Decisión técnica:** Implementación de notificaciones locales con Service Workers, fallback a API estándar y manejo estricto de estados en bloques try/catch para evitar bloqueos.
 - **Prueba:** Validación del prompt de permisos solo bajo interacción y recepción de mensajes sintéticos.
 - **Limitación:** Sin push remoto; las notificaciones operan solo con la PWA activa o el Service Worker en segundo plano.
