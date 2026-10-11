@@ -228,6 +228,9 @@ describe("Geolocalización simulada", { concurrency: false }, () => {
         geolocation: { getCurrentPosition() { throw new Error("synthetic API failure"); } },
       },
     });
+    const rawResult = await requestCoarseLocation();
+    assert.equal(rawResult.ok, false);
+    if (!rawResult.ok) assert.equal(rawResult.reason, "unknown");
     assert.deepEqual(await getCurrentLocation(), { status: "error" });
 
   });

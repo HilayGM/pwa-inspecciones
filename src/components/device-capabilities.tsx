@@ -76,7 +76,7 @@ export function DeviceCapabilities() {
       </div>
       <p>Estas demostraciones solo comienzan al pulsar el botón correspondiente.</p>
       <div className="inspection-grid">
-        <article className="inspection-card" aria-labelledby="camera-heading">
+        <div className="inspection-card" aria-labelledby="camera-heading">
           <h3 id="camera-heading">Cámara</h3>
           <p>Vista previa local de video. No se graba ni se almacena una imagen.</p>
           {camera?.ok ? (
@@ -91,23 +91,23 @@ export function DeviceCapabilities() {
           )}
           {camera && !camera.ok && <p role="status">Estado: {camera.message}</p>}
           {cameraMessage && <p role="status">{cameraMessage}</p>}
-        </article>
+        </div>
 
-        <article className="inspection-card" aria-labelledby="location-heading">
+        <div className="inspection-card" aria-labelledby="location-heading">
           <h3 id="location-heading">Ubicación aproximada</h3>
           <p>Se solicita una lectura puntual y se redondea a tres decimales.</p>
           <button className="retry-button" type="button" onClick={() => void requestLocation()}>Leer ubicación</button>
           {location?.ok ? (
             <p role="status">Latitud {location.location.latitude}; longitud {location.location.longitude} (solo en esta vista).</p>
           ) : location && <p role="status">Estado: {location.message}</p>}
-        </article>
+        </div>
 
-        <article className="inspection-card" aria-labelledby="notification-heading">
+        <div className="inspection-card" aria-labelledby="notification-heading">
           <h3 id="notification-heading">Notificación local</h3>
           <p>Solicita permiso y muestra un mensaje de demostración sintético.</p>
           <button className="retry-button" type="button" onClick={() => void requestNotifications()}>Solicitar permiso y enviar</button>
           {notificationStatus && <p role="status">Estado: {notificationStatus}</p>}
-        </article>
+        </div>
       </div>
     </section>
   );

@@ -103,23 +103,31 @@ export function requestCoarseLocation(
   }
 
   return new Promise((resolve) => {
-    geolocation.getCurrentPosition(
-      (position) => {
-        resolve({
-          ok: true,
-          location: {
-            latitude: roundCoordinate(position.coords.latitude),
-            longitude: roundCoordinate(position.coords.longitude),
-            accuracyMeters: Math.round(position.coords.accuracy),
-          },
-        });
-      },
-      (error) => resolve({ ok: false, ...getGeolocationFailure(error) }),
-      {
-        ...DEFAULT_GEOLOCATION_OPTIONS,
-        ...options,
-        enableHighAccuracy: false,
-      },
-    );
+    try {
+      geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            ok: true,
+            location: {
+              latitude: roundCoordinate(position.coords.latitude),
+              longitude: roundCoordinate(position.coords.longitude),
+              accuracyMeters: Math.round(position.coords.accuracy),
+            },
+          });
+        },
+        (error) => resolve({ ok: false, ...getGeolocationFailure(error) }),
+        {
+          ...DEFAULT_GEOLOCATION_OPTIONS,
+          ...options,
+          enableHighAccuracy: false,
+        },
+      );
+    } catch {
+      resolve({
+        ok: false,
+        reason: "unknown",
+        message: "No fue posible obtener la ubicación. Puedes continuar sin agregar ubicación.",
+      });
+    }
   });
 }
