@@ -1,4 +1,5 @@
 import { inspections } from "../lib/data/inspections";
+import { DeviceCapabilities } from "../components/device-capabilities";
 
 export default function HomePage() {
   return (
@@ -54,6 +55,8 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      <DeviceCapabilities />
     </div>
   );
 }

@@ -37,3 +37,19 @@
 - **Limitación:** Sin push remoto; las notificaciones operan solo con la PWA activa o el Service Worker en segundo plano.
 - **Uso de IA:** Generación de código y documentación mediante IA en el IDE con instrucciones estrictas de no alterar código ajeno, bloquear PII y usar fallbacks seguros.
 - **Validación humana:** Revisión manual para asegurar la ausencia de datos sensibles y verificar que no haya llamadas automáticas al montar la app.
+
+## Pruebas, documentación y CI - Oscar Martinez Martinez
+
+- **Responsabilidad:** Pruebas deterministas de capacidades, guía operativa del proyecto e integración de CI para la Semana 06.
+- **Commit SHA evaluado:** `1176578398135b61e6147cb8b21637ac4b1b1308` — `Implementa pruebas y capacidades de dispositivos semana 06` (`dev-oscar`).
+- **Trabajo realizado:** Añadí adaptadores de cámara y geolocalización, la suite `tests/capabilities.spec.ts`, el script `test:capabilities`, documentación de instalación, desarrollo, pruebas y límites, y el workflow de Semana 06. Integré un panel de demostración con acciones explícitas para invocar las capacidades.
+- **Decisión técnica:** Usé `node:test` y mocks para probar sin hardware ni permisos reales. La cámara solicita únicamente video (`audio: false`) y libera todos los tracks al cerrar la vista. La geolocalización hace una sola lectura con `enableHighAccuracy: false`, redondea a tres decimales y conserva el resultado solo en memoria. Las notificaciones usan mensajes sintéticos. El workflow fija Node 22, instala con `npm ci` y ejecuta explícitamente `npm run test:capabilities`. Conservé sin cambios el módulo de notificaciones de Felipe.
+- **Pruebas ejecutadas y resultados:**
+  - `npm ci`: completado; agregó 416 paquetes y auditó 417. npm informó 15 vulnerabilidades (4 moderadas, 10 altas y 1 crítica) y paquetes obsoletos (`inflight`, `glob@7.2.3` y `sourcemap-codec`). No ejecuté `npm audit fix` ni `npm audit fix --force`.
+  - `npm run test:capabilities`: 15 pruebas en 3 suites; 15 aprobadas, 0 fallidas, canceladas u omitidas. Se probaron soporte ausente, permisos, limpieza de tracks, restricciones y resultados de APIs simuladas, errores geográficos y fallbacks/error de notificaciones. No se usaron dispositivos ni permisos reales. Node mostró `MODULE_TYPELESS_PACKAGE_JSON`; no impidió el resultado.
+  - `npm test`: `starter.spec.mjs: PASS` y `manifest.spec.ts: PASS`. También mostró `MODULE_TYPELESS_PACKAGE_JSON`, sin impedir la ejecución.
+  - `npm run build`: completó correctamente compilación de producción, lint y tipos, recopilación de datos, generación de seis páginas estáticas, trazas y optimización, sin errores.
+  - `git diff --check`: código de salida 0; mostró avisos de conversión LF/CRLF en Windows, sin errores de whitespace.
+- **Limitaciones y seguimiento:** No hay un resultado exitoso confirmado para `npm run verify`. El check público `bash public-tests/check.sh` no pudo ejecutarse porque Windows no permitió acceder a `bash.exe`; la búsqueda de lectura encontró coincidencias textuales que pueden causar falsos positivos. Tampoco se ha confirmado una ejecución remota de GitHub Actions. npm reportó las vulnerabilidades indicadas y persiste la advertencia de detección de módulos. En el módulo existente de notificaciones, si `navigator.serviceWorker.getRegistration()` rechaza, se devuelve `"error"` sin intentar `new Notification(...)`; la diferencia con el fallback descrito en documentación queda pendiente de coordinación con Felipe y no se considera un fallo de estas pruebas.
+- **Uso de IA:** Utilicé Codex como apoyo para implementar los adaptadores, generar las pruebas, actualizar el README y configurar el workflow.
+- **Validación humana:** Ejecuté manualmente los comandos anteriores en PowerShell y revisé sus salidas. Esta evidencia no afirma una revisión línea por línea ni una ejecución exitosa de GitHub Actions.
