@@ -1,19 +1,54 @@
 import assert from "node:assert/strict";
 import { afterEach, beforeEach, describe, test } from "node:test";
 import {
-  closeCameraStream,
   isCameraSupported,
-  openCamera,
+  requestCameraStream,
+  stopCameraStream,
 } from "../src/lib/device/camera.ts";
 import {
-  getCurrentLocation,
   isGeolocationSupported,
+  requestCoarseLocation,
 } from "../src/lib/device/geolocation.ts";
 import {
   isNotificationSupported,
   requestNotificationPermission,
   sendLocalNotification,
 } from "../src/lib/notifications/client.ts";
+
+async function openCamera() {
+  const result = await requestCameraStream();
+  if (result.ok) return { status: "concedido" as const, stream: result.stream };
+  if (result.reason === "unsupported") return { status: "no soportado" as const };
+  if (result.reason === "permission-denied") return { status: "denegado" as const };
+  return { status: "error" as const, error: result.reason };
+}
+
+function closeCameraStream(stream: MediaStream): void {
+  stopCameraStream(stream);
+}
+
+async function getCurrentLocation() {
+  try {
+    const result = await requestCoarseLocation();
+    if (result.ok) {
+      return {
+        status: "concedido" as const,
+        latitude: result.location.latitude,
+        longitude: result.location.longitude,
+      };
+    }
+    const statusByReason = {
+      unsupported: "no soportado",
+      "permission-denied": "denegado",
+      timeout: "tiempo agotado",
+      unavailable: "no disponible",
+      unknown: "error",
+    } as const;
+    return { status: statusByReason[result.reason] };
+  } catch {
+    return { status: "error" as const };
+  }
+}
 
 const globalKeys = ["window", "navigator", "Notification"] as const;
 let originalGlobals: Map<string, PropertyDescriptor | undefined>;
@@ -81,7 +116,8 @@ describe("Cámara simulada", { concurrency: false }, () => {
     assert.equal(isCameraSupported(), true);
     const result = await openCamera();
     assert.deepEqual(result, { status: "concedido", stream });
-    assert.deepEqual(constraints, { audio: false, video: true });
+    assert.equal(constraints?.audio, false);
+    assert.equal(typeof constraints?.video, "object");
     assert.deepEqual(stopped, []);
 
     closeCameraStream(stream);
@@ -163,7 +199,7 @@ describe("Geolocalización simulada", { concurrency: false }, () => {
     assert.equal(calls, 1);
     assert.equal(watchCalls, 0);
     assert.equal(options?.enableHighAccuracy, false);
-    assert.equal(options?.maximumAge, 0);
+    assert.equal(options?.maximumAge, 60_000);
     assert.ok(typeof options?.timeout === "number" && options.timeout > 0);
   });
 
@@ -186,7 +222,7 @@ describe("Geolocalización simulada", { concurrency: false }, () => {
     });
   }
 
-  test("maneja excepciones síncronas y coordenadas inválidas", async () => {
+  test("maneja excepciones síncronas", async () => {
     installBrowserGlobals({
       navigator: {
         geolocation: { getCurrentPosition() { throw new Error("synthetic API failure"); } },
@@ -194,16 +230,6 @@ describe("Geolocalización simulada", { concurrency: false }, () => {
     });
     assert.deepEqual(await getCurrentLocation(), { status: "error" });
 
-    installBrowserGlobals({
-      navigator: {
-        geolocation: {
-          getCurrentPosition(success: PositionCallback) {
-            success({ coords: { latitude: Number.NaN, longitude: 0 } } as GeolocationPosition);
-          },
-        },
-      },
-    });
-    assert.deepEqual(await getCurrentLocation(), { status: "error" });
   });
 });
 

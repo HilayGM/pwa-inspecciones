@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  closeCameraStream,
-  openCamera,
-  type CameraResult,
+  requestCameraStream,
+  stopCameraStream,
+  type CameraRequestResult,
 } from "../lib/device/camera";
 import {
-  getCurrentLocation,
-  type GeolocationResult,
+  requestCoarseLocation,
+  type GeolocationRequestResult,
 } from "../lib/device/geolocation";
 import {
   requestNotificationPermission,
@@ -17,10 +17,10 @@ import {
 } from "../lib/notifications/client";
 
 export function DeviceCapabilities() {
-  const [camera, setCamera] = useState<CameraResult | null>(null);
+  const [camera, setCamera] = useState<CameraRequestResult | null>(null);
   const [cameraOpening, setCameraOpening] = useState(false);
   const [cameraMessage, setCameraMessage] = useState<string | null>(null);
-  const [location, setLocation] = useState<GeolocationResult | null>(null);
+  const [location, setLocation] = useState<GeolocationRequestResult | null>(null);
   const [notificationStatus, setNotificationStatus] = useState<NotificationStatus | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const cameraAttempt = useRef(0);
@@ -28,12 +28,12 @@ export function DeviceCapabilities() {
   useEffect(() => () => { cameraAttempt.current += 1; }, []);
 
   useEffect(() => {
-    if (camera?.status !== "concedido") return;
+    if (!camera?.ok) return;
     const video = videoRef.current;
     if (video) video.srcObject = camera.stream;
     return () => {
       if (video) video.srcObject = null;
-      closeCameraStream(camera.stream);
+      stopCameraStream(camera.stream);
     };
   }, [camera]);
 
@@ -41,9 +41,9 @@ export function DeviceCapabilities() {
     const attempt = ++cameraAttempt.current;
     setCameraMessage(null);
     setCameraOpening(true);
-    const result = await openCamera();
+    const result = await requestCameraStream();
     if (attempt !== cameraAttempt.current) {
-      if (result.status === "concedido") closeCameraStream(result.stream);
+      if (result.ok) stopCameraStream(result.stream);
       return;
     }
     setCameraOpening(false);
@@ -57,7 +57,7 @@ export function DeviceCapabilities() {
   }
 
   async function requestLocation() {
-    setLocation(await getCurrentLocation());
+    setLocation(await requestCoarseLocation());
   }
 
   async function requestNotifications() {
@@ -79,7 +79,7 @@ export function DeviceCapabilities() {
         <article className="inspection-card" aria-labelledby="camera-heading">
           <h3 id="camera-heading">Cámara</h3>
           <p>Vista previa local de video. No se graba ni se almacena una imagen.</p>
-          {camera?.status === "concedido" ? (
+          {camera?.ok ? (
             <>
               <video ref={videoRef} autoPlay muted playsInline aria-label="Vista previa local de cámara" style={{ maxWidth: "100%" }} />
               <button className="retry-button" type="button" onClick={() => setCamera(null)}>Cerrar cámara</button>
@@ -89,7 +89,7 @@ export function DeviceCapabilities() {
           ) : (
             <button className="retry-button" type="button" onClick={() => void requestCamera()}>Abrir cámara</button>
           )}
-          {camera && camera.status !== "concedido" && <p role="status">Estado: {camera.status}</p>}
+          {camera && !camera.ok && <p role="status">Estado: {camera.message}</p>}
           {cameraMessage && <p role="status">{cameraMessage}</p>}
         </article>
 
@@ -97,9 +97,9 @@ export function DeviceCapabilities() {
           <h3 id="location-heading">Ubicación aproximada</h3>
           <p>Se solicita una lectura puntual y se redondea a tres decimales.</p>
           <button className="retry-button" type="button" onClick={() => void requestLocation()}>Leer ubicación</button>
-          {location?.status === "concedido" ? (
-            <p role="status">Latitud {location.latitude}; longitud {location.longitude} (solo en esta vista).</p>
-          ) : location && <p role="status">Estado: {location.status}</p>}
+          {location?.ok ? (
+            <p role="status">Latitud {location.location.latitude}; longitud {location.location.longitude} (solo en esta vista).</p>
+          ) : location && <p role="status">Estado: {location.message}</p>}
         </article>
 
         <article className="inspection-card" aria-labelledby="notification-heading">

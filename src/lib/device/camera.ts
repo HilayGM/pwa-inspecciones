@@ -105,5 +105,18 @@ export async function requestCameraStream(
  * Libera el hardware al cerrar el selector o después de capturar evidencia.
  */
 export function stopCameraStream(stream: MediaStream | null | undefined): void {
-  stream?.getTracks().forEach((track) => track.stop());
+  let tracks: MediaStreamTrack[];
+  try {
+    tracks = stream?.getTracks() ?? [];
+  } catch {
+    return;
+  }
+
+  for (const track of tracks) {
+    try {
+      track.stop();
+    } catch {
+      // Se continúa para intentar liberar todos los tracks.
+    }
+  }
 }
