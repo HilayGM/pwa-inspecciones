@@ -29,3 +29,11 @@
   `src/lib/device/camera.ts`, `src/lib/device/geolocation.ts` y esta evidencia.
   Revisé manualmente que no se solicite audio, no haya geolocalización continua
   y no se introduzcan datos reales, secretos ni PII persistida.
+
+## Evidencia de Implementación - Felipe Mora López
+- **SHA Completo del commit:** c8969c743f350dde5e2531ce28c3f195581b1a1d
+- **Decisión técnica:** Implementación de notificaciones locales con Service Workers, fallback a API estándar y manejo estricto de estados en bloques try/catch para evitar bloqueos.
+- **Prueba:** Validación del prompt de permisos solo bajo interacción y recepción de mensajes sintéticos.
+- **Limitación:** Sin push remoto; las notificaciones operan solo con la PWA activa o el Service Worker en segundo plano.
+- **Uso de IA:** Generación de código y documentación mediante IA en el IDE con instrucciones estrictas de no alterar código ajeno, bloquear PII y usar fallbacks seguros.
+- **Validación humana:** Revisión manual para asegurar la ausencia de datos sensibles y verificar que no haya llamadas automáticas al montar la app.
