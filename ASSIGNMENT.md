@@ -1,4 +1,4 @@
-# Actividad 6: Capacidades del dispositivo y notificaciones
+# Actividad 8: Pirámide de pruebas e integración continua
 
 ## Scenario
 
@@ -6,27 +6,27 @@ La Universidad Tecnológica de Tehuacán necesita una PWA para registrar inspecc
 
 ## Objective
 
-Integrar capacidades del dispositivo con permisos mínimos, fallback funcional, privacidad y manejo de fallos.
+Construir una pirámide de pruebas que cubra riesgos reales, produzca reportes y diagnostique al menos un fallo reproducible.
 
 ## Competencies
 
-**Primaria:** C06. **Acumulativas:** C03, C05, C10.
+**Primaria:** C14. **Acumulativas:** C07, C09.
 
 ## Engineering uplift traceability
 
-**Mínimo oficial:** Unidad II: notificaciones push, características nativas del dispositivo y funcionamiento offline.
+**Mínimo oficial:** Capacidades derivadas: ejecutar pruebas a componentes y gestionar desarrollo mediante integración continua.
 
-**Elevación Engineering Target:** Integrar capacidades del dispositivo con permisos mínimos, fallback funcional, privacidad y manejo de fallos.
+**Elevación Engineering Target:** Construir una pirámide de pruebas que cubra riesgos reales, produzca reportes y diagnostique al menos un fallo reproducible.
 
-**Evidencia de la elevación:** Permite adjuntar evidencia opcional y enviar/mostrar una notificación de cambio, con fallback cuando la API no existe o el permiso es denegado. La solución se juzga por comportamiento, decisiones justificadas, pruebas y reproducibilidad, no solo por una demo.
+**Evidencia de la elevación:** Incluye pruebas unitarias, integración y E2E del critical path, una estrategia de selección y un caso de fallo corregido. La solución se juzga por comportamiento, decisiones justificadas, pruebas y reproducibilidad, no solo por una demo.
 
 ## Prerequisites
 
-Continuar el repositorio personal creado en las semanas anteriores. No descargues un starter nuevo: conserva la captura y sincronización, y agrega solo la capacidad de dispositivo indicada.
+Continuar el repositorio personal creado en las semanas anteriores. No descargues un starter nuevo: la regresión debe ejecutarse sobre la aplicación acumulada.
 
 ## Schedule and one-week submission window
 
-Semana 6 del calendario de 14 semanas; trabajo individual preferente. Inicio en lunes y entrega a más tardar el domingo de esa misma semana. La duración máxima de la actividad es 7 días y no se aceptan extensiones implícitas de calendario.
+Semana 8 del calendario de 14 semanas; trabajo individual preferente. Inicio en lunes y entrega a más tardar el domingo de esa misma semana. La duración máxima de la actividad es 7 días y no se aceptan extensiones implícitas de calendario.
 
 ## Difficulty
 
@@ -34,22 +34,22 @@ Nivel 8/10. La dificultad proviene de integrar restricciones, justificar trade-o
 
 ## Requirements
 
-1. Continuar el mismo repositorio de inspecciones e implementar las alertas y evidencia solicitadas.
+1. Continuar el mismo repositorio de inspecciones e implementar la estrategia de pruebas y CI indicada.
 2. Entregar los archivos indicados y datos exclusivamente sintéticos.
 3. Explicar decisiones, límites, riesgos y evidencia de prueba.
 4. Ejecutar los comandos de verificación localmente antes de enviar.
 
-**Funcionalidad mínima:** Permite adjuntar evidencia opcional y enviar/mostrar una notificación de cambio, con fallback cuando la API no existe o el permiso es denegado.
+**Funcionalidad mínima:** Incluye pruebas unitarias, integración y E2E del critical path, una estrategia de selección y un caso de fallo corregido.
 
-**No funcionales:** No usa secretos reales, solicita permisos bajo acción del usuario, limita datos recolectados y mantiene flujo útil sin la capacidad.
+**No funcionales:** CI ejecuta setup, lint, build, tests y reportes; las pruebas son deterministas y no dependen de datos privados.
 
 ## Deliverables
 
-- `src/lib/device/camera.ts`
-- `src/lib/device/geolocation.ts`
-- `src/lib/notifications/client.ts`
-- `docs/capabilities.md`
-- `tests/capabilities.spec.ts`
+- `tests/unit/`
+- `tests/integration/`
+- `tests/e2e/`
+- `docs/test-strategy.md`
+- `.github/workflows/academic-evaluation.yml`
 - `README.md` con ejecución, supuestos y evidencia.
 - Reporte de verificación generado por CI o localmente.
 
@@ -107,7 +107,7 @@ Objetivo de automatización: 90% o más. El workflow instala, compila, ejecuta p
 
 ## Hidden tests
 
-`private-evaluator/w06-device-push/check.sh` y su contrato JSON son solo del instructor. Cubren invariantes, regresiones, seguridad, idempotencia, accesibilidad o trazabilidad que no deben poder ajustarse mirando el caso público.
+`private-evaluator/w08-testing-ci/check.sh` y su contrato JSON son solo del instructor. Cubren invariantes, regresiones, seguridad, idempotencia, accesibilidad o trazabilidad que no deben poder ajustarse mirando el caso público.
 
 ## Manual review
 
