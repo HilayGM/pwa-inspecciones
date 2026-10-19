@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
-  "assignmentId": "w06-device-push",
+  "assignmentId": "w08-testing-ci",
   "schedule": {
-    "week": 6,
-    "partial": 1,
+    "week": 8,
+    "partial": 2,
     "maxDurationDays": 7
   },
   "grading": {
@@ -15,17 +15,16 @@
     "justification": "Integra el mínimo oficial con restricciones de ingeniería, evidencia ejecutable, trade-offs y recuperación dentro de una semana."
   },
   "traceability": {
-    "officialOutcome": "Unidad II: notificaciones push, características nativas del dispositivo y funcionamiento offline.",
-    "institutionalMinimum": "Unidad II: notificaciones push, características nativas del dispositivo y funcionamiento offline.",
-    "engineeringTarget": "Integrar capacidades del dispositivo con permisos mínimos, fallback funcional, privacidad y manejo de fallos.",
+    "officialOutcome": "Capacidades derivadas: ejecutar pruebas a componentes y gestionar desarrollo mediante integración continua.",
+    "institutionalMinimum": "Capacidades derivadas: ejecutar pruebas a componentes y gestionar desarrollo mediante integración continua.",
+    "engineeringTarget": "Construir una pirámide de pruebas que cubra riesgos reales, produzca reportes y diagnostique al menos un fallo reproducible.",
     "upliftBasis": "La actividad agrega criterios de calidad, automatización, seguridad, observabilidad y evidencia individual sin alterar el alcance oficial."
   },
   "competencies": {
-    "primary": "C06",
+    "primary": "C14",
     "cumulative": [
-      "C03",
-      "C05",
-      "C10"
+      "C07",
+      "C09"
     ]
   },
   "reproducibility": {
@@ -36,7 +35,7 @@
     "required": true,
     "platform": "github_actions",
     "mode": "hybrid",
-    "workflowPath": ".github/workflows/week-06-w06-device-push.yml",
+    "workflowPath": ".github/workflows/week-08-w08-testing-ci.yml",
     "setupCommands": [
       "npm ci --ignore-scripts --no-audit --no-fund"
     ],
@@ -74,7 +73,7 @@
       "type": "automatic",
       "points": 3,
       "evidence": "Los artefactos declarados para la actividad existen.",
-      "command": "test -e 'src/lib/device/camera.ts' && test -e 'src/lib/device/geolocation.ts' && test -e 'src/lib/notifications/client.ts' && test -e 'docs/capabilities.md' && test -e 'tests/capabilities.spec.ts'"
+      "command": "test -e 'tests/unit/' && test -e 'tests/integration/' && test -e 'tests/e2e/' && test -e 'docs/test-strategy.md' && test -e '.github/workflows/academic-evaluation.yml'"
     },
     {
       "id": "AC-03",
