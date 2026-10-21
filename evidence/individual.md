@@ -31,12 +31,27 @@
   y no se introduzcan datos reales, secretos ni PII persistida.
 
 ## Evidencia de Implementación - Felipe Mora López
+- **Matrícula:** 3523110443
 - **SHA Completo del commit:** c8969c743f350dde5e2531ce28c3f195581b1a1d
 - **Decisión técnica:** Implementación de notificaciones locales con Service Workers, fallback a API estándar y manejo estricto de estados en bloques try/catch para evitar bloqueos.
 - **Prueba:** Validación del prompt de permisos solo bajo interacción y recepción de mensajes sintéticos.
 - **Limitación:** Sin push remoto; las notificaciones operan solo con la PWA activa o el Service Worker en segundo plano.
 - **Uso de IA:** Generación de código y documentación mediante IA en el IDE con instrucciones estrictas de no alterar código ajeno, bloquear PII y usar fallbacks seguros.
 - **Validación humana:** Revisión manual para asegurar la ausencia de datos sensibles y verificar que no haya llamadas automáticas al montar la app.
+
+### Evidencia de pruebas de integración
+
+- **Pruebas creadas y ejecutadas:**
+  - `tests/integration/storage-queue.spec.ts`: persistencia offline y listado de inspecciones, confirmación de sincronización con recibo, y fallo con reintento persistido.
+  - `tests/integration/api-inspecciones.spec.ts`: listado de datos sintéticos, header `Cache-Control: no-store` y validación del contrato ante un payload malformado.
+  - `tests/integration/notifications.spec.ts`: solicitud explícita de permiso, emisión sintética mediante Service Worker, fallback a `Notification` y respuestas seguras ante API ausente o permiso denegado.
+- **Comandos exactos para ejecutar las pruebas de integración** (desde `pwa-inspecciones`):
+  - `npx tsx --test tests\integration\storage-queue.spec.ts`
+  - `npx tsx --test tests\integration\api-inspecciones.spec.ts`
+  - `npx tsx --test tests\integration\notifications.spec.ts`
+- **Resultado de ejecución:** Las tres suites de integración aprobaron: 3/3 pruebas de Storage Queue, 3/3 del API y 4/4 de notificaciones (10 aprobadas, 0 fallidas). También pasaron `npm run test:sync` (16/16), `npm run test:capabilities` (15/15) y el chequeo enfocado `npx tsc --noEmit --strict --skipLibCheck --target ES2017 --module esnext --moduleResolution bundler --lib dom,dom.iterable,esnext --types node tests\integration\storage-queue.spec.ts tests\integration\api-inspecciones.spec.ts tests\integration\notifications.spec.ts`.
+- **Limitación técnica:** `fake-indexeddb` implementa IndexedDB en memoria para Node y no reproduce todas las diferencias de navegador, como persistencia en disco, cuotas, restricciones por origen ni coordinación real entre pestañas. Los permisos y el Service Worker también se simulan, por lo que las pruebas no sustituyen una validación en navegador.
+- **Uso de IA:** Utilicé IA en el IDE para elaborar y revisar las pruebas y esta evidencia. Comprobé que el cambio se limite a los tres archivos de prueba nuevos y a este archivo de evidencia; no se modificaron fuentes de la aplicación ni configuración.
 
 ## Pruebas, documentación y CI - Oscar Martinez Martinez
 
