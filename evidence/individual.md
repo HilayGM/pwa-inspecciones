@@ -1,70 +1,46 @@
 # Evidencia individual
 
-## Martin Moreno Libreros — Semana 06
+## Martin Moreno Libreros — Semana 08: Lead de Pruebas Unitarias y Estrategia
 
-- **Commit SHA evaluado:** `ebd3d50c3c6a24ad769017fcfa4a329e74c5336c`
-  en la rama `dev-martin`.
-- **Contribución concreta:** Implementé `src/lib/device/camera.ts` y
-  `src/lib/device/geolocation.ts` como adaptadores de navegador sin efectos al
-  importarse. Solo solicitan una capacidad cuando la interfaz invoca su función,
-  regresan un resultado explícito para éxito o fallback y no guardan datos.
-- **Decisión técnica que puedo explicar:** La cámara solicita únicamente video,
-  nunca audio. La geolocalización obtiene una sola posición, desactiva alta
-  precisión y redondea coordenadas a tres decimales; no usa observación continua
-  ni conserva fecha o ubicación. Esto reduce permisos, datos recolectados y
-  exposición de privacidad.
-- **Prueba ejecutada y resultado:** `npx tsc --noEmit --incremental false`,
-  `npm test`, `npm run test:sync`, `npm run verify` y `npm run build`
-  terminaron con código 0.
-  La suite específica `npm run test:capabilities` corresponde a Oscar y deberá
-  ejecutarse antes de fusionar el PR final del equipo.
-- **Limitación o fallo diagnosticado:** Las APIs dependen del navegador, origen
-  seguro y permiso explícito. La captura de imagen y el uso posterior de la
-  ubicación deben permanecer opcionales; el fallback permite continuar sin ellas.
-- **Cambio que puedo defender o modificar en vivo:** Puedo ajustar el redondeo
-  de ubicación, los límites de timeout, los mensajes de fallback y el ciclo de
-  vida del stream para comprobar que la cámara se libera al cerrar la interfaz.
-- **Uso declarado de IA:** Utilicé OpenAI Codex para analizar los requisitos,
-  proponer los contratos de fallback y revisar TypeScript. Influyó en
-  `src/lib/device/camera.ts`, `src/lib/device/geolocation.ts` y esta evidencia.
-  Revisé manualmente que no se solicite audio, no haya geolocalización continua
-  y no se introduzcan datos reales, secretos ni PII persistida.
+- **Estudiante:** Martin Moreno Libreros (Matrícula: 3523110349)
+- **Commit SHA evaluado:** `61325bf20515fb631b4861bb2c2f1862678556a3`
+- **Decisión técnica que puedo explicar:** Diseñé e implementé la suite de pruebas unitarias (`tests/unit/sync-logic.spec.ts` y `tests/unit/device-adapters.spec.ts`) y la estrategia de aseguramiento de calidad (`docs/test-strategy.md`). Decidí aislar rigurosamente la lógica pura de retroceso exponencial (`calculateRetryDelay`) y la matriz de resolución determinista de conflictos (`resolveSyncConflict`) sin dependencias de I/O, red o motores de base de datos para garantizar ejecuciones sub-segundo en cualquier entorno de CI. En los adaptadores de hardware (`camera.ts` y `geolocation.ts`), emulé las interfaces W3C mediante inyección de descriptores globales en `globalThis` para validar que `enableHighAccuracy: false` y el truncamiento de coordenadas a tres decimales protejan la privacidad del usuario, y que la detención de tracks de cámara sea tolerante a excepciones individuales sin interrumpir la liberación de recursos.
+- **Prueba que ejecuté y resultado:**
+  - `npm run test:unit`: Ejecutó 28 pruebas en 6 suites (13 de sincronización/backoff y 15 de adaptadores con mocks). Resultado: 28 aprobadas, 0 fallidas, 0 canceladas o ignoradas en 861 ms.
+  - `npm test`: Ejecutó pruebas estructurales y de manifiesto PWA con código de salida 0.
+  - `npm run build`: Compilación de producción en Next.js completada con éxito (`exit code 0`), generando todas las rutas estáticas y dinámicas optimizadas.
+- **Limitación o fallo diagnosticado:**
+  - *Fallo diagnosticado y corregido:* Se diagnosticó que en llamadas sin validación a `calculateRetryDelay`, valores no enteros o menores a 1 podían romper el cálculo, y que valores altos de `attempts` podían exceder exponencialmente el umbral razonable; se implementaron aserciones estrictas para validar tipos enteros y garantizar el tope estricto de `DEFAULT_RETRY_MAX_MS` (60,000 ms).
+  - *Limitación:* Las pruebas unitarias validan lógica aislada y contratos de datos, pero no sustituyen la verificación de transacciones concurrentes en IndexedDB real ni la interacción visual del usuario en el navegador, las cuales son cubiertas por los niveles de integración y E2E de Felipe y Oscar.
+- **Cambio que podría defender o modificar en vivo:** Puedo ajustar los parámetros de backoff (`baseDelayMs`, `maximumDelayMs`), implementar reglas adicionales de conciliación de conflictos (*three-way merge*) o modificar la precisión de redondeo geográfico (`COORDINATE_DECIMALS`) y demostrar de forma inmediata cómo las pruebas unitarias capturan la regresión o validan la nueva regla.
+- **Uso declarado de IA (herramienta, propósito, validación):**
+  - *Herramienta:* Gemini 3.8 Flash en Antigravity IDE.
+  - *Propósito:* Asistencia en la generación de casos de prueba exhaustivos para la matriz de conflictos en `tests/unit/sync-logic.spec.ts` y la redacción estructurada de `docs/test-strategy.md`.
+  - *Validación humana:* Ejecución manual de los comandos de prueba en consola, revisión línea a línea de las aserciones, verificación de la inmutabilidad de objetos y comprobación de ausencia total de PII, secretos o llamadas a hardware físico.
 
-## Evidencia de Implementación - Felipe Mora López
-- **Matrícula:** 3523110443
-- **SHA Completo del commit:** c8969c743f350dde5e2531ce28c3f195581b1a1d
-- **Decisión técnica:** Implementación de notificaciones locales con Service Workers, fallback a API estándar y manejo estricto de estados en bloques try/catch para evitar bloqueos.
-- **Prueba:** Validación del prompt de permisos solo bajo interacción y recepción de mensajes sintéticos.
-- **Limitación:** Sin push remoto; las notificaciones operan solo con la PWA activa o el Service Worker en segundo plano.
-- **Uso de IA:** Generación de código y documentación mediante IA en el IDE con instrucciones estrictas de no alterar código ajeno, bloquear PII y usar fallbacks seguros.
-- **Validación humana:** Revisión manual para asegurar la ausencia de datos sensibles y verificar que no haya llamadas automáticas al montar la app.
+---
 
-### Evidencia de pruebas de integración
+## Felipe Mora López — Semana 08: Lead de Pruebas de Integración y Adaptadores/API
+- **Estudiante:** Felipe Mora López (Matrícula: 3523110443)
+- **Commit SHA evaluado:** Pendiente de commit de esta contribución.
+- **Decisión técnica:** Añadí pruebas de integración para IndexedDB y la cola de mutaciones usando `fake-indexeddb`, para el endpoint sintético de inspecciones y para el cliente de notificaciones con APIs de navegador simuladas. No modifiqué los módulos de producción.
+- **Pruebas ejecutadas y resultado:**
+  - `npx tsx --test tests\integration\storage-queue.spec.ts`: 3 aprobadas, 0 fallidas.
+  - `npx tsx --test tests\integration\api-inspecciones.spec.ts`: 3 aprobadas, 0 fallidas.
+  - `npx tsx --test tests\integration\notifications.spec.ts`: 4 aprobadas, 0 fallidas.
+  - `npm run test:sync`: 16 aprobadas, 0 fallidas.
+  - `npm run test:capabilities`: 15 aprobadas, 0 fallidas.
+  - Chequeo de tipos enfocado para los tres archivos de integración completado sin errores.
+- **Limitación técnica:** `fake-indexeddb` simula IndexedDB en memoria bajo Node, pero no cubre todas las diferencias de un navegador real, como persistencia en disco, cuotas, restricciones de origen o coordinación entre pestañas. Los permisos y el Service Worker también se simulan.
+- **Uso de IA:** Utilicé IA en el IDE como apoyo para elaborar y validar las pruebas y esta evidencia; revisé los resultados ejecutando las suites y el chequeo de tipos.
+- **Validación adicional:** `git diff --check` no reportó errores de whitespace.
 
-- **Pruebas creadas y ejecutadas:**
-  - `tests/integration/storage-queue.spec.ts`: persistencia offline y listado de inspecciones, confirmación de sincronización con recibo, y fallo con reintento persistido.
-  - `tests/integration/api-inspecciones.spec.ts`: listado de datos sintéticos, header `Cache-Control: no-store` y validación del contrato ante un payload malformado.
-  - `tests/integration/notifications.spec.ts`: solicitud explícita de permiso, emisión sintética mediante Service Worker, fallback a `Notification` y respuestas seguras ante API ausente o permiso denegado.
-- **Comandos exactos para ejecutar las pruebas de integración** (desde `pwa-inspecciones`):
-  - `npx tsx --test tests\integration\storage-queue.spec.ts`
-  - `npx tsx --test tests\integration\api-inspecciones.spec.ts`
-  - `npx tsx --test tests\integration\notifications.spec.ts`
-- **Resultado de ejecución:** Las tres suites de integración aprobaron: 3/3 pruebas de Storage Queue, 3/3 del API y 4/4 de notificaciones (10 aprobadas, 0 fallidas). También pasaron `npm run test:sync` (16/16), `npm run test:capabilities` (15/15) y el chequeo enfocado `npx tsc --noEmit --strict --skipLibCheck --target ES2017 --module esnext --moduleResolution bundler --lib dom,dom.iterable,esnext --types node tests\integration\storage-queue.spec.ts tests\integration\api-inspecciones.spec.ts tests\integration\notifications.spec.ts`.
-- **Limitación técnica:** `fake-indexeddb` implementa IndexedDB en memoria para Node y no reproduce todas las diferencias de navegador, como persistencia en disco, cuotas, restricciones por origen ni coordinación real entre pestañas. Los permisos y el Service Worker también se simulan, por lo que las pruebas no sustituyen una validación en navegador.
-- **Uso de IA:** Utilicé IA en el IDE para elaborar y revisar las pruebas y esta evidencia. Comprobé que el cambio se limite a los tres archivos de prueba nuevos y a este archivo de evidencia; no se modificaron fuentes de la aplicación ni configuración.
+---
 
-## Pruebas, documentación y CI - Oscar Martinez Martinez
-
-- **Responsabilidad:** Pruebas deterministas de capacidades, guía operativa del proyecto e integración de CI para la Semana 06.
-- **Commit SHA evaluado:** `1176578398135b61e6147cb8b21637ac4b1b1308` — `Implementa pruebas y capacidades de dispositivos semana 06` (`dev-oscar`).
-- **Trabajo realizado:** Añadí adaptadores de cámara y geolocalización, la suite `tests/capabilities.spec.ts`, el script `test:capabilities`, documentación de instalación, desarrollo, pruebas y límites, y el workflow de Semana 06. Integré un panel de demostración con acciones explícitas para invocar las capacidades.
-- **Decisión técnica:** Usé `node:test` y mocks para probar sin hardware ni permisos reales. La cámara solicita únicamente video (`audio: false`) y libera todos los tracks al cerrar la vista. La geolocalización hace una sola lectura con `enableHighAccuracy: false`, redondea a tres decimales y conserva el resultado solo en memoria. Las notificaciones usan mensajes sintéticos. El workflow fija Node 22, instala con `npm ci` y ejecuta explícitamente `npm run test:capabilities`. Conservé sin cambios el módulo de notificaciones de Felipe.
-- **Pruebas ejecutadas y resultados:**
-  - `npm ci`: completado; agregó 416 paquetes y auditó 417. npm informó 15 vulnerabilidades (4 moderadas, 10 altas y 1 crítica) y paquetes obsoletos (`inflight`, `glob@7.2.3` y `sourcemap-codec`). No ejecuté `npm audit fix` ni `npm audit fix --force`.
-  - `npm run test:capabilities`: 15 pruebas en 3 suites; 15 aprobadas, 0 fallidas, canceladas u omitidas. Se probaron soporte ausente, permisos, limpieza de tracks, restricciones y resultados de APIs simuladas, errores geográficos y fallbacks/error de notificaciones. No se usaron dispositivos ni permisos reales. Node mostró `MODULE_TYPELESS_PACKAGE_JSON`; no impidió el resultado.
-  - `npm test`: `starter.spec.mjs: PASS` y `manifest.spec.ts: PASS`. También mostró `MODULE_TYPELESS_PACKAGE_JSON`, sin impedir la ejecución.
-  - `npm run build`: completó correctamente compilación de producción, lint y tipos, recopilación de datos, generación de seis páginas estáticas, trazas y optimización, sin errores.
-  - `git diff --check`: código de salida 0; mostró avisos de conversión LF/CRLF en Windows, sin errores de whitespace.
-- **Limitaciones y seguimiento:** No hay un resultado exitoso confirmado para `npm run verify`. El check público `bash public-tests/check.sh` no pudo ejecutarse porque Windows no permitió acceder a `bash.exe`; la búsqueda de lectura encontró coincidencias textuales que pueden causar falsos positivos. Tampoco se ha confirmado una ejecución remota de GitHub Actions. npm reportó las vulnerabilidades indicadas y persiste la advertencia de detección de módulos. En el módulo existente de notificaciones, si `navigator.serviceWorker.getRegistration()` rechaza, se devuelve `"error"` sin intentar `new Notification(...)`; la diferencia con el fallback descrito en documentación queda pendiente de coordinación con Felipe y no se considera un fallo de estas pruebas.
-- **Uso de IA:** Utilicé Codex como apoyo para implementar los adaptadores, generar las pruebas, actualizar el README y configurar el workflow.
-- **Validación humana:** Ejecuté manualmente los comandos anteriores en PowerShell y revisé sus salidas. Esta evidencia no afirma una revisión línea por línea ni una ejecución exitosa de GitHub Actions.
+## Oscar Martinez Martinez — Semana 08: Lead de Pruebas E2E, Pipeline de CI y Documentación Operativa
+- **Estudiante:** Oscar Martinez Martinez (Matrícula: 3523110806)
+- **Commit SHA evaluado:** [Pendiente de integración en dev-oscar]
+- **Decisión técnica:** [Pendiente]
+- **Prueba:** [Pendiente]
+- **Limitación:** [Pendiente]
+- **Uso de IA:** [Pendiente]

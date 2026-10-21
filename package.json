@@ -8,6 +8,7 @@
     "start": "next start",
     "test": "node tests/starter.spec.mjs && node --experimental-strip-types tests/manifest.spec.ts",
     "verify": "node scripts/verify.mjs",
+    "test:unit": "tsx --test tests/unit/sync-logic.spec.ts tests/unit/device-adapters.spec.ts",
     "test:service-worker": "node --experimental-strip-types tests/service-worker.spec.ts",
     "test:offline": "playwright test tests/offline.spec.ts",
     "test:rendering": "node --experimental-strip-types tests/rendering.spec.ts",
