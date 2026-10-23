@@ -6,3 +6,4 @@ detecta si quieren subir directamente a main no dejar  o pedir un pr a main y si
 
 
 no se pueden modificar los archivos .github/workflows/
+no modificar package-lock.json
