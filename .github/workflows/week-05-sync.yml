@@ -1,6 +1,8 @@
 name: Semana 05 - Persistencia y sincronización idempotente
 
 on:
+  push:
+  pull_request:
   workflow_dispatch:
 
 permissions:
