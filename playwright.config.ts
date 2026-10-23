@@ -2,7 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./tests",
-  testMatch: "offline.spec.ts",
+  testMatch: "**/*.spec.ts",
   outputDir: "test-results",
   reporter: [["list"], ["html", { outputFolder: "playwright-report", open: "never" }]],
   retries: process.env.CI ? 2 : 0,

@@ -1,4 +1,4 @@
-export type CameraFailureReason =
+﻿export type CameraFailureReason =
   | "unsupported"
   | "permission-denied"
   | "unavailable"
@@ -119,4 +119,23 @@ export function stopCameraStream(stream: MediaStream | null | undefined): void {
       // Se continúa para intentar liberar todos los tracks.
     }
   }
+}
+
+/** Compatibility contract retained for the Week 06 component and consumers. */
+export type CameraResult =
+  | { status: "concedido"; stream: MediaStream }
+  | { status: "no soportado" }
+  | { status: "denegado" }
+  | { status: "error"; error: unknown };
+
+export async function openCamera(): Promise<CameraResult> {
+  const result = await requestCameraStream({ audio: false, video: true });
+  if (result.ok) return { status: "concedido", stream: result.stream };
+  if (result.reason === "unsupported") return { status: "no soportado" };
+  if (result.reason === "permission-denied") return { status: "denegado" };
+  return { status: "error", error: result.reason };
+}
+
+export function closeCameraStream(stream: MediaStream): void {
+  stopCameraStream(stream);
 }

@@ -1,4 +1,4 @@
-export type GeolocationFailureReason =
+﻿export type GeolocationFailureReason =
   | "unsupported"
   | "permission-denied"
   | "unavailable"
@@ -106,12 +106,19 @@ export function requestCoarseLocation(
     try {
       geolocation.getCurrentPosition(
         (position) => {
+          const { latitude, longitude, accuracy } = position.coords;
+          if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90
+            || !Number.isFinite(longitude) || longitude < -180 || longitude > 180
+            || !Number.isFinite(accuracy) || accuracy < 0) {
+            resolve({ ok: false, reason: "unknown", message: "No fue posible obtener la ubicación. Puedes continuar sin agregar ubicación." });
+            return;
+          }
           resolve({
             ok: true,
             location: {
-              latitude: roundCoordinate(position.coords.latitude),
-              longitude: roundCoordinate(position.coords.longitude),
-              accuracyMeters: Math.round(position.coords.accuracy),
+              latitude: roundCoordinate(latitude),
+              longitude: roundCoordinate(longitude),
+              accuracyMeters: Math.round(accuracy),
             },
           });
         },
@@ -130,4 +137,26 @@ export function requestCoarseLocation(
       });
     }
   });
+}
+
+/** Compatibility result retained for the Week 06 UI and consumers. */
+export type GeolocationResult =
+  | { status: "concedido"; latitude: number; longitude: number }
+  | { status: "no soportado" | "denegado" | "tiempo agotado" | "no disponible" }
+  | { status: "error" };
+
+export const COORDINATE_DECIMAL_PLACES = COORDINATE_DECIMALS;
+
+export async function getCurrentLocation(): Promise<GeolocationResult> {
+  const result = await requestCoarseLocation({ maximumAge: 0 });
+  if (result.ok) return { status: "concedido", latitude: result.location.latitude, longitude: result.location.longitude };
+  const statusByReason = {
+    unsupported: "no soportado",
+    "permission-denied": "denegado",
+    unavailable: "no disponible",
+    timeout: "tiempo agotado",
+    unknown: "error",
+  } as const;
+  const status = statusByReason[result.reason];
+  return status === "error" ? { status } : { status };
 }
