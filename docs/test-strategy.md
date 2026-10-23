@@ -43,7 +43,7 @@ La arquitectura de pruebas se distribuye conforme a la pirámide de testing clá
 
 ### 2.3. Nivel E2E (`tests/e2e/`)
 - **Alcance:**
-  - Flujo crítico del inspector universitario: carga inicial, navegación del listado de laboratorios, filtrado de estados ("ok", "warning", "danger"), consulta del detalle y verificación de estados offline en el navegador.
+  - Flujo critico: dashboard, listado, detalle sintetico y shell offline. No hay filtro visual en el listado actual y la API no se cachea.
 - **Trade-offs:**
   - *Ventaja:* Máxima confianza en la experiencia final del usuario sobre la aplicación compilada de Next.js.
   - *Límite asumido:* Mayor costo computacional y tiempo de ejecución; se acota al critical path para no sobrecargar el pipeline de CI.
@@ -117,3 +117,7 @@ Para cumplir con las políticas académicas y de seguridad:
 | **Verificación Global** | `npm test` | ~1 s | Integridad estructural del starter y manifest PWA. |
 | **Compilación** | `npm run build` | ~5 s | Compilación de producción en Next.js sin errores de tipos ni lint. |
 | **Script Evaluador** | `npm run verify` | < 1 s | Comprobación de artefactos y generación de reporte JSON. |
+
+## Implementacion ejecutable de Semana 08
+
+`npm run test:unit` apunta a los dos specs unitarios reales. `npm run test:integration` ejecuta `tests/sync.spec.ts` y el handler API comprobado en `tests/integration/inspections-api.spec.ts`. `npm run test:e2e` cubre dashboard, listado, detalle valido y la estrategia offline con el servidor de produccion. No existe un filtro visual en el listado actual. El Service Worker cachea el shell `/`, pero omite `/api/`; por eso no se afirma que el listado CSR funcione sin conexion.

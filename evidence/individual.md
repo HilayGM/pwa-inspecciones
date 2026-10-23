@@ -18,6 +18,29 @@
   - *Propósito:* Asistencia en la generación de casos de prueba exhaustivos para la matriz de conflictos en `tests/unit/sync-logic.spec.ts` y la redacción estructurada de `docs/test-strategy.md`.
   - *Validación humana:* Ejecución manual de los comandos de prueba en consola, revisión línea a línea de las aserciones, verificación de la inmutabilidad de objetos y comprobación de ausencia total de PII, secretos o llamadas a hardware físico.
 
+## Evidencia de Implementación - Felipe Mora López
+- **SHA Completo del commit:** c8969c743f350dde5e2531ce28c3f195581b1a1d
+- **Decisión técnica:** Implementación de notificaciones locales con Service Workers, fallback a API estándar y manejo estricto de estados en bloques try/catch para evitar bloqueos.
+- **Prueba:** Validación del prompt de permisos solo bajo interacción y recepción de mensajes sintéticos.
+- **Limitación:** Sin push remoto; las notificaciones operan solo con la PWA activa o el Service Worker en segundo plano.
+- **Uso de IA:** Generación de código y documentación mediante IA en el IDE con instrucciones estrictas de no alterar código ajeno, bloquear PII y usar fallbacks seguros.
+- **Validación humana:** Revisión manual para asegurar la ausencia de datos sensibles y verificar que no haya llamadas automáticas al montar la app.
+
+## Pruebas, documentación y CI - Oscar Martinez Martinez
+
+- **Responsabilidad:** Pruebas deterministas de capacidades, guía operativa del proyecto e integración de CI para la Semana 06.
+- **Commit SHA evaluado:** `1176578398135b61e6147cb8b21637ac4b1b1308` — `Implementa pruebas y capacidades de dispositivos semana 06` (`dev-oscar`).
+- **Trabajo realizado:** Añadí adaptadores de cámara y geolocalización, la suite `tests/capabilities.spec.ts`, el script `test:capabilities`, documentación de instalación, desarrollo, pruebas y límites, y el workflow de Semana 06. Integré un panel de demostración con acciones explícitas para invocar las capacidades.
+- **Decisión técnica:** Usé `node:test` y mocks para probar sin hardware ni permisos reales. La cámara solicita únicamente video (`audio: false`) y libera todos los tracks al cerrar la vista. La geolocalización hace una sola lectura con `enableHighAccuracy: false`, redondea a tres decimales y conserva el resultado solo en memoria. Las notificaciones usan mensajes sintéticos. El workflow fija Node 22, instala con `npm ci` y ejecuta explícitamente `npm run test:capabilities`. Conservé sin cambios el módulo de notificaciones de Felipe.
+- **Pruebas ejecutadas y resultados:**
+  - `npm ci`: completado; agregó 416 paquetes y auditó 417. npm informó 15 vulnerabilidades (4 moderadas, 10 altas y 1 crítica) y paquetes obsoletos (`inflight`, `glob@7.2.3` y `sourcemap-codec`). No ejecuté `npm audit fix` ni `npm audit fix --force`.
+  - `npm run test:capabilities`: 15 pruebas en 3 suites; 15 aprobadas, 0 fallidas, canceladas u omitidas. Se probaron soporte ausente, permisos, limpieza de tracks, restricciones y resultados de APIs simuladas, errores geográficos y fallbacks/error de notificaciones. No se usaron dispositivos ni permisos reales. Node mostró `MODULE_TYPELESS_PACKAGE_JSON`; no impidió el resultado.
+  - `npm test`: `starter.spec.mjs: PASS` y `manifest.spec.ts: PASS`. También mostró `MODULE_TYPELESS_PACKAGE_JSON`, sin impedir la ejecución.
+  - `npm run build`: completó correctamente compilación de producción, lint y tipos, recopilación de datos, generación de seis páginas estáticas, trazas y optimización, sin errores.
+  - `git diff --check`: código de salida 0; mostró avisos de conversión LF/CRLF en Windows, sin errores de whitespace.
+- **Limitaciones y seguimiento:** No hay un resultado exitoso confirmado para `npm run verify`. El check público `bash public-tests/check.sh` no pudo ejecutarse porque Windows no permitió acceder a `bash.exe`; la búsqueda de lectura encontró coincidencias textuales que pueden causar falsos positivos. Tampoco se ha confirmado una ejecución remota de GitHub Actions. npm reportó las vulnerabilidades indicadas y persiste la advertencia de detección de módulos. En el módulo existente de notificaciones, si `navigator.serviceWorker.getRegistration()` rechaza, se devuelve `"error"` sin intentar `new Notification(...)`; la diferencia con el fallback descrito en documentación queda pendiente de coordinación con Felipe y no se considera un fallo de estas pruebas.
+- **Uso de IA:** Utilicé Codex como apoyo para implementar los adaptadores, generar las pruebas, actualizar el README y configurar el workflow.
+- **Validación humana:** Ejecuté manualmente los comandos anteriores en PowerShell y revisé sus salidas. Esta evidencia no afirma una revisión línea por línea ni una ejecución exitosa de GitHub Actions.
 ---
 
 ## Felipe Mora López — Semana 08: Lead de Pruebas de Integración y Adaptadores/API
@@ -38,9 +61,17 @@
 ---
 
 ## Oscar Martinez Martinez — Semana 08: Lead de Pruebas E2E, Pipeline de CI y Documentación Operativa
-- **Estudiante:** Oscar Martinez Martinez (Matrícula: 3523110806)
-- **Commit SHA evaluado:** [Pendiente de integración en dev-oscar]
-- **Decisión técnica:** [Pendiente]
-- **Prueba:** [Pendiente]
-- **Limitación:** [Pendiente]
-- **Uso de IA:** [Pendiente]
+
+- **Estudiante:** Oscar Martinez Martinez (Matrícula: 3523110806).
+- **Commit SHA de entrega:** `5364a2edf0f7ae1221900902cb1f750fce42c54d`.
+- **Rol y alcance:** Lead de Pruebas E2E, Pipeline de CI y Documentación Operativa. Implementé `tests/e2e/critical-path.spec.ts`, el workflow `.github/workflows/academic-evaluation.yml`, los scripts de pruebas por nivel, una prueba de integración del handler API y la documentación operativa.
+
+- **Decisiones técnicas y trade-offs:** La suite Playwright valida el dashboard, el listado CSR, el detalle de la inspección sintética `inspection-001` y el shell `/` servido desde caché cuando se simula el modo offline. No se afirma que el listado funcione sin conexión, porque el Service Worker excluye `/api/`. La suite de integración comprueba el contrato del endpoint y utiliza pruebas relacionadas con la cola e IndexedDB sintética. Se conservaron los contratos de Semana 06 mediante adaptadores compatibles para cámara y geolocalización.
+
+- **Pruebas ejecutadas y resultados reportados:** `npm ci` terminó correctamente e instaló 416 paquetes. `npm run build`, `npm test` y `npm run verify` terminaron con código 0. Los resultados reportados fueron: unitarias 28/28, integración 17/17, capacidades 15/15, rendering 13/13 y Playwright 4/4. El contrato estático del Service Worker reportó PASS. `npm run verify` generó `reports/verification.json`.
+
+- **Limitaciones conocidas:** El comportamiento offline garantiza el shell del dashboard después de una visita online; el listado CSR y la API no se almacenan en caché. `bash public-tests/check.sh` quedó pendiente de ejecución porque el entorno local no pudo iniciar Bash. La versión local de Node fue 21.7.3, mientras que CI está configurado para Node 22. La primera ejecución de capacidades falló por un mock sin `accuracy`; después de ajustar el dato sintético, la suite completa reportó éxito.
+
+- **Uso declarado de IA y validación humana:** Utilicé OpenAI Codex como apoyo para implementar, resolver los conflictos autorizados, escribir pruebas y documentación y revisar resultados. Los resultados automatizados se registran arriba. La revisión final y aprobación de entrega corresponden a Oscar.
+
+- **Estado de integración:** Commit de entrega creado localmente. Pendiente confirmar la publicación de la rama `dev-oscar` y la ejecución de los checks remotos de GitHub Actions.

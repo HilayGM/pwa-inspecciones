@@ -1,6 +1,4 @@
-/// <reference types="node" />
-
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import { afterEach, beforeEach, describe, test } from "node:test";
 import {
   isCameraSupported,
@@ -189,7 +187,7 @@ describe("Geolocalización simulada", { concurrency: false }, () => {
           getCurrentPosition(success: PositionCallback, _error?: PositionErrorCallback, value?: PositionOptions) {
             calls += 1;
             options = value;
-            success({ coords: { latitude: 0.1234567, longitude: -0.9876543 } } as GeolocationPosition);
+            success({ coords: { latitude: 0.1234567, longitude: -0.9876543, accuracy: 25 } } as GeolocationPosition);
           },
           watchPosition() { watchCalls += 1; return 1; },
         },
@@ -234,6 +232,19 @@ describe("Geolocalización simulada", { concurrency: false }, () => {
     assert.equal(rawResult.ok, false);
     if (!rawResult.ok) assert.equal(rawResult.reason, "unknown");
     assert.deepEqual(await getCurrentLocation(), { status: "error" });
+
+    installBrowserGlobals({
+      navigator: {
+        geolocation: {
+          getCurrentPosition(success: PositionCallback) {
+            success({ coords: { latitude: Number.NaN, longitude: 0, accuracy: 1 } } as GeolocationPosition);
+          },
+        },
+      },
+    });
+    const invalidCoordinates = await requestCoarseLocation();
+    assert.equal(invalidCoordinates.ok, false);
+    if (!invalidCoordinates.ok) assert.equal(invalidCoordinates.reason, "unknown");
 
   });
 });

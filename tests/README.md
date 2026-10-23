@@ -1,10 +1,9 @@
 # Contrato de pruebas
 
-Este directorio contiene las suites de pruebas automatizadas organizadas bajo la pirámide de pruebas:
+Las pruebas se organizan por nivel y usan exclusivamente datos sinteticos:
 
-- `tests/unit/`: Pruebas unitarias de funciones puras, algoritmos de retroceso exponencial, resolución de conflictos y adaptadores de hardware sintéticos con mocks (`sync-logic.spec.ts` y `device-adapters.spec.ts`). Ejecutable con `npm run test:unit`.
-- `tests/integration/`: Pruebas de integración entre la cola de sincronización, almacenamiento IndexedDB y endpoints API (asignado a Felipe).
-- `tests/e2e/`: Pruebas de extremo a extremo del flujo crítico del inspector PWA (asignado a Oscar).
+- `tests/unit/`: logica pura y adaptadores de dispositivos con APIs de navegador simuladas. Ejecutar con `npm run test:unit`.
+- `tests/integration/`: contrato del handler API de inspecciones. `npm run test:integration` tambien incluye `tests/sync.spec.ts`, que valida la integracion entre la cola y IndexedDB sintetica.
+- `tests/e2e/critical-path.spec.ts`: dashboard, listado, detalle sintetico y shell offline del dashboard con Playwright. La suite tambien conserva `tests/offline.spec.ts`.
 
-Todas las pruebas son deterministas, utilizan datos 100% sintéticos y no dependen de periféricos físicos ni servicios externos.
-
+El listado CSR necesita `/api/inspecciones`; el Service Worker no cachea esa API. La prueba offline verifica unicamente el comportamiento garantizado: el shell del dashboard despues de una primera visita online.
