@@ -54,10 +54,17 @@
 ---
 
 ## Oscar Martinez Martinez — Semana 08: Lead de Pruebas E2E, Pipeline de CI y Documentación Operativa
-- **Estudiante:** Oscar Martinez Martinez (Matrícula: 3523110806)
-- **Commit SHA evaluado:** [Pendiente de integración en dev-oscar]
-- **Rol y alcance:** Lead de Pruebas E2E, Pipeline de CI y Documentación Operativa. Implementé `tests/e2e/critical-path.spec.ts`, el workflow canónico `.github/workflows/academic-evaluation.yml`, los scripts por nivel, una prueba de integración del handler API y la documentación de ejecución. El SHA final queda pendiente hasta el commit de entrega.
-- **Decisión técnica y trade-offs:** La suite Playwright valida el dashboard, el listado CSR, el detalle sintético `inspection-001` y el shell `/` servido desde caché cuando se simula offline. No afirma que el listado funcione sin conexión porque el Service Worker excluye `/api/`. La suite de integración combina el contrato del endpoint con las pruebas existentes de cola e IndexedDB sintética. Conservé los contratos de Semana 06 mediante adaptadores compatibles para cámara y geolocalización, mientras el componente usa los contratos actuales.
-- **Pruebas ejecutadas y resultados reales:** `npm ci` terminó correctamente e instaló 416 paquetes; `npm run build` terminó con código 0; `npm test` terminó con código 0. Dentro de la suite completa: unitarias 28/28, integración 17/17, capacidades 15/15, rendering 13/13 y Playwright 4/4 (incluye la prueba de offline existente). El contrato estático del Service Worker reportó PASS. `npm run verify` terminó con código 0 y generó `reports/verification.json`.
-- **Limitaciones conocidas:** Offline se garantiza para el shell del dashboard tras una visita online; el listado CSR y la API no se guardan en caché. El check `bash public-tests/check.sh` no pudo ejecutarse localmente porque el `bash.exe` disponible no tuvo acceso para iniciar; queda pendiente correrlo en Git Bash, WSL o CI. La versión local de Node fue 21.7.3; CI fija Node 22. La primera ejecución de capacidades falló porque un mock no incluía `accuracy`; ajusté el dato sintético y la suite completa posterior pasó.
-- **Uso declarado de IA y validación humana:** Utilicé OpenAI Codex para apoyar la implementación, resolver los conflictos autorizados, escribir pruebas y documentación y revisar los resultados. La validación automatizada ejecutada se detalla arriba; la revisión final y aprobación de entrega corresponden a Oscar.
+
+- **Estudiante:** Oscar Martinez Martinez (Matrícula: 3523110806).
+- **Commit SHA de entrega:** `5364a2edf0f7ae1221900902cb1f750fce42c54d`.
+- **Rol y alcance:** Lead de Pruebas E2E, Pipeline de CI y Documentación Operativa. Implementé `tests/e2e/critical-path.spec.ts`, el workflow `.github/workflows/academic-evaluation.yml`, los scripts de pruebas por nivel, una prueba de integración del handler API y la documentación operativa.
+
+- **Decisiones técnicas y trade-offs:** La suite Playwright valida el dashboard, el listado CSR, el detalle de la inspección sintética `inspection-001` y el shell `/` servido desde caché cuando se simula el modo offline. No se afirma que el listado funcione sin conexión, porque el Service Worker excluye `/api/`. La suite de integración comprueba el contrato del endpoint y utiliza pruebas relacionadas con la cola e IndexedDB sintética. Se conservaron los contratos de Semana 06 mediante adaptadores compatibles para cámara y geolocalización.
+
+- **Pruebas ejecutadas y resultados reportados:** `npm ci` terminó correctamente e instaló 416 paquetes. `npm run build`, `npm test` y `npm run verify` terminaron con código 0. Los resultados reportados fueron: unitarias 28/28, integración 17/17, capacidades 15/15, rendering 13/13 y Playwright 4/4. El contrato estático del Service Worker reportó PASS. `npm run verify` generó `reports/verification.json`.
+
+- **Limitaciones conocidas:** El comportamiento offline garantiza el shell del dashboard después de una visita online; el listado CSR y la API no se almacenan en caché. `bash public-tests/check.sh` quedó pendiente de ejecución porque el entorno local no pudo iniciar Bash. La versión local de Node fue 21.7.3, mientras que CI está configurado para Node 22. La primera ejecución de capacidades falló por un mock sin `accuracy`; después de ajustar el dato sintético, la suite completa reportó éxito.
+
+- **Uso declarado de IA y validación humana:** Utilicé OpenAI Codex como apoyo para implementar, resolver los conflictos autorizados, escribir pruebas y documentación y revisar resultados. Los resultados automatizados se registran arriba. La revisión final y aprobación de entrega corresponden a Oscar.
+
+- **Estado de integración:** Commit de entrega creado localmente. Pendiente confirmar la publicación de la rama `dev-oscar` y la ejecución de los checks remotos de GitHub Actions.
