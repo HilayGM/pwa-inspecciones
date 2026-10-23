@@ -22,11 +22,18 @@
 
 ## Felipe Mora López — Semana 08: Lead de Pruebas de Integración y Adaptadores/API
 - **Estudiante:** Felipe Mora López (Matrícula: 3523110443)
-- **Commit SHA evaluado:** [Pendiente de integración en dev-felipe]
-- **Decisión técnica:** [Pendiente]
-- **Prueba:** [Pendiente]
-- **Limitación:** [Pendiente]
-- **Uso de IA:** [Pendiente]
+- **Commit SHA evaluado:** Pendiente de commit de esta contribución.
+- **Decisión técnica:** Añadí pruebas de integración para IndexedDB y la cola de mutaciones usando `fake-indexeddb`, para el endpoint sintético de inspecciones y para el cliente de notificaciones con APIs de navegador simuladas. No modifiqué los módulos de producción.
+- **Pruebas ejecutadas y resultado:**
+  - `npx tsx --test tests\integration\storage-queue.spec.ts`: 3 aprobadas, 0 fallidas.
+  - `npx tsx --test tests\integration\api-inspecciones.spec.ts`: 3 aprobadas, 0 fallidas.
+  - `npx tsx --test tests\integration\notifications.spec.ts`: 4 aprobadas, 0 fallidas.
+  - `npm run test:sync`: 16 aprobadas, 0 fallidas.
+  - `npm run test:capabilities`: 15 aprobadas, 0 fallidas.
+  - Chequeo de tipos enfocado para los tres archivos de integración completado sin errores.
+- **Limitación técnica:** `fake-indexeddb` simula IndexedDB en memoria bajo Node, pero no cubre todas las diferencias de un navegador real, como persistencia en disco, cuotas, restricciones de origen o coordinación entre pestañas. Los permisos y el Service Worker también se simulan.
+- **Uso de IA:** Utilicé IA en el IDE como apoyo para elaborar y validar las pruebas y esta evidencia; revisé los resultados ejecutando las suites y el chequeo de tipos.
+- **Validación adicional:** `git diff --check` no reportó errores de whitespace.
 
 ---
 
