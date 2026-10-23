@@ -45,8 +45,8 @@ npm run test:rendering
 npm run test:sync
 ```
 
-- `npm test`: contratos del starter y del manifest.
-- `npm run test:capabilities`: mocks deterministas de cámara, geolocalización y notificaciones; no requiere dispositivos ni permisos reales. Node 22 ejecuta TypeScript con `--experimental-strip-types` y el runner integrado `node:test`.
+- `npm test`: orquesta las pruebas estructurales, unitarias, de integracion, capacidades, sincronizacion, rendering, Service Worker y E2E.
+- `npm run test:capabilities`: mocks deterministas de camara, geolocalizacion y notificaciones, ejecutados con tsx y node:test; no requieren dispositivos ni permisos reales.
 - `npm run test:service-worker`: contrato estático del Service Worker.
 - `npm run test:rendering`: contratos de rutas y estados CSR/SSR.
 - `npm run test:sync`: persistencia y sincronización con IndexedDB sintética (`fake-indexeddb`).
@@ -56,6 +56,37 @@ El workflow de Semana 06 instala con `npm ci`, ejecuta estas validaciones y cons
 
 El kit también solicita ejecutar `bash public-tests/check.sh` desde Bash. Su búsqueda de palabras sensibles es textual y el estado actual contiene coincidencias en documentación, el lockfile y nombres como `SyntaxKind.*Token`; por ello puede reportar falsos positivos. El workflow de Semana 06 conserva sus checks de artefactos y no ejecuta este check público hasta que ese filtro se ajuste por la persona responsable del kit.
 
+## Semana 08: ejecucion de la piramide de pruebas
+
+Requisitos: Node.js 22, npm y Chromium instalado para las pruebas E2E. Despues de clonar, ejecuta `npm ci` desde la raiz. Instala el navegador localmente con `npx playwright install chromium` (en Linux CI se instalan tambien las dependencias del sistema).
+
+Ejecuta cada nivel con:
+
+```sh
+npm run test:unit
+npm run test:integration
+npm run test:e2e
+npm test
+```
+
+`test:unit` ejecuta las pruebas de `tests/unit/`. `test:integration` combina la sincronizacion con IndexedDB sintetica y el contrato de la API de inspecciones. `test:e2e` ejecuta el recorrido critico con Playwright y la prueba existente del Service Worker. Las pruebas E2E usan el servidor de produccion: ejecuta `npm run build` antes de `npm run test:e2e`. `npm test` orquesta todos los niveles y conserva las comprobaciones de semanas anteriores.
+
+Compila y verifica artefactos localmente:
+
+```sh
+npm run build
+npm run verify
+make verify
+```
+
+`npm run verify` y `make verify` son equivalentes y escriben `reports/verification.json`. Playwright escribe el reporte HTML en `playwright-report/` y resultados, trazas y adjuntos en `test-results/`. Abre el reporte con `npx playwright show-report playwright-report`.
+
+El workflow `.github/workflows/academic-evaluation.yml` corre en GitHub Actions para pushes y pull requests. En GitHub abre **Actions**, selecciona **Academic Evaluation** y revisa cada gate; descarga `academic-evidence-w08-testing-ci` para consultar los reportes incluso si fallan las pruebas.
+El workflow ejecuta los Quality Gates de CI y `npm run verify`. El script shell `public-tests/check.sh` se mantiene como comprobacion manual; no se ejecuta en el workflow porque su busqueda textual actual marca palabras de documentacion y dependencias como falsos positivos.
+
+El check publico se ejecuta con `bash public-tests/check.sh`. En Windows usa Git Bash o WSL desde la raiz; PowerShell no ejecuta directamente este script. Su escaneo textual puede reportar coincidencias en dependencias o documentacion; revisa el contexto de cada hallazgo.
+
+Todas las pruebas usan datos sinteticos y no requieren servicios privados ni perifericos. El Service Worker recupera desde cache el shell del dashboard `/`. El listado `/inspecciones` depende de `/api/inspecciones`, que no se cachea; no se garantiza el listado ni el detalle completos offline.
 ## Prueba manual de capacidades
 
 En la página principal está el panel **Capacidades del dispositivo**. Usa un entorno de prueba y no introduzcas información personal.

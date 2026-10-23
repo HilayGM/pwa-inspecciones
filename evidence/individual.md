@@ -1,32 +1,22 @@
 # Evidencia individual
 
-## Martin Moreno Libreros — Semana 06
+## Martin Moreno Libreros — Semana 08: Lead de Pruebas Unitarias y Estrategia
 
-- **Commit SHA evaluado:** se completará después de confirmar la implementación
-  de cámara y geolocalización en `dev-martin`.
-- **Contribución concreta:** Implementé `src/lib/device/camera.ts` y
-  `src/lib/device/geolocation.ts` como adaptadores de navegador sin efectos al
-  importarse. Solo solicitan una capacidad cuando la interfaz invoca su función,
-  regresan un resultado explícito para éxito o fallback y no guardan datos.
-- **Decisión técnica que puedo explicar:** La cámara solicita únicamente video,
-  nunca audio. La geolocalización obtiene una sola posición, desactiva alta
-  precisión y redondea coordenadas a tres decimales; no usa observación continua
-  ni conserva fecha o ubicación. Esto reduce permisos, datos recolectados y
-  exposición de privacidad.
-- **Prueba que ejecutaré y resultado:** `npm test`, `npm run build` y la suite
-  de capacidades cuando Oscar la integre. El resultado real se actualizará antes
-  de fusionar el PR.
-- **Limitación o fallo diagnosticado:** Las APIs dependen del navegador, origen
-  seguro y permiso explícito. La captura de imagen y el uso posterior de la
-  ubicación deben permanecer opcionales; el fallback permite continuar sin ellas.
-- **Cambio que puedo defender o modificar en vivo:** Puedo ajustar el redondeo
-  de ubicación, los límites de timeout, los mensajes de fallback y el ciclo de
-  vida del stream para comprobar que la cámara se libera al cerrar la interfaz.
-- **Uso declarado de IA:** Utilicé OpenAI Codex para analizar los requisitos,
-  proponer los contratos de fallback y revisar TypeScript. Influyó en
-  `src/lib/device/camera.ts`, `src/lib/device/geolocation.ts` y esta evidencia.
-  Revisé manualmente que no se solicite audio, no haya geolocalización continua
-  y no se introduzcan datos reales, secretos ni PII persistida.
+- **Estudiante:** Martin Moreno Libreros (Matrícula: 3523110349)
+- **Commit SHA evaluado:** `61325bf20515fb631b4861bb2c2f1862678556a3`
+- **Decisión técnica que puedo explicar:** Diseñé e implementé la suite de pruebas unitarias (`tests/unit/sync-logic.spec.ts` y `tests/unit/device-adapters.spec.ts`) y la estrategia de aseguramiento de calidad (`docs/test-strategy.md`). Decidí aislar rigurosamente la lógica pura de retroceso exponencial (`calculateRetryDelay`) y la matriz de resolución determinista de conflictos (`resolveSyncConflict`) sin dependencias de I/O, red o motores de base de datos para garantizar ejecuciones sub-segundo en cualquier entorno de CI. En los adaptadores de hardware (`camera.ts` y `geolocation.ts`), emulé las interfaces W3C mediante inyección de descriptores globales en `globalThis` para validar que `enableHighAccuracy: false` y el truncamiento de coordenadas a tres decimales protejan la privacidad del usuario, y que la detención de tracks de cámara sea tolerante a excepciones individuales sin interrumpir la liberación de recursos.
+- **Prueba que ejecuté y resultado:**
+  - `npm run test:unit`: Ejecutó 28 pruebas en 6 suites (13 de sincronización/backoff y 15 de adaptadores con mocks). Resultado: 28 aprobadas, 0 fallidas, 0 canceladas o ignoradas en 861 ms.
+  - `npm test`: Ejecutó pruebas estructurales y de manifiesto PWA con código de salida 0.
+  - `npm run build`: Compilación de producción en Next.js completada con éxito (`exit code 0`), generando todas las rutas estáticas y dinámicas optimizadas.
+- **Limitación o fallo diagnosticado:**
+  - *Fallo diagnosticado y corregido:* Se diagnosticó que en llamadas sin validación a `calculateRetryDelay`, valores no enteros o menores a 1 podían romper el cálculo, y que valores altos de `attempts` podían exceder exponencialmente el umbral razonable; se implementaron aserciones estrictas para validar tipos enteros y garantizar el tope estricto de `DEFAULT_RETRY_MAX_MS` (60,000 ms).
+  - *Limitación:* Las pruebas unitarias validan lógica aislada y contratos de datos, pero no sustituyen la verificación de transacciones concurrentes en IndexedDB real ni la interacción visual del usuario en el navegador, las cuales son cubiertas por los niveles de integración y E2E de Felipe y Oscar.
+- **Cambio que podría defender o modificar en vivo:** Puedo ajustar los parámetros de backoff (`baseDelayMs`, `maximumDelayMs`), implementar reglas adicionales de conciliación de conflictos (*three-way merge*) o modificar la precisión de redondeo geográfico (`COORDINATE_DECIMALS`) y demostrar de forma inmediata cómo las pruebas unitarias capturan la regresión o validan la nueva regla.
+- **Uso declarado de IA (herramienta, propósito, validación):**
+  - *Herramienta:* Gemini 3.8 Flash en Antigravity IDE.
+  - *Propósito:* Asistencia en la generación de casos de prueba exhaustivos para la matriz de conflictos en `tests/unit/sync-logic.spec.ts` y la redacción estructurada de `docs/test-strategy.md`.
+  - *Validación humana:* Ejecución manual de los comandos de prueba en consola, revisión línea a línea de las aserciones, verificación de la inmutabilidad de objetos y comprobación de ausencia total de PII, secretos o llamadas a hardware físico.
 
 ## Evidencia de Implementación - Felipe Mora López
 - **SHA Completo del commit:** c8969c743f350dde5e2531ce28c3f195581b1a1d
@@ -51,3 +41,23 @@
 - **Limitaciones y seguimiento:** No hay un resultado exitoso confirmado para `npm run verify`. El check público `bash public-tests/check.sh` no pudo ejecutarse porque Windows no permitió acceder a `bash.exe`; la búsqueda de lectura encontró coincidencias textuales que pueden causar falsos positivos. Tampoco se ha confirmado una ejecución remota de GitHub Actions. npm reportó las vulnerabilidades indicadas y persiste la advertencia de detección de módulos. En el módulo existente de notificaciones, si `navigator.serviceWorker.getRegistration()` rechaza, se devuelve `"error"` sin intentar `new Notification(...)`; la diferencia con el fallback descrito en documentación queda pendiente de coordinación con Felipe y no se considera un fallo de estas pruebas.
 - **Uso de IA:** Utilicé Codex como apoyo para implementar los adaptadores, generar las pruebas, actualizar el README y configurar el workflow.
 - **Validación humana:** Ejecuté manualmente los comandos anteriores en PowerShell y revisé sus salidas. Esta evidencia no afirma una revisión línea por línea ni una ejecución exitosa de GitHub Actions.
+---
+
+## Felipe Mora López — Semana 08: Lead de Pruebas de Integración y Adaptadores/API
+- **Estudiante:** Felipe Mora López (Matrícula: 3523110443)
+- **Commit SHA evaluado:** [Pendiente de integración en dev-felipe]
+- **Decisión técnica:** [Pendiente]
+- **Prueba:** [Pendiente]
+- **Limitación:** [Pendiente]
+- **Uso de IA:** [Pendiente]
+
+---
+
+## Oscar Martinez Martinez — Semana 08: Lead de Pruebas E2E, Pipeline de CI y Documentación Operativa
+- **Estudiante:** Oscar Martinez Martinez (Matrícula: 3523110806)
+- **Commit SHA evaluado:** [Pendiente de integración en dev-oscar]
+- **Rol y alcance:** Lead de Pruebas E2E, Pipeline de CI y Documentación Operativa. Implementé `tests/e2e/critical-path.spec.ts`, el workflow canónico `.github/workflows/academic-evaluation.yml`, los scripts por nivel, una prueba de integración del handler API y la documentación de ejecución. El SHA final queda pendiente hasta el commit de entrega.
+- **Decisión técnica y trade-offs:** La suite Playwright valida el dashboard, el listado CSR, el detalle sintético `inspection-001` y el shell `/` servido desde caché cuando se simula offline. No afirma que el listado funcione sin conexión porque el Service Worker excluye `/api/`. La suite de integración combina el contrato del endpoint con las pruebas existentes de cola e IndexedDB sintética. Conservé los contratos de Semana 06 mediante adaptadores compatibles para cámara y geolocalización, mientras el componente usa los contratos actuales.
+- **Pruebas ejecutadas y resultados reales:** `npm ci` terminó correctamente e instaló 416 paquetes; `npm run build` terminó con código 0; `npm test` terminó con código 0. Dentro de la suite completa: unitarias 28/28, integración 17/17, capacidades 15/15, rendering 13/13 y Playwright 4/4 (incluye la prueba de offline existente). El contrato estático del Service Worker reportó PASS. `npm run verify` terminó con código 0 y generó `reports/verification.json`.
+- **Limitaciones conocidas:** Offline se garantiza para el shell del dashboard tras una visita online; el listado CSR y la API no se guardan en caché. El check `bash public-tests/check.sh` no pudo ejecutarse localmente porque el `bash.exe` disponible no tuvo acceso para iniciar; queda pendiente correrlo en Git Bash, WSL o CI. La versión local de Node fue 21.7.3; CI fija Node 22. La primera ejecución de capacidades falló porque un mock no incluía `accuracy`; ajusté el dato sintético y la suite completa posterior pasó.
+- **Uso declarado de IA y validación humana:** Utilicé OpenAI Codex para apoyar la implementación, resolver los conflictos autorizados, escribir pruebas y documentación y revisar los resultados. La validación automatizada ejecutada se detalla arriba; la revisión final y aprobación de entrega corresponden a Oscar.

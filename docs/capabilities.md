@@ -22,8 +22,9 @@
   puede continuar sin ubicación y utilizar la alternativa manual de la aplicación.
 - **Notificaciones:** si no hay soporte, el permiso no está concedido o el envío
   falla, se devuelve un estado explícito. El envío intenta el Service Worker y
-  recurre a la API estándar cuando no hay un registro disponible o el Service
-  Worker no puede mostrar la notificación.
+  recurre a la API estándar cuando no hay un registro disponible o cuando
+  `showNotification` falla. Si la consulta del registro del Service Worker
+  rechaza, devuelve `error` para no ocultar ese fallo.
 
 ## Datos mínimos utilizados
 
