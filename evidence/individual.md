@@ -45,7 +45,7 @@
 
 ## Felipe Mora López — Semana 08: Lead de Pruebas de Integración y Adaptadores/API
 - **Estudiante:** Felipe Mora López (Matrícula: 3523110443)
-- **Commit SHA evaluado:** Pendiente de commit de esta contribución.
+- **Commit SHA evaluado:** 9562d78e96ade5fba0846bdff948ff35023ea509 - test: agregar pruebas de integración, actualizar evidencia y resolver tipos de nodo - Integrado en rama principal mediante PR #20, commit `f7c02e0`
 - **Decisión técnica:** Añadí pruebas de integración para IndexedDB y la cola de mutaciones usando `fake-indexeddb`, para el endpoint sintético de inspecciones y para el cliente de notificaciones con APIs de navegador simuladas. No modifiqué los módulos de producción.
 - **Pruebas ejecutadas y resultado:**
   - `npx tsx --test tests\integration\storage-queue.spec.ts`: 3 aprobadas, 0 fallidas.

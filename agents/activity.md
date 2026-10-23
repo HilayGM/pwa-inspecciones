@@ -6,6 +6,9 @@ este archivo solo es para tratar las instrucciones y los criterios de aceptacion
 
 Tu trabajo sera dividir la tarea entre 3 personas para poder entregar todo completo para la respectiva semana y devolver las asignaciones a cada persona por el chat 
 
+
+Actividad:
+
 Esta es la actividad de esta semana los archivos comprimidos ya se encuentran en el proyecto:
 
 PROPÓSITO

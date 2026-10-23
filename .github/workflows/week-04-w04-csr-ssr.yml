@@ -1,8 +1,6 @@
 name: Semana 04 - CSR y SSR
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
 
 permissions:

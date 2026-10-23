@@ -1,8 +1,6 @@
 name: Starter Semana 1 — feedback
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
 
 permissions:
