@@ -10,9 +10,9 @@
     "verify": "node scripts/verify.mjs",
     "test:unit": "tsx --test tests/unit/sync-logic.spec.ts tests/unit/device-adapters.spec.ts",
     "test:integration": "tsx --test tests/sync.spec.ts tests/integration/inspections-api.spec.ts",
-    "test:e2e": "playwright test tests/e2e/ tests/offline.spec.ts",
+    "test:e2e": "node scripts/run-e2e.mjs tests/e2e/ tests/offline.spec.ts",
     "test:service-worker": "tsx tests/service-worker.spec.ts",
-    "test:offline": "playwright test tests/offline.spec.ts",
+    "test:offline": "node scripts/run-e2e.mjs tests/offline.spec.ts",
     "test:rendering": "tsx tests/rendering.spec.ts",
     "test:sync": "tsx --test tests/sync.spec.ts",
     "test:capabilities": "tsx --test tests/capabilities.spec.ts"

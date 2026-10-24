@@ -1,0 +1,8 @@
+package-lock.json
+tests/rendering.spec.ts
+*.md
+docs/
+evidence/
+skills/
+agents/
+evaluation.json
