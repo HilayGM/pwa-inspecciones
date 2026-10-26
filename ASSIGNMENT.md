@@ -1,4 +1,4 @@
-# Actividad 8: Pirámide de pruebas e integración continua
+# Actividad 9: Modelo de amenazas y privacidad aplicada
 
 ## Scenario
 
@@ -6,27 +6,27 @@ La Universidad Tecnológica de Tehuacán necesita una PWA para registrar inspecc
 
 ## Objective
 
-Construir una pirámide de pruebas que cubra riesgos reales, produzca reportes y diagnostique al menos un fallo reproducible.
+Modelar amenazas y aplicar controles de mínimo privilegio, secretos, transporte, almacenamiento, CSP y validación para un sujeto obligado mexicano.
 
 ## Competencies
 
-**Primaria:** C14. **Acumulativas:** C07, C09.
+**Primaria:** C13. **Acumulativas:** C06, C07.
 
 ## Engineering uplift traceability
 
-**Mínimo oficial:** Capacidades derivadas: ejecutar pruebas a componentes y gestionar desarrollo mediante integración continua.
+**Mínimo oficial:** Capacidad derivada: implementar esquemas de seguridad para privacidad y confidencialidad cumpliendo leyes y regulaciones aplicables.
 
-**Elevación Engineering Target:** Construir una pirámide de pruebas que cubra riesgos reales, produzca reportes y diagnostique al menos un fallo reproducible.
+**Elevación Engineering Target:** Modelar amenazas y aplicar controles de mínimo privilegio, secretos, transporte, almacenamiento, CSP y validación para un sujeto obligado mexicano.
 
-**Evidencia de la elevación:** Incluye pruebas unitarias, integración y E2E del critical path, una estrategia de selección y un caso de fallo corregido. La solución se juzga por comportamiento, decisiones justificadas, pruebas y reproducibilidad, no solo por una demo.
+**Evidencia de la elevación:** Identifica activos, amenazas y controles; valida entradas, evita secretos, restringe permisos y documenta datos tratados y finalidades. La solución se juzga por comportamiento, decisiones justificadas, pruebas y reproducibilidad, no solo por una demo.
 
 ## Prerequisites
 
-Continuar el repositorio personal creado en las semanas anteriores. No descargues un starter nuevo: la regresión debe ejecutarse sobre la aplicación acumulada.
+Continuar el repositorio personal creado en las semanas anteriores. No descargues un starter nuevo: analiza y endurece la aplicación acumulada.
 
 ## Schedule and one-week submission window
 
-Semana 8 del calendario de 14 semanas; trabajo individual preferente. Inicio en lunes y entrega a más tardar el domingo de esa misma semana. La duración máxima de la actividad es 7 días y no se aceptan extensiones implícitas de calendario.
+Semana 9 del calendario de 14 semanas; trabajo individual preferente. Inicio en lunes y entrega a más tardar el domingo de esa misma semana. La duración máxima de la actividad es 7 días y no se aceptan extensiones implícitas de calendario.
 
 ## Difficulty
 
@@ -34,22 +34,22 @@ Nivel 8/10. La dificultad proviene de integrar restricciones, justificar trade-o
 
 ## Requirements
 
-1. Continuar el mismo repositorio de inspecciones e implementar la estrategia de pruebas y CI indicada.
+1. Continuar el mismo repositorio de inspecciones y aplicar el análisis de seguridad y privacidad solicitado.
 2. Entregar los archivos indicados y datos exclusivamente sintéticos.
 3. Explicar decisiones, límites, riesgos y evidencia de prueba.
 4. Ejecutar los comandos de verificación localmente antes de enviar.
 
-**Funcionalidad mínima:** Incluye pruebas unitarias, integración y E2E del critical path, una estrategia de selección y un caso de fallo corregido.
+**Funcionalidad mínima:** Identifica activos, amenazas y controles; valida entradas, evita secretos, restringe permisos y documenta datos tratados y finalidades.
 
-**No funcionales:** CI ejecuta setup, lint, build, tests y reportes; las pruebas son deterministas y no dependen de datos privados.
+**No funcionales:** Usa datos sintéticos, HTTPS en despliegue, headers/CSP razonables, dependencias auditables y fallback seguro.
 
 ## Deliverables
 
-- `tests/unit/`
-- `tests/integration/`
-- `tests/e2e/`
-- `docs/test-strategy.md`
-- `.github/workflows/academic-evaluation.yml`
+- `docs/threat-model.md`
+- `docs/privacy-data-inventory.md`
+- `src/lib/security/`
+- `tests/security.spec.ts`
+- `public/robots.txt`
 - `README.md` con ejecución, supuestos y evidencia.
 - Reporte de verificación generado por CI o localmente.
 
@@ -107,7 +107,7 @@ Objetivo de automatización: 90% o más. El workflow instala, compila, ejecuta p
 
 ## Hidden tests
 
-`private-evaluator/w08-testing-ci/check.sh` y su contrato JSON son solo del instructor. Cubren invariantes, regresiones, seguridad, idempotencia, accesibilidad o trazabilidad que no deben poder ajustarse mirando el caso público.
+`private-evaluator/w09-security-privacy/check.sh` y su contrato JSON son solo del instructor. Cubren invariantes, regresiones, seguridad, idempotencia, accesibilidad o trazabilidad que no deben poder ajustarse mirando el caso público.
 
 ## Manual review
 
