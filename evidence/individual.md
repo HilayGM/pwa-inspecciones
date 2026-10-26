@@ -3,7 +3,7 @@
 ## Martin Moreno Libreros — Seguridad y Privacidad: Lead de Lógica de Seguridad y Configuración
 
 - **Estudiante:** Martin Moreno Libreros (Matrícula: 3523110349)
-- **Commit SHA evaluado:** `PENDING_COMMIT_SHA`
+- **Commit SHA evaluado:** `84a7a68f89024a716044d6a26e09bdf4bbc1df72`
 - **Rol y alcance asignado:** Lead de Lógica de Seguridad y Configuración. Responsable de la arquitectura y diseño de los módulos de sanitización y validación estricta (`src/lib/security/validation.ts`), Content Security Policy y cabeceras HTTP de protección (`src/lib/security/headers.ts`), detección y salvaguarda de secretos (`src/lib/security/secrets.ts`), barrel de exportación (`src/lib/security/index.ts`), directivas de privacidad para rastreadores (`public/robots.txt`) y suite de pruebas automatizadas de seguridad (`tests/security.spec.ts`).
 - **Decisión técnica que puedo explicar:**
   1. *Sanitización en múltiples capas sin dependencias externas:* Implementé funciones puras de saneamiento de texto (`sanitizeText`, `escapeHtml`) que eliminan etiquetas HTML maliciosas, scripts incrustados, estilos e iframes con todo su contenido interior, controladores de eventos en línea (`onerror`, `onload`, `onclick`) y esquemas peligrosos (`javascript:`, `vbscript:`, `data:` no gráfico). Esta arquitectura de funciones puras garantiza cero dependencias adicionales en `package-lock.json` y tiempos de ejecución sub-segundo tanto en Node.js como en navegadores.
