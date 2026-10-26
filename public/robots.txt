@@ -1,0 +1,11 @@
+# Robots.txt - PWA Inspecciones de Laboratorio
+# Directivas de rastreo e indexación para privacidad y seguridad
+
+User-agent: *
+Allow: /$
+Allow: /manifest.webmanifest
+Allow: /icons/
+Disallow: /api/
+Disallow: /inspecciones/
+
+# Prohibir rastreadores en endpoints de datos internos y registros de laboratorio

@@ -1,5 +1,31 @@
 # Evidencia individual
 
+## Martin Moreno Libreros — Seguridad y Privacidad: Lead de Lógica de Seguridad y Configuración
+
+- **Estudiante:** Martin Moreno Libreros (Matrícula: 3523110349)
+- **Commit SHA evaluado:** `84a7a68f89024a716044d6a26e09bdf4bbc1df72`
+- **Rol y alcance asignado:** Lead de Lógica de Seguridad y Configuración. Responsable de la arquitectura y diseño de los módulos de sanitización y validación estricta (`src/lib/security/validation.ts`), Content Security Policy y cabeceras HTTP de protección (`src/lib/security/headers.ts`), detección y salvaguarda de secretos (`src/lib/security/secrets.ts`), barrel de exportación (`src/lib/security/index.ts`), directivas de privacidad para rastreadores (`public/robots.txt`) y suite de pruebas automatizadas de seguridad (`tests/security.spec.ts`).
+- **Decisión técnica que puedo explicar:**
+  1. *Sanitización en múltiples capas sin dependencias externas:* Implementé funciones puras de saneamiento de texto (`sanitizeText`, `escapeHtml`) que eliminan etiquetas HTML maliciosas, scripts incrustados, estilos e iframes con todo su contenido interior, controladores de eventos en línea (`onerror`, `onload`, `onclick`) y esquemas peligrosos (`javascript:`, `vbscript:`, `data:` no gráfico). Esta arquitectura de funciones puras garantiza cero dependencias adicionales en `package-lock.json` y tiempos de ejecución sub-segundo tanto en Node.js como en navegadores.
+  2. *Validación canónica y defensiva:* Implementé `validateAndSanitizeInspection` y `validateInspectionId`, bloqueando ataques de Path Traversal (`..`, `/`, `\`), garantizando formato estricto `inspection-[a-zA-Z0-9_-]{1,64}`, fechas ISO 8601 con calendario real (validando años bisiestos y días máximos por mes) y rangos acotados de hallazgos para prevenir desbordamientos o manipulación de estado.
+  3. *Content Security Policy (CSP) restrictiva y cabeceras HTTP:* Definí directivas estrictas (`default-src 'self'`, `object-src 'none'`, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`) junto con cabeceras `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin` y `Permissions-Policy: camera=(self), geolocation=(self), microphone=()`, mitigando Clickjacking, MIME-sniffing e inyección de plugins.
+  4. *Prevención de fuga de secretos y saneamiento de registros:* Implementé `detectExposedSecrets` y `assertNoClientSecrets` para escanear y bloquear variables públicas `NEXT_PUBLIC_*` que contengan nombres de secretos o claves privadas PEM, además de `sanitizeLogData` que ofusca recursivamente campos críticos (`password`, `token`, `secret`, `credential`, `apiKey`) y expresiones de tokens JWT y Bearer.
+  5. *Políticas de rastreo en robots.txt:* Configuré `public/robots.txt` para desautorizar a los motores de búsqueda el rastreo de `/api/` e `/inspecciones/`, impidiendo la indexación inadvertida de registros y datos internos de laboratorio.
+- **Pruebas que ejecuté y resultado:**
+  - `npm run test:security`: Ejecutó 27 pruebas automatizadas en 5 suites (mitigación de XSS, validación estricta de registros, CSP y cabeceras de protección, detección de secretos y robots.txt). Resultado: 27 aprobadas, 0 fallidas, 0 canceladas o ignoradas en 295 ms.
+  - `npm test`: Ejecutó la pirámide completa de pruebas (starter, manifiesto, unitarias, integración, capacidades, seguridad, Service Worker, rendering y E2E Playwright) con código de salida 0.
+  - `npm run build`: Compilación de producción en Next.js completada con éxito (`exit code 0`), generando todas las páginas y rutas estáticas y dinámicas sin errores de tipos ni advertencias de linting.
+  - `npm run verify`: Ejecutó la verificación estructural con código de salida 0 generando `reports/verification.json`.
+- **Limitación o fallo diagnosticado:**
+  - *Fallo diagnosticado y corregido:* Se diagnosticó que en la sanitización inicial, etiquetas compuestas con contenido como `<marquee>` o tags anidados preservaban texto si no se normalizaba el flujo de tokens, y que iframes o bloques de estilo podían dejar reglas CSS no deseadas en cadenas de texto plano; se añadieron expresiones regulares específicas para depurar bloques completos de `style` e `iframe`.
+  - *Limitación:* La sanitización y validación en `src/lib/security/` protegen la lógica de la aplicación y la interfaz de usuario en el cliente y servidor Node.js, pero en arquitecturas multi-inquilino o con bases de datos remotas, deben complementarse con autorización basada en roles (RBAC) y validación en el gateway de la API para endpoints de escritura.
+- **Uso declarado de IA (herramienta, propósito, validación):**
+  - *Herramienta:* Gemini 3.8 Flash en Antigravity IDE.
+  - *Propósito:* Asistencia en el diseño de expresiones regulares defensivas para sanitización XSS, estructuración de directivas CSP y generación exhaustiva de casos de prueba en `tests/security.spec.ts`.
+  - *Validación humana:* Ejecución manual de las suites de prueba en consola local, auditoría estricta de regex para evitar vulnerabilidades de ReDoS (Regular Expression Denial of Service), verificación de ausencia de dependencias externas que alteren `package-lock.json` y confirmación de build limpio.
+
+---
+
 ## Martin Moreno Libreros — Semana 08: Lead de Pruebas Unitarias y Estrategia
 
 - **Estudiante:** Martin Moreno Libreros (Matrícula: 3523110349)
