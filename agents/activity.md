@@ -8,11 +8,8 @@ Tu trabajo sera dividir la tarea entre 3 personas para poder entregar todo compl
 
 
 Actividad:
-
-Esta es la actividad de esta semana los archivos comprimidos ya se encuentran en el proyecto:
-
 PROPÓSITO
-Construir pruebas unitarias, integración y E2E del flujo crítico y automatizarlas en CI.
+Modelar amenazas y aplicar controles de validación, secretos, CSP, permisos y privacidad.
 
 QUÉ DEBES HACER
 1. Trabaja sobre el repositorio del proyecto integrador de la PWA de inspecciones y mantenimiento de laboratorios, usando únicamente datos sintéticos.
@@ -20,11 +17,11 @@ QUÉ DEBES HACER
 3. Escribe pruebas reproducibles y ejecuta GitHub Actions antes de entregar.
 
 ENTREGABLES OBLIGATORIOS
-- tests/unit/
-- tests/integration/
-- tests/e2e/
-- docs/test-strategy.md
-- .github/workflows/academic-evaluation.yml
+- docs/threat-model.md
+- docs/privacy-data-inventory.md
+- src/lib/security/
+- tests/security.spec.ts
+- public/robots.txt
 - README.md con setup, ejecución, verificación y evidencia.
 - evidence/individual.md con tu commit SHA, decisión técnica, prueba ejecutada, limitación y uso declarado de IA.
 
@@ -42,6 +39,5 @@ REGLAS
 - IA permitida en esta actividad si declaras herramienta, propósito y validación humana.
 - El quiz semanal es presencial, en papel, de 3 preguntas y no permite IA.
 - Los checks públicos dan feedback; la calificación final usa commit fijado y checks privados.
-
 
 
