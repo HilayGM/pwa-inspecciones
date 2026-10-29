@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "owner": "Oscar Martínez Martínez",
+  "studentId": "3523110806",
+  "role": "Integrante 3",
+  "week": 9,
+  "responsibility": "Inyección de fallas, respuesta perdida post-commit y decisión de ingeniería.",
+  "branch": "dev-oscar",
+  "commitSha": "0b74a831be11c9faa7f9dd64fec373a5af3b4f4e",
+  "commitMessage": "test(week-09): implementa inyeccion de fallas post-commit y documenta estrategia de idempotencia",
+  "workCompleted": [
+    "Se incorporó en tests/sync.spec.ts un escenario de respuesta perdida después de una aplicación sintética.",
+    "Se creó reports/week-09/fault-injection.json con comandos y resultados.",
+    "Se creó evidence/week-09/engineering.json con la decisión técnica y los criterios AC-01 a AC-05."
+  ],
+  "testsExecuted": {
+    "sync": {
+      "command": "npm run test:sync",
+      "status": "passed",
+      "passed": 17,
+      "failed": 0,
+      "historicalError": "uv_os_get_passwd returned ENOMEM; resuelto antes de la ejecución final satisfactoria."
+    },
+    "build": {
+      "command": "npm run build",
+      "status": "passed",
+      "result": "Next.js 14.2.35 correcto; validación de tipos aprobada y seis páginas estáticas generadas."
+    },
+    "jsonParse": {
+      "status": "passed",
+      "result": "Los tres archivos JSON fueron validados correctamente."
+    },
+    "cachedDiffCheck": {
+      "command": "git diff --cached --check",
+      "status": "passed",
+      "result": "Sin errores antes del primer commit."
+    },
+    "scenario": {
+      "environment": "fake-indexeddb y doble de servidor en memoria",
+      "observedCounters": {
+        "logicalOperations": 1,
+        "events": 1,
+        "evidences": 1,
+        "notifications": 1
+      },
+      "result": "Los efectos simulados no se duplicaron."
+    }
+  },
+  "acceptanceCriteria": {
+    "AC-01": "partial: el build pasó, pero no se ejecutó npm ci.",
+    "AC-02": "verified: artefactos presentes y JSON válidos.",
+    "AC-03": "verified: pruebas aprobadas con servidor simulado.",
+    "AC-04": "partial: artefactos presentes; revisión humana final pendiente.",
+    "AC-05": "pending_confirmation: no se encontró su definición."
+  },
+  "limitations": [
+    "No existe un endpoint real de resolución/cierre remoto ni persistencia remota.",
+    "La prueba no certifica la idempotencia de un backend de producción.",
+    "No se ha confirmado la ejecución remota de GitHub Actions.",
+    "El primer commit está confirmado localmente; no se afirma que se haya subido a GitHub."
+  ],
+  "aiUsage": "Codex se utilizó como apoyo para la implementación y documentación.",
+  "humanReview": {
+    "status": "pending",
+    "statement": "La revisión final de la evidencia queda pendiente."
+  }
+}
