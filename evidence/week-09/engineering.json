@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "owner": "Oscar Martínez Martínez",
+  "role": "Integrante 3",
+  "scope": "Inyección de fallas post-commit, respuesta perdida, reintento con la misma clave y evidencia técnica.",
+  "problem": "El cliente puede perder la respuesta después de que un servidor haya aplicado una operación. El repositorio no contiene un servidor real; por ello la prueba usa el límite SyncSender y un doble en memoria.",
+  "decision": "Reutilizar enqueueInspection y syncDueEntries con fake-indexeddb. El doble registra la primera aplicación antes de lanzar un timeout y reconoce la misma idempotencyKey en el reintento para devolver el resultado previo sin repetir efectos.",
+  "retryPolicy": {
+    "retry": "Cuando el error es transitorio o la respuesta puede haberse perdido, conservar la entrada y reintentar con exactamente la misma clave.",
+    "fallback": "No usar un fallback de negocio; el contrato actual solo permite conservar la entrada en la cola y aplicar el backoff existente.",
+    "abort": "Abortar cuando se agotan maxAttempts o cuando el error no es recuperable, dejando la entrada en estado exhausted según la cola existente."
+  },
+  "alternativesDiscarded": [
+    "Crear un endpoint ficticio de cierre.",
+    "Agregar un backend o una base de datos remota.",
+    "Generar un clientMutationId nuevo para el reintento.",
+    "Inferir deduplicación remota a partir de los recibos locales."
+  ],
+  "tradeoffs": [
+    "La prueba es determinista, rápida y no depende de red ni servicios externos.",
+    "Demuestra la coordinación de la cola local, pero no certifica la idempotencia de un backend real.",
+    "Los contadores de eventos, evidencias y notificaciones pertenecen únicamente al doble de servidor y no a funcionalidades existentes del producto."
+  ],
+  "evidence": {
+    "implementation": [
+      "src/lib/sync/queue.ts",
+      "src/lib/storage/schema.ts",
+      "tests/sync.spec.ts"
+    ],
+    "documentation": [
+      "docs/sync-policy.md",
+      "ASSIGNMENT.md",
+      "evaluation.json",
+      ".github/workflows/week-09-w09-security-privacy.yml"
+    ],
+    "testCommand": "npm run test:sync",
+    "testStatus": "passed",
+    "testResults": {
+      "exitCode": 0,
+      "tests": 17,
+      "passed": 17,
+      "failed": 0,
+      "includesPostCommitScenario": true
+    },
+    "historicalIncident": {
+      "command": "npm run test:sync",
+      "status": "failed_before_test_execution",
+      "error": "uv_os_get_passwd returned ENOMEM",
+      "resolvedBeforeFinalRun": true
+    },
+    "buildCommand": "npm run build",
+    "buildStatus": "passed",
+    "buildResults": {
+      "exitCode": 0,
+      "nextVersion": "14.2.35",
+      "typeValidation": "passed",
+      "staticPagesGenerated": 6
+    },
+    "jsonValidation": {
+      "command": "JSON.parse de reports/week-09/fault-injection.json, evidence/week-09/engineering.json y evidence/week-09/individual.json",
+      "status": "passed",
+      "allThreeValid": true
+    },
+    "diffCheck": {
+      "command": "git diff --check",
+      "status": "passed"
+    },
+    "commitSha": null,
+    "commitShaStatus": "pending"
+  },
+  "acceptanceCriteria": {
+    "AC-01": {
+      "requirement": "Instalación limpia y build completan.",
+      "source": "ASSIGNMENT.md; evaluation.json; .github/workflows/week-09-w09-security-privacy.yml",
+      "status": "partial",
+      "evidence": "npm run build terminó con código 0; Next.js 14.2.35 pasó la validación de tipos y generó 6 páginas estáticas.",
+      "gap": "No se ejecutó npm ci, por lo que la instalación limpia no está verificada."
+    },
+    "AC-02": {
+      "requirement": "Los artefactos declarados para la actividad existen.",
+      "source": "evaluation.json; workflow de Semana 09",
+      "status": "verified",
+      "evidence": "Los artefactos de seguridad declarados y los tres JSON de la asignación existen; los tres JSON fueron válidos mediante JSON.parse.",
+      "gap": "La verificación confirma existencia y validez estructural, no sustituye la revisión de contenido por el evaluador."
+    },
+    "AC-03": {
+      "requirement": "Existe una suite ejecutable que cubre comportamiento crítico y detecta regresiones.",
+      "source": "ASSIGNMENT.md; evaluation.json",
+      "status": "verified",
+      "evidence": "npm run test:sync terminó con código 0: 17 pruebas aprobadas y 0 fallidas; incluye el escenario post-commit. La prueba usa fake-indexeddb y un doble de servidor en memoria.",
+      "gap": "La prueba no verifica un backend real; sus efectos son los contadores del doble simulado."
+    },
+    "AC-04": {
+      "requirement": "El reporte y la evidencia individual están presentes para inspección.",
+      "source": "ASSIGNMENT.md; evaluation.json",
+      "status": "partial",
+      "evidence": "El reporte de ingeniería, el reporte de fault injection y la evidencia individual están presentes; la suite, el build, JSON.parse y git diff --check fueron verificados.",
+      "gap": "La validación humana final y el SHA del commit evaluado siguen pendientes."
+    },
+    "AC-05": {
+      "requirement": "No localizado.",
+      "source": "No aparece en ASSIGNMENT.md, evaluation.json ni el workflow de Semana 09.",
+      "status": "pending_confirmation",
+      "gap": "Debe localizarse el kit o la especificación que defina AC-05."
+    }
+  },
+  "limitations": [
+    "No existe un flujo real de resolución/cierre remoto.",
+    "No existen modelos existentes para eventos, evidencias asociadas o notificaciones remotas.",
+    "La prueba demuestra el comportamiento del doble en memoria, no la idempotencia de un servidor remoto real."
+  ]
+}
