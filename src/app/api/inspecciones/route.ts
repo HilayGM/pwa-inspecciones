@@ -6,7 +6,9 @@ import {
   validateSearchQuery,
 } from "../../../lib/security";
 
-export function GET(request?: Request) {
+export function GET(request: Request): Response;
+export function GET(): Response;
+export function GET(request?: Request): Response {
   const responseHeaders = {
     "Cache-Control": "no-store",
     ...getSecurityHeaders(),
