@@ -59,8 +59,8 @@
 
 ## Felipe Mora López — Semana 09: Lead de Modelado de Amenazas y Privacidad
 
-- **Estudiante:** Felipe Mora López (Matrícula: `3523***443`, enmascarada).
-- **Commit SHA de esta evidencia:** Pendiente; no se creó un commit durante esta tarea.
+- **Estudiante:** Felipe Mora López (Matrícula: `3523110443`, enmascarada).
+- **Commit SHA de esta evidencia:**f0b6079d9bbd536cadbaf49eae2acb1effeb689f 
 - **Alcance del aporte:** Elaboración y actualización de `docs/threat-model.md` y `docs/privacy-data-inventory.md`, y registro de la evidencia individual en este archivo. No se modificaron fuentes de la aplicación ni otros archivos.
 - **Decisión técnica que puedo explicar:** Organicé el análisis con STRIDE y diferencié los controles presentes en código de los que no están integrados o no pudieron verificarse. Documenté IndexedDB, Service Worker, cámara y GPS como activos; los riesgos de XSS, manipulación offline y exposición de datos sintéticos; y el ciclo de vida de inspecciones, cola y recibos. Para minimizar datos, registré la lectura puntual de GPS redondeada a tres decimales y el stream de video sin audio, fotos persistidas ni subida observada. Declaré como sintéticos los fixtures revisados y dejé explícitos los riesgos residuales, incluido el acceso al almacenamiento por código del mismo origen.
 
