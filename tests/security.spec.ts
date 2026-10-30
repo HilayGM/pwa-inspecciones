@@ -1,6 +1,6 @@
 /**
  * Pruebas automatizadas de controles de seguridad, validación, CSP, secretos y robots.txt.
- * Ejecuta validaciones exhaustivas sobre las utilidades de src/lib/security y políticas de privacidad.
+ * Ejecuta validaciones exhaustivas unitarias y de integración sobre src/lib/security, rutas y configuración.
  */
 
 import test from "node:test";
@@ -11,6 +11,7 @@ import { resolve } from "node:path";
 import {
   sanitizeText,
   escapeHtml,
+  isSafeUri,
   validateInspectionId,
   validateStatus,
   validateIsoDate,
@@ -23,12 +24,16 @@ import {
   buildContentSecurityPolicy,
   SECURITY_HEADERS,
   getSecurityHeaders,
+  getNextSecurityHeadersConfig,
   validateResponseSecurityHeaders,
   detectExposedSecrets,
   assertNoClientSecrets,
   redactSensitiveString,
   sanitizeLogData,
 } from "../src/lib/security";
+import { GET as getInspectionsRoute } from "../src/app/api/inspecciones/route";
+import InspectionDetailPage from "../src/app/inspecciones/[id]/page";
+import nextConfig from "../next.config.mjs";
 
 test("Seguridad: Saneamiento de texto y mitigación de XSS", async (t) => {
   await t.test("Elimina scripts maliciosos y etiquetas HTML", () => {
@@ -38,17 +43,22 @@ test("Seguridad: Saneamiento de texto y mitigación de XSS", async (t) => {
     assert.doesNotMatch(cleaned, /<script>/i);
   });
 
-  await t.test("Elimina controladores de eventos en línea (onerror, onload, onclick)", () => {
-    const attack = "<img src='x' onerror='stealCookies()' />Equipo de Cómputo";
+  await t.test("Elimina controladores de eventos en línea sin mutilar palabras legítimas como online=", () => {
+    const attack = "<img src='x' onerror='stealCookies()' />Equipo online=activo";
     const cleaned = sanitizeText(attack);
-    assert.equal(cleaned, "Equipo de Cómputo");
+    assert.equal(cleaned, "Equipo online=activo");
     assert.doesNotMatch(cleaned, /onerror/i);
   });
 
-  await t.test("Elimina protocolo javascript: embebido", () => {
-    const linkAttack = "javascript:alert(1)";
-    const cleaned = sanitizeText(linkAttack);
-    assert.doesNotMatch(cleaned, /javascript:/i);
+  await t.test("Elimina protocolos peligrosos javascript:, vbscript:, file: y data: no gráficos", () => {
+    assert.doesNotMatch(sanitizeText("javascript:alert(1)"), /javascript:/i);
+    assert.doesNotMatch(sanitizeText("vbscript:msgbox(1)"), /vbscript:/i);
+    assert.doesNotMatch(sanitizeText("file:///etc/passwd"), /file:/i);
+    assert.doesNotMatch(sanitizeText("data:text/html;base64,PHNjcmlwdD4="), /data:text\/html/i);
+    assert.equal(isSafeUri("https://utt.edu.mx"), true);
+    assert.equal(isSafeUri("data:image/png;base64,iVBORw0KGgo="), true);
+    assert.equal(isSafeUri("javascript:alert(1)"), false);
+    assert.equal(isSafeUri("data:text/html;base64,PHNjcmlwdD4="), false);
   });
 
   await t.test("Elimina caracteres de control ASCII potencialmente peligrosos", () => {
@@ -74,7 +84,7 @@ test("Seguridad: Validación estricta de identificadores y campos de inspección
   await t.test("Rechaza ataques de Path Traversal en el ID de inspección", () => {
     const traversal1 = validateInspectionId("../inspection-001");
     const traversal2 = validateInspectionId("..\\windows\\system32");
-    const slash = validateInspectionId("inspection/secret");
+    const slash = validateInspectionId("inspection/admin");
 
     assert.equal(traversal1.valid, false);
     assert.equal(traversal2.valid, false);
@@ -151,13 +161,14 @@ test("Seguridad: Validación estricta de identificadores y campos de inspección
   });
 });
 
-test("Seguridad: Content Security Policy (CSP) y cabeceras HTTP de protección", async (t) => {
-  await t.test("Construye una política CSP restrictiva con directivas obligatorias", () => {
+test("Seguridad: Content Security Policy (CSP), cabeceras HTTP e integración en runtime", async (t) => {
+  await t.test("Construye una política CSP restrictiva sin unsafe-eval y con directivas obligatorias", () => {
     const csp = buildContentSecurityPolicy();
     assert.match(csp, /default-src 'self'/);
     assert.match(csp, /object-src 'none'/);
     assert.match(csp, /frame-ancestors 'none'/);
     assert.match(csp, /base-uri 'self'/);
+    assert.doesNotMatch(csp, /unsafe-eval/);
   });
 
   await t.test("Las cabeceras de seguridad contienen protección anti-sniffing y anti-clickjacking", () => {
@@ -186,6 +197,44 @@ test("Seguridad: Content Security Policy (CSP) y cabeceras HTTP de protección",
     assert.equal(failedCheck.compliant, false);
     assert.ok(failedCheck.missing.includes("Content-Security-Policy"));
     assert.ok(failedCheck.missing.includes("X-Frame-Options"));
+  });
+
+  await t.test("next.config.mjs conecta async headers() con getNextSecurityHeadersConfig()", async () => {
+    assert.equal(typeof nextConfig.headers, "function", "next.config.mjs debe definir async headers()");
+    const configured = await nextConfig.headers();
+    assert.deepEqual(configured, getNextSecurityHeadersConfig());
+    assert.equal(configured[0]?.source, "/:path*");
+    const headerKeys = configured[0]?.headers.map((h: { key: string }) => h.key) ?? [];
+    assert.ok(headerKeys.includes("Content-Security-Policy"));
+    assert.ok(headerKeys.includes("X-Content-Type-Options"));
+    assert.ok(headerKeys.includes("X-Frame-Options"));
+  });
+
+  await t.test("La ruta GET /api/inspecciones devuelve cabeceras de seguridad y rechaza IDs maliciosos", async () => {
+    const okResponse = getInspectionsRoute();
+    assert.equal(okResponse.status, 200);
+    const headerValidation = validateResponseSecurityHeaders(okResponse.headers);
+    assert.equal(headerValidation.compliant, true);
+    assert.equal(okResponse.headers.get("X-Content-Type-Options"), "nosniff");
+
+    const maliciousRequest = new Request("http://localhost:3000/api/inspecciones?id=../etc/passwd");
+    const rejectedResponse = getInspectionsRoute(maliciousRequest);
+    assert.equal(rejectedResponse.status, 400);
+    const body = (await rejectedResponse.json()) as { error?: string };
+    assert.ok(body.error);
+  });
+
+  await t.test("La página de detalle InspectionDetailPage rechaza un ID malicioso antes de buscar", async () => {
+    await assert.rejects(
+      async () => {
+        await InspectionDetailPage({
+          params: Promise.resolve({ id: "../inspection-001" }),
+        });
+      },
+      (err: unknown) => {
+        return err instanceof Error && /NEXT_NOT_FOUND/i.test(err.message);
+      }
+    );
   });
 });
 
@@ -261,10 +310,12 @@ test("Seguridad y Privacidad: Archivo public/robots.txt", async (t) => {
     assert.equal(existsSync(robotsPath), true, "public/robots.txt debe existir en la raíz pública");
   });
 
-  await t.test("Bloquea rastreadores de indexar APIs y rutas privadas de inspecciones", () => {
+  await t.test("Bloquea rastreadores de indexar APIs y rutas privadas de inspecciones (con y sin barra)", () => {
     const content = readFileSync(robotsPath, "utf-8");
-    assert.match(content, /Disallow:\s*\/api\//);
-    assert.match(content, /Disallow:\s*\/inspecciones\//);
-    assert.match(content, /Allow:\s*\/\$?|\//);
+    assert.match(content, /^User-agent:\s*\*\s*$/m);
+    assert.match(content, /^Allow:\s*\/(?:\$)?\s*$/m);
+    assert.match(content, /^Disallow:\s*\/api\/\s*$/m);
+    assert.match(content, /^Disallow:\s*\/inspecciones\s*$/m);
+    assert.match(content, /^Disallow:\s*\/inspecciones\/\s*$/m);
   });
 });

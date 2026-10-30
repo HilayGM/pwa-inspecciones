@@ -6,6 +6,7 @@ Allow: /$
 Allow: /manifest.webmanifest
 Allow: /icons/
 Disallow: /api/
+Disallow: /inspecciones
 Disallow: /inspecciones/
 
 # Prohibir rastreadores en endpoints de datos internos y registros de laboratorio

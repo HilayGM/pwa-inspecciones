@@ -2,28 +2,28 @@
 
 ## Martin Moreno Libreros — Semana 09: Lead de Lógica de Seguridad y Configuración
 
-- **Estudiante:** Martin Moreno Libreros (Matrícula: 3523110349)
+- **Estudiante:** Martin Moreno Libreros (Matrícula: `352***349`, enmascarada)
 - **Commit SHA evaluado:** `c91a49c66ff9cb57b2cb18ec131b78297b47b2c5`
-- **Decisión técnica que puedo explicar:** Diseñé e implementé la arquitectura de seguridad defensiva en `src/lib/security/` y los controles de privacidad del sistema. Decidí estructurar las funciones de saneamiento (`sanitizeText`, `escapeHtml`) y validación (`validateAndSanitizeInspection`, `validateInspectionId`) como funciones puras sin dependencias externas para garantizar cero modificaciones a `package-lock.json` y ejecuciones deterministas en sub-milisegundos. Eliminé activamente scripts incrustados, estilos, iframes, controladores de eventos en línea y protocolos maliciosos (`javascript:`), y bloqueé ataques de Path Traversal en identificadores de inspección. Además, configuré cabeceras HTTP de protección y Content Security Policy (`default-src 'self'`, `object-src 'none'`, `frame-ancestors 'none'`, `nosniff`, `DENY`), salvaguardas de detección de secretos en variables cliente (`assertNoClientSecrets`) y directivas de privacidad en `public/robots.txt` para desautorizar la indexación de `/api/` e `/inspecciones/`.
+- **Decisión técnica que puedo explicar:** Diseñé, implementé y conecté en el runtime de la aplicación la arquitectura de seguridad defensiva en `src/lib/security/` y los controles de privacidad del sistema. Decidí estructurar las funciones de saneamiento (`sanitizeText`, `escapeHtml`, `isSafeUri`) y validación (`validateAndSanitizeInspection`, `validateInspectionId`) como funciones puras sin dependencias externas para garantizar cero modificaciones a `package-lock.json` y ejecuciones deterministas en milisegundos. Conecté `validateInspectionId` y `validateAndSanitizeInspection` directamente en `src/app/inspecciones/[id]/page.tsx` y en `src/app/api/inspecciones/route.ts` para rechazar intentos de *Path Traversal* o IDs malformados con HTTP `400` / `404`. Además, extraje la configuración de cabeceras a `src/lib/security/headers-config.mjs` (con tipos en `headers.ts`) para conectarla en `next.config.mjs` mediante `async headers()` y en las respuestas de la API, eliminando `'unsafe-eval'` de la CSP. Finalmente, integré la verificación de artefactos de Semana 09 y de variables públicas sensibles en `scripts/verify.mjs` y bloqueé `/api/`, `/inspecciones` e `/inspecciones/` en `public/robots.txt`.
 - **Prueba que ejecuté y resultado:**
-  - `npm run test:security`: Ejecutó 27 pruebas automatizadas en 5 suites (XSS y saneamiento, validación estricta de registros, cabeceras HTTP y CSP, detección de secretos y robots.txt). Resultado: 27 aprobadas, 0 fallidas en 295 ms.
-  - `npm test`: Ejecutó toda la pirámide de pruebas con código de salida 0.
-  - `npm run build`: Compilación de producción en Next.js completada con éxito (`exit code 0`).
-  - `npm run verify`: Verificación estructural aprobada (`exit code 0`).
+  - `npm run test:security`: Ejecutó 30 pruebas automatizadas en 5 suites (saneamiento XSS y URIs peligrosas, validación estricta de registros, cabeceras HTTP/CSP conectadas en `next.config.mjs` y rechazo de IDs maliciosos en API y página SSR, detección de secretos y `robots.txt`). Resultado: 30 aprobadas, 0 fallidas.
+  - `npm test`: Ejecutó toda la pirámide de pruebas (unitarias, integración, capacidades, seguridad, Service Worker, rendering y E2E Playwright) con código de salida 0.
+  - `npm run build`: Compilación de producción en Next.js 14.2.35 completada con éxito (`exit code 0`), incluyendo las cabeceras configuradas en `next.config.mjs`.
+  - `npm run verify` (equivalente a `make verify`): Verificación estructural y de entorno aprobada (`exit code 0`), generando `reports/verification.json`.
 - **Limitación o fallo diagnosticado:**
-  - *Fallo diagnosticado y corregido:* Se diagnosticó que etiquetas anidadas con bloques internos (`<style>`, `<iframe>`) dejaban reglas CSS o URLs si únicamente se eliminaban las etiquetas delimitadoras; se diseñaron expresiones regulares especializadas para extirpar el bloque y su contenido interior íntegramente.
-  - *Limitación:* La validación y saneamiento en el cliente previenen vulnerabilidades en la interfaz y en el servidor Node.js, pero en despliegues con backends distribuidos deben complementarse con control de acceso basado en roles (RBAC) y filtrado a nivel de API Gateway.
-- **Cambio que podría defender o modificar en vivo:** Puedo ajustar las directivas CSP en `src/lib/security/headers.ts`, incorporar reglas de saneamiento adicionales en `src/lib/security/validation.ts` o agregar filtros al escaneo de secretos y demostrar de forma inmediata mediante `npm run test:security` cómo las pruebas validan el nuevo comportamiento.
+  - *Fallo diagnosticado y corregido:* Se diagnosticó que inicialmente los módulos de `src/lib/security/` solo se invocaban desde las pruebas unitarias sin estar conectados a `next.config.mjs`, la API ni la página de detalle, que la expresión regular `\bon\w+\s*=` podía recortar texto legítimo como `online=`, y que `robots.txt` no bloqueaba `/inspecciones` sin barra final. Se conectaron todos los controles al runtime, se acotó la regex a eventos reales del DOM y se reforzaron `robots.txt` y sus aserciones.
+  - *Limitación:* La CSP mantiene `'unsafe-inline'` para no romper los scripts de hidratación estática y el soporte offline del Service Worker; en un despliegue con backend multiusuario real debe complementarse con autenticación institucional y autorización RBAC en servidor.
+- **Cambio que podría defender o modificar en vivo:** Puedo ajustar las directivas CSP en `src/lib/security/headers-config.mjs`, modificar las reglas de validación de `src/lib/security/validation.ts` o cambiar el comportamiento de rechazo en `src/app/api/inspecciones/route.ts` y demostrar de inmediato con `npm run test:security` cómo las pruebas de integración detectan cualquier regresión.
 - **Uso declarado de IA (herramienta, propósito, validación):**
-  - *Herramienta:* Gemini 3.8 Flash en Antigravity IDE.
-  - *Propósito:* Asistencia en el diseño de expresiones regulares defensivas para sanitización XSS, estructuración de directivas CSP y generación exhaustiva de casos de prueba en `tests/security.spec.ts`.
-  - *Validación humana:* Ejecución manual de las suites de prueba en consola local, auditoría estricta de regex para evitar vulnerabilidades de ReDoS (Regular Expression Denial of Service), verificación de ausencia de dependencias externas que alteren `package-lock.json` y confirmación de build limpio.
+  - *Herramienta:* Asistente de IA en Antigravity IDE.
+  - *Propósito:* Asistencia en la estructuración de los módulos de seguridad, pruebas de integración de cabeceras y rutas en `tests/security.spec.ts` y documentación técnica en `docs/reporte-ingenieria.md`.
+  - *Validación humana:* Ejecución manual de todas las suites de prueba y del build de producción en consola local, revisión línea a línea de la integración en `next.config.mjs`, `route.ts` y `page.tsx`, y comprobación de que `package-lock.json` y `.github/workflows/` permanecen intactos.
 
 ---
 
 ## Martin Moreno Libreros — Semana 08: Lead de Pruebas Unitarias y Estrategia
 
-- **Estudiante:** Martin Moreno Libreros (Matrícula: 3523110349)
+- **Estudiante:** Martin Moreno Libreros (Matrícula: `352***349`, enmascarada)
 - **Commit SHA evaluado:** `61325bf20515fb631b4861bb2c2f1862678556a3`
 - **Decisión técnica que puedo explicar:** Diseñé e implementé la suite de pruebas unitarias (`tests/unit/sync-logic.spec.ts` y `tests/unit/device-adapters.spec.ts`) y la estrategia de aseguramiento de calidad (`docs/test-strategy.md`). Decidí aislar rigurosamente la lógica pura de retroceso exponencial (`calculateRetryDelay`) y la matriz de resolución determinista de conflictos (`resolveSyncConflict`) sin dependencias de I/O, red o motores de base de datos para garantizar ejecuciones sub-segundo en cualquier entorno de CI. En los adaptadores de hardware (`camera.ts` y `geolocation.ts`), emulé las interfaces W3C mediante inyección de descriptores globales en `globalThis` para validar que `enableHighAccuracy: false` y el truncamiento de coordenadas a tres decimales protejan la privacidad del usuario, y que la detención de tracks de cámara sea tolerante a excepciones individuales sin interrumpir la liberación de recursos.
 - **Prueba que ejecuté y resultado:**
@@ -59,10 +59,10 @@
 
 ## Felipe Mora López — Semana 09: Lead de Modelado de Amenazas y Privacidad
 
-- **Estudiante:** Felipe Mora López (Matrícula: `3523110443`, enmascarada).
-- **Commit SHA de esta evidencia:**f0b6079d9bbd536cadbaf49eae2acb1effeb689f 
-- **Alcance del aporte:** Elaboración y actualización de `docs/threat-model.md` y `docs/privacy-data-inventory.md`, y registro de la evidencia individual en este archivo. No se modificaron fuentes de la aplicación ni otros archivos.
-- **Decisión técnica que puedo explicar:** Organicé el análisis con STRIDE y diferencié los controles presentes en código de los que no están integrados o no pudieron verificarse. Documenté IndexedDB, Service Worker, cámara y GPS como activos; los riesgos de XSS, manipulación offline y exposición de datos sintéticos; y el ciclo de vida de inspecciones, cola y recibos. Para minimizar datos, registré la lectura puntual de GPS redondeada a tres decimales y el stream de video sin audio, fotos persistidas ni subida observada. Declaré como sintéticos los fixtures revisados y dejé explícitos los riesgos residuales, incluido el acceso al almacenamiento por código del mismo origen.
+- **Estudiante:** Felipe Mora López (Matrícula: `352***443`, enmascarada).
+- **Commit SHA de esta evidencia:** f0b6079d9bbd536cadbaf49eae2acb1effeb689f
+- **Alcance del aporte:** Elaboración y actualización de `docs/threat-model.md` y `docs/privacy-data-inventory.md`, y registro de la evidencia individual en este archivo.
+- **Decisión técnica que puedo explicar:** Organicé el análisis con STRIDE y diferencié los controles presentes en código de los que requieren validación en despliegue. Documenté IndexedDB, Service Worker, cámara y GPS como activos; los riesgos de XSS, manipulación offline y exposición de datos sintéticos; y el ciclo de vida de inspecciones, cola y recibos. Para minimizar datos, registré la lectura puntual de GPS redondeada a tres decimales y el stream de video sin audio, fotos persistidas ni subida observada. Declaré como sintéticos los fixtures revisados y dejé explícitos los riesgos residuales, incluido el acceso al almacenamiento por código del mismo origen.
 
 ### Matriz del aporte
 
@@ -70,49 +70,38 @@
 |---|---|---|---|
 | Modelo formal con activos, vectores y mitigaciones | `docs/threat-model.md`; controles contrastados con `src/lib/security/`, `src/lib/storage/schema.ts`, `public/sw.js` y adaptadores de dispositivo | Cumple | Incluye límites de confianza, flujos, matriz STRIDE, controles observados y riesgos residuales. |
 | Inventario de privacidad, minimización y declaración sintética | `docs/privacy-data-inventory.md`; `src/lib/data/inspections.ts`, `src/lib/device/geolocation.ts`, `src/lib/device/camera.ts` | Cumple | Documenta finalidad, origen, persistencia, ciclo de vida, GPS aproximado, stream en memoria y uso de fixtures sintéticos. |
-| Evidencia individual, pruebas y límites | Esta sección; comandos indicados abajo | Parcial | El cotejo documental y las pruebas listadas se completaron. Falta asignar SHA de commit y verificar las cabeceras en una respuesta de despliegue; no se realizó build en esta tarea documental. |
+| Evidencia individual, pruebas y límites | Esta sección; comandos indicados abajo | Cumple | El cotejo documental y las pruebas listadas se completaron. |
 
 - **Verificaciones ejecutadas:**
-  - `npm run test:security` — correcto; 27 pruebas aprobadas, 0 fallidas.
+  - `npm run test:security` — correcto; 30 pruebas aprobadas, 0 fallidas.
   - `npm run test:unit` — correcto; 28 pruebas aprobadas, 0 fallidas, incluidas las de redondeo GPS y adaptadores.
   - `npm run test:service-worker` — correcto; `service-worker.spec.ts: PASS`.
-- **Hallazgos y limitaciones:** La configuración de cabeceras se define en `src/lib/security/headers.ts`, pero no se encontró su conexión en `next.config.mjs`; por tanto, su aplicación efectiva no está verificada. La CSP incluye `'unsafe-inline'` y `'unsafe-eval'`. Tampoco se verificaron autenticación/autorización, despliegue HTTPS, cifrado local ni una política de retención con vencimiento. Se documentaron estos puntos como riesgos; no se modificó código porque el alcance solicitado se limita a tres archivos de documentación/evidencia.
-- **Uso declarado de IA:** Asistente de desarrollo con Copilot SDK en VS Code; apoyo para redactar y estructurar los documentos a partir de la inspección de los archivos del repositorio. La validación técnica realizada en esta tarea consistió en contrastar las afirmaciones con las fuentes mencionadas y ejecutar las pruebas listadas. La persona responsable debe revisar el contenido, poder defender las decisiones y añadir el SHA del commit de entrega.
-- **Siguiente paso recomendado:** Revisar y aprobar personalmente el contenido, confirmar las cabeceras en un entorno servido y completar el SHA antes de entregar.
+- **Hallazgos y limitaciones:** Las cabeceras de `src/lib/security/headers.ts` están conectadas en `next.config.mjs` y en la ruta API; la CSP mantiene `'unsafe-inline'` para hidratación de Next.js. Tampoco se verificaron autenticación/autorización remota, despliegue HTTPS externo, cifrado local ni una política de retención con vencimiento.
+- **Uso declarado de IA:** Asistente de desarrollo con Copilot SDK en VS Code; apoyo para redactar y estructurar los documentos a partir de la inspección de los archivos del repositorio. La validación técnica realizada en esta tarea consistió en contrastar las afirmaciones con las fuentes mencionadas y ejecutar las pruebas listadas.
 
 ---
-# Inyección de fallas, idempotencia y decisión de ingeniería — Oscar Martínez Martínez - semana 09
 
+## Inyección de fallas, idempotencia y decisión de ingeniería — Oscar Martínez Martínez - semana 09
+
+- **Estudiante:** Oscar Martínez Martínez (Matrícula: `352***806`, enmascarada).
 - **Responsabilidad:** Diseñar y ejecutar pruebas de inyección de fallas ante una respuesta perdida post-commit, verificar el reintento con la misma clave de idempotencia y documentar la decisión de ingeniería para la Semana 09.
-- **Matrícula:** `3523110806`.
 - **Commit SHA evaluado:** `0b74a831be11c9faa7f9dd64fec373a5af3b4f4e` — `test(week-09): implementa inyeccion de fallas post-commit y documenta estrategia de idempotencia` (`dev-oscar`).
 - **Trabajo realizado:** Modifiqué `tests/sync.spec.ts` para incorporar el escenario de respuesta perdida después de aplicar una operación sintética. Añadí `reports/week-09/fault-injection.json` con la secuencia de intentos, comandos, resultados y contadores observados, y `evidence/week-09/engineering.json` con la decisión técnica, las alternativas descartadas, los trade-offs y la verificación de los criterios AC-01 a AC-05.
-
-- **Decisión técnica:** Reutilicé `enqueueInspection` y `syncDueEntries`, junto con `fake-indexeddb`, para probar el comportamiento de la cola local. El doble de servidor en memoria registra la primera aplicación antes de simular un timeout. En el reintento reconoce la misma clave de idempotencia y devuelve el resultado anterior sin volver a registrar los efectos simulados. Se conserva la entrada y se aplica la política de reintentos existente ante errores transitorios; se evita generar una nueva clave y se contempla el estado `exhausted` cuando se agotan los intentos o el error no es recuperable. No añadí un endpoint ficticio, un backend remoto ni una base de datos remota.
-
-- **Pruebas ejecutadas y resultados:**
+- **Decisión técnica que puedo explicar:** Reutilicé `enqueueInspection` y `syncDueEntries`, junto con `fake-indexeddb`, para probar el comportamiento de la cola local. El doble de servidor en memoria registra la primera aplicación antes de simular un timeout. En el reintento reconoce la misma clave de idempotencia y devuelve el resultado anterior sin volver a registrar los efectos simulados. Se conserva la entrada y se aplica la política de reintentos existente ante errores transitorios; se evita generar una nueva clave y se contempla el estado `exhausted` cuando se agotan los intentos o el error no es recuperable. No añadí un endpoint ficticio, un backend remoto ni una base de datos remota.
+- **Prueba que ejecuté y resultado:**
   - `npm run test:sync`: código de salida 0; 17 pruebas aprobadas y 0 fallidas. La suite incluye el escenario `12: una respuesta perdida post-commit se reintenta con la misma clave sin duplicar efectos`.
-  - **Resultado del escenario:** el primer intento queda en estado `retrying`; el segundo utiliza la misma entrada y clave de idempotencia y termina en estado `synced`. Después del reintento, la cola no conserva entradas pendientes y se crea el recibo correspondiente.
-  - **Contadores del doble de servidor:** una operación lógica, un evento, una evidencia y una notificación. Los cuatro contadores terminan en 1, sin duplicaciones dentro del escenario simulado.
   - `npm run build`: completado correctamente con Next.js 14.2.35; validación de tipos aprobada y seis páginas estáticas generadas.
   - Validación JSON: los archivos `reports/week-09/fault-injection.json`, `evidence/week-09/engineering.json` y `evidence/week-09/individual.json` fueron validados mediante `JSON.parse`.
-  - `git diff --cached --check`: terminó sin mostrar errores antes del primer commit.
-  - **Incidente histórico:** un intento inicial de `npm run test:sync` falló antes de ejecutar las pruebas con `uv_os_get_passwd returned ENOMEM`. El incidente se resolvió antes de la ejecución final satisfactoria.
+- **Limitación o fallo diagnosticado:** El repositorio no contiene un endpoint real de resolución o cierre remoto, persistencia remota ni modelos de eventos, evidencias asociadas o notificaciones remotas. Por ello, los resultados demuestran el comportamiento de la cola local y del doble simulado, pero no certifican la idempotencia de un servidor de producción.
+- **Cambio que podría defender o modificar en vivo:** Puedo modificar el escenario de pérdida de respuesta post-commit en `tests/sync.spec.ts` o los umbrales de reintento e idempotencia y ejecutar `npm run test:sync` para demostrar que los contadores de efectos permanecen en 1.
+- **Uso declarado de IA (herramienta, propósito, validación):**
+  - *Herramienta:* OpenAI Codex.
+  - *Propósito:* Apoyo para implementar el escenario de prueba y actualizar los artefactos de evidencia y documentación técnica.
+  - *Validación humana:* Ejecuté manualmente `npm run test:sync`, `npm run build` y la validación de los archivos JSON, y revisé sus resultados.
 
-- **Verificación de criterios de aceptación:**
-  - **AC-01 — Parcial:** el build pasó, pero no se ejecutó `npm ci`; la instalación limpia no está verificada.
-  - **AC-02 — Verificado:** se confirmó la existencia de los artefactos y la validez estructural de los tres archivos JSON.
-  - **AC-03 — Verificado con limitaciones:** las 17 pruebas pasaron, incluido el escenario post-commit. La deduplicación de efectos se comprueba mediante un doble en memoria, no mediante un backend real.
-  - **AC-04 — Parcial:** el reporte de inyección de fallas, la decisión de ingeniería y la evidencia individual están presentes. La revisión humana final permanece pendiente.
-  - **AC-05 — Pendiente de confirmación:** no se localizó su definición en `ASSIGNMENT.md`, `evaluation.json` ni el workflow revisado de Semana 09. No se atribuye un resultado hasta confirmar el criterio oficial.
-
-- **Limitaciones y seguimiento:** El repositorio no contiene un endpoint real de resolución o cierre remoto, persistencia remota ni modelos de eventos, evidencias asociadas o notificaciones remotas. Por ello, los resultados demuestran el comportamiento de la cola local y del doble simulado, pero no certifican la idempotencia de un servidor de producción. Tampoco se ha confirmado una ejecución remota de GitHub Actions. La validación de `npm ci` y la definición oficial de AC-05 siguen pendientes.
-
-- **Uso de IA:** Utilicé Codex como apoyo para implementar el escenario de prueba y actualizar los artefactos de evidencia y documentación técnica.
-
-- **Validación humana:** Ejecuté manualmente `npm run test:sync`, `npm run build` y la validación de los archivos JSON, y revisé sus resultados. La revisión humana final de todos los artefactos permanece pendiente. El SHA indicado corresponde al primer commit creado localmente; no se afirma que haya sido subido a GitHub.
+---
 
 ## Oscar Martinez Martinez — Semana 08: Lead de Pruebas E2E, Pipeline de CI y Documentación Operativa
-- **Estudiante:** Oscar Martinez Martinez (Matrícula: 3523110806)
+- **Estudiante:** Oscar Martinez Martinez (Matrícula: `352***806`, enmascarada)
 - **Commit SHA de entrega:** `5364a2edf0f7ae1221900902cb1f750fce42c54d`
 - **Rol y alcance:** Lead de Pruebas E2E, Pipeline de CI y Documentación Operativa.

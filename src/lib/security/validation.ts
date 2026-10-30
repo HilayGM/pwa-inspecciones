@@ -19,13 +19,24 @@ const SCRIPT_INJECTION_REGEX = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script
 const STYLE_INJECTION_REGEX = /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi;
 const IFRAME_INJECTION_REGEX = /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi;
 const JAVASCRIPT_PROTOCOL_REGEX = /javascript\s*:/gi;
-const EVENT_HANDLER_REGEX = /\bon\w+\s*=/gi;
-const DANGEROUS_URI_REGEX = /^(?:data:(?!image\/(?:png|jpe?g|webp|gif);base64,)|vbscript:|file:)/i;
+const EVENT_HANDLER_REGEX =
+  /\bon(?:error|load|click|dblclick|mouseover|mouseout|mouseenter|mouseleave|mousedown|mouseup|mousemove|focus|blur|change|submit|reset|keydown|keyup|keypress|input|select|abort|unload|beforeunload|resize|scroll|contextmenu|drag|drop|copy|cut|paste|wheel|animationstart|animationend|transitionend|toggle|pointerdown|pointerup)\s*=/gi;
+const DANGEROUS_URI_REGEX = /(?:data:(?!image\/(?:png|jpe?g|webp|gif);base64,)[^\s"'<>]*|vbscript\s*:|file\s*:)/gi;
 const INSPECTION_ID_REGEX = /^inspection-[a-zA-Z0-9_-]{1,64}$/;
 const DATE_ISO_REGEX = /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])$/;
 
 /**
- * Elimina etiquetas HTML, controladores de eventos en línea y protocolos javascript:.
+ * Verifica si una cadena URI utiliza un esquema seguro permitido.
+ */
+export function isSafeUri(uri: unknown): boolean {
+  if (typeof uri !== "string") return false;
+  const trimmed = uri.trim();
+  if (!trimmed) return false;
+  return !JAVASCRIPT_PROTOCOL_REGEX.test(trimmed) && !DANGEROUS_URI_REGEX.test(trimmed);
+}
+
+/**
+ * Elimina etiquetas HTML, controladores de eventos en línea y protocolos peligrosos (javascript:, vbscript:, file:, data: no gráfico).
  * Devuelve texto plano seguro contra Cross-Site Scripting (XSS).
  */
 export function sanitizeText(input: unknown): string {
@@ -39,6 +50,7 @@ export function sanitizeText(input: unknown): string {
     .replace(IFRAME_INJECTION_REGEX, "")
     .replace(EVENT_HANDLER_REGEX, "")
     .replace(JAVASCRIPT_PROTOCOL_REGEX, "")
+    .replace(DANGEROUS_URI_REGEX, "")
     .replace(HTML_TAG_REGEX, "")
     .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "") // Caracteres de control ASCII
     .trim();
