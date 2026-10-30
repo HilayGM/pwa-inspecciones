@@ -1,4 +1,5 @@
 import withPWAInit from "@ducanh2912/next-pwa";
+import { getNextSecurityHeadersConfig } from "./src/lib/security/headers-config.mjs";
 
 const withPWA = withPWAInit({
   dest: "public",
@@ -10,7 +11,10 @@ const withPWA = withPWAInit({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true
+  reactStrictMode: true,
+  async headers() {
+    return getNextSecurityHeadersConfig();
+  },
 };
 
 export default withPWA(nextConfig);

@@ -1,124 +1,79 @@
-# PWA Inspecciones de laboratorio
+# PWA Inspecciones de Laboratorio — Universidad Tecnológica de Tehuacán
 
-Aplicación académica para consultar inspecciones de mantenimiento con datos sintéticos y probar capacidades opcionales del navegador. Continúa el repositorio de semanas anteriores; no es un starter nuevo. Las capacidades solo solicitan acceso después de que la persona pulsa el botón correspondiente.
+Aplicación Web Progresiva (PWA) *offline-first* para el registro, consulta y sincronización de inspecciones físicas y técnicas en los laboratorios de la Universidad Tecnológica de Tehuacán, operando exclusivamente con datos sintéticos.
 
-## Requisitos
+## Semana 09: Modelo de Amenazas, Privacidad y Controles de Seguridad Aplicados
 
-- Node.js 22, alineado con los workflows de GitHub Actions de las semanas 3 a 5.
-- npm incluido con Node.js.
-- Para las pruebas E2E offline: Chromium de Playwright instalado.
+En esta entrega se modela la seguridad mediante **STRIDE**, se documenta el inventario de privacidad bajo los principios de minimización de un sujeto obligado mexicano (**LGPDPPSO**) y se conectan los controles técnicos directamente en el runtime de la aplicación:
 
-## Instalación y desarrollo
+- **Saneamiento y validación en rutas reales:** `src/lib/security/validation.ts` elimina etiquetas `<script>`, `<style>`, `<iframe>`, atributos de eventos DOM en línea y esquemas peligrosos (`javascript:`, `vbscript:`, `file:`, `data:` no gráficos). Se invoca directamente en la vista de detalle SSR (`src/app/inspecciones/[id]/page.tsx`) y en el endpoint `GET /api/inspecciones` (`src/app/api/inspecciones/route.ts`), rechazando identificadores maliciosos o intentos de *path traversal* con HTTP `400` / `404`.
+- **Content Security Policy (CSP) y cabeceras HTTP conectadas:** Definidas en `src/lib/security/headers-config.mjs` y `src/lib/security/headers.ts` y conectadas tanto en `next.config.mjs` (`async headers()`) como en las respuestas de `GET /api/inspecciones`. Incluye `default-src 'self'`, `object-src 'none'`, `frame-ancestors 'none'`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin` y `Permissions-Policy: camera=(self), geolocation=(self), microphone=()`, sin `'unsafe-eval'`.
+- **Salvaguarda de secretos:** `src/lib/security/secrets.ts` y `scripts/verify.mjs` verifican la ausencia de claves privadas PEM o variables públicas `NEXT_PUBLIC_*` con nombres sensibles, además de redactar tokens y credenciales en registros (`sanitizeLogData`).
+- **Política de rastreo (`public/robots.txt`):** Desautoriza el rastreo e indexación tanto de `/api/` como de `/inspecciones` e `/inspecciones/`.
 
-Desde la raíz del repositorio:
+---
 
-```sh
+## Estructura de Artefactos Obligatorios
+
+- [`docs/threat-model.md`](docs/threat-model.md): Modelo de amenazas bajo metodología STRIDE, activos, límites de confianza y riesgos residuales.
+- [`docs/privacy-data-inventory.md`](docs/privacy-data-inventory.md): Inventario y ciclo de vida de datos bajo principios de minimización (LGPDPPSO) y declaración de datos 100% sintéticos.
+- [`docs/reporte-ingenieria.md`](docs/reporte-ingenieria.md): Reporte de ingeniería detallado con arquitectura, tabla de *trade-offs*, resultados de pruebas, limitaciones y trabajo individual.
+- [`src/lib/security/`](src/lib/security/): Módulos de validación (`validation.ts`), cabeceras y CSP (`headers-config.mjs`, `headers.ts`), resguardo de secretos (`secrets.ts`) y barril de exportación (`index.ts`).
+- [`tests/security.spec.ts`](tests/security.spec.ts): Suite de 30 pruebas automatizadas unitarias y de integración sobre saneamiento, validación, cabeceras en runtime, rechazo de IDs maliciosos, secretos y `robots.txt`.
+- [`public/robots.txt`](public/robots.txt): Directivas de exclusión para motores de búsqueda en rutas internas y API.
+- [`evidence/individual.md`](evidence/individual.md): Evidencia técnica individual de cada integrante con matrículas parcialmente enmascaradas.
+
+---
+
+## Instalación, Compilación y Ejecución
+
+**Entorno probado:** Node.js v22.x (CI Ubuntu) y v21.7.3 (Windows local), Next.js 14.2.35, npm.
+
+```bash
+# 1. Instalación limpia reproducible usando package-lock.json
 npm ci
-npm run dev
-```
 
-Abre `http://localhost:3000`. En Windows puede usarse PowerShell o la terminal integrada de VS Code. `npm ci` instala exactamente las dependencias del lockfile.
-
-Para compilar y ejecutar la versión de producción:
-
-```sh
+# 2. Compilación de producción
 npm run build
+
+# 3. Iniciar servidor de producción local
 npm run start
 ```
 
-La verificación general existente es:
+---
 
-```sh
-npm run verify
-# Equivalente: make verify
-```
+## Verificación y Ejecución de Pruebas (`make verify` ↔ `npm run verify`)
 
-El script `verify` valida los artefactos del starter y genera `reports/verification.json`.
+El repositorio incluye un `Makefile` en la raíz donde el objetivo `make verify` invoca exactamente `npm run verify` (`node scripts/verify.mjs`), el cual comprueba todos los artefactos obligatorios (incluidos los de la Semana 09), verifica que no existan variables `NEXT_PUBLIC_*` sensibles y escribe `reports/verification.json`.
 
-## Pruebas automatizadas
-
-```sh
-npm test
-npm run test:capabilities
-npm run test:service-worker
-npm run test:rendering
-npm run test:sync
-```
-
-- `npm test`: orquesta las pruebas estructurales, unitarias, de integracion, capacidades, sincronizacion, rendering, Service Worker y E2E.
-- `npm run test:capabilities`: mocks deterministas de camara, geolocalizacion y notificaciones, ejecutados con tsx y node:test; no requieren dispositivos ni permisos reales.
-- `npm run test:service-worker`: contrato estático del Service Worker.
-- `npm run test:rendering`: contratos de rutas y estados CSR/SSR.
-- `npm run test:sync`: persistencia y sincronización con IndexedDB sintética (`fake-indexeddb`).
-- `npm run test:offline`: prueba E2E Playwright de navegación offline. Requiere primero un build y Chromium instalado (`npx playwright install chromium`); Playwright inicia `npm run start` según `playwright.config.ts`.
-
-El workflow de Semana 06 instala con `npm ci`, ejecuta estas validaciones y conserva los artefactos de evaluación disponibles. Los tests de capacidades son independientes de permisos del sistema; la prueba manual de permisos sí requiere interacción en el navegador.
-
-El kit también solicita ejecutar `bash public-tests/check.sh` desde Bash. Su búsqueda de palabras sensibles es textual y el estado actual contiene coincidencias en documentación, el lockfile y nombres como `SyntaxKind.*Token`; por ello puede reportar falsos positivos. El workflow de Semana 06 conserva sus checks de artefactos y no ejecuta este check público hasta que ese filtro se ajuste por la persona responsable del kit.
-
-## Semana 08: ejecucion de la piramide de pruebas
-
-Requisitos: Node.js 22, npm y Chromium instalado para las pruebas E2E. Despues de clonar, ejecuta `npm ci` desde la raiz. Instala el navegador localmente con `npx playwright install chromium` (en Linux CI se instalan tambien las dependencias del sistema).
-
-Ejecuta cada nivel con:
-
-```sh
-npm run test:unit
-npm run test:integration
-npm run test:e2e
-npm test
-```
-
-`test:unit` ejecuta las pruebas de `tests/unit/`. `test:integration` combina la sincronizacion con IndexedDB sintetica y el contrato de la API de inspecciones. `test:e2e` ejecuta el recorrido critico con Playwright y la prueba existente del Service Worker. Las pruebas E2E usan el servidor de produccion: ejecuta `npm run build` antes de `npm run test:e2e`. `npm test` orquesta todos los niveles y conserva las comprobaciones de semanas anteriores.
-
-Compila y verifica artefactos localmente:
-
-```sh
-npm run build
-npm run verify
+```bash
+# En Linux / macOS / Git Bash con GNU Make:
 make verify
+
+# Equivalente exacto en Windows (PowerShell / CMD) o cualquier entorno Node:
+npm run verify
+
+# Suite de seguridad de la Semana 09 (30 pruebas en 5 suites)
+npm run test:security
+
+# Suite completa acumulada (starter, manifest, unit, integration, capabilities, security, service-worker, rendering, e2e)
+npm test
 ```
 
-`npm run verify` y `make verify` son equivalentes y escriben `reports/verification.json`. Playwright escribe el reporte HTML en `playwright-report/` y resultados, trazas y adjuntos en `test-results/`. Abre el reporte con `npx playwright show-report playwright-report`.
+### Resultado de las suites verificadas
+- `npm run test:security`: **30 aprobadas, 0 fallidas** (5 suites).
+- `npm run test:unit`: **28 aprobadas, 0 fallidas** (6 suites).
+- `npm run test:integration`: **18 aprobadas, 0 fallidas** (incluye inyección de fallas post-commit e idempotencia).
+- `npm run test:capabilities`: **15 aprobadas, 0 fallidas** (3 suites).
+- `npm run test:rendering`: **13 aprobadas, 0 fallidas**.
+- `npm run test:service-worker`: **PASS**.
+- `npm run test:e2e`: **4 aprobadas, 0 fallidas** (Playwright Chromium).
+- `npm run build` y `npm run verify`: **PASS (`exit code 0`)**.
 
-El workflow `.github/workflows/academic-evaluation.yml` corre en GitHub Actions para pushes y pull requests. En GitHub abre **Actions**, selecciona **Academic Evaluation** y revisa cada gate; descarga `academic-evidence-w08-testing-ci` para consultar los reportes incluso si fallan las pruebas.
-El workflow ejecuta los Quality Gates de CI y `npm run verify`. El script shell `public-tests/check.sh` se mantiene como comprobacion manual; no se ejecuta en el workflow porque su busqueda textual actual marca palabras de documentacion y dependencias como falsos positivos.
+---
 
-El check publico se ejecuta con `bash public-tests/check.sh`. En Windows usa Git Bash o WSL desde la raiz; PowerShell no ejecuta directamente este script. Su escaneo textual puede reportar coincidencias en dependencias o documentacion; revisa el contexto de cada hallazgo.
+## Resumen de Trade-offs y Limitaciones
 
-Todas las pruebas usan datos sinteticos y no requieren servicios privados ni perifericos. El Service Worker recupera desde cache el shell del dashboard `/`. El listado `/inspecciones` depende de `/api/inspecciones`, que no se cachea; no se garantiza el listado ni el detalle completos offline.
-## Prueba manual de capacidades
-
-En la página principal está el panel **Capacidades del dispositivo**. Usa un entorno de prueba y no introduzcas información personal.
-
-1. **Cámara:** pulsa **Abrir cámara** y concede el permiso en el navegador. Se muestra una vista previa local; pulsa **Cerrar cámara** y confirma que desaparece la vista y se apaga el indicador de cámara. Para comprobar denegación, bloquea el permiso del sitio y vuelve a pulsar. El botón **Cancelar solicitud** descarta una respuesta pendiente y libera un stream tardío; el navegador puede mantener abierto su propio diálogo de permiso.
-2. **Ubicación:** para concederla, usa la simulación de ubicación del panel Sensors de DevTools (si está disponible) con coordenadas ficticias, pulsa **Leer ubicación** y verifica que el resultado se muestra redondeado a tres decimales. Para denegar, bloquea el permiso del sitio y repite. La aplicación no usa seguimiento continuo ni guarda el resultado.
-3. **Notificaciones:** pulsa **Solicitar permiso y enviar** y responde al prompt. Con permiso concedido se intenta mostrar un mensaje local sintético. Repite tras denegar el permiso para observar el estado de fallback. La ausencia de API y los errores de `showNotification` o del navegador se verifican mediante mocks automatizados; el navegador no ofrece una forma uniforme de forzarlos manualmente.
-
-Las APIs pueden requerir un contexto seguro; `localhost` se considera seguro en navegadores habituales, mientras que otros orígenes pueden requerir HTTPS. El soporte y los nombres de los controles varían según navegador y sistema operativo.
-
-### Revocar permisos
-
-Abre la información/permisos del sitio desde el icono junto a la dirección o desde la configuración de privacidad del navegador. Cambia Cámara, Ubicación o Notificaciones a **Bloquear** o **Preguntar** y recarga el sitio si el navegador lo solicita. Los nombres y la ubicación de estos controles cambian entre versiones. DevTools puede ofrecer simulación de ubicación en su panel de Sensors, pero los permisos se revocan desde los controles del sitio/navegador. No se necesita borrar datos ni conceder permisos persistentes para las pruebas automatizadas.
-
-## Privacidad, compatibilidad y límites
-
-- Pruebas y ejemplos utilizan únicamente mensajes, inspecciones y coordenadas sintéticas. No uses nombres reales, PII, tokens ni ubicaciones personales.
-- La cámara solicita solo video (`audio: false`), presenta el stream localmente y detiene todos sus tracks al cerrar la vista o desmontar el componente. No captura ni persiste imágenes.
-- La ubicación se solicita con una única lectura (`getCurrentPosition`), `enableHighAccuracy: false`, timeout de 10 segundos y redondeo a tres decimales. No se usa `watchPosition` ni almacenamiento persistente; el resultado vive solo en el estado de la pantalla.
-- Las notificaciones son locales, usan texto sintético y requieren permiso. No hay push remoto ni suscripciones push.
-- La implementación de notificaciones recurre a `new Notification(...)` si `showNotification` falla o no hay registro. Si `getRegistration()` rechaza, devuelve `"error"` sin intentar ese fallback; coordinar cualquier cambio de ese contrato con la persona responsable de notificaciones.
-- Permisos denegados, restricciones del navegador, falta de hardware, políticas del sistema y origen no seguro pueden impedir una capacidad. Los fallbacks permiten mostrar el estado sin solicitar permisos al cargar la aplicación.
-- No se adjunta evidencia fotográfica ni se registra una inspección desde este panel; es una demostración de APIs opcionales.
-
-## Actividad Semana 06 y GitHub Actions
-
-El workflow es [`.github/workflows/week-06-w06-device-push.yml`](.github/workflows/week-06-w06-device-push.yml). Para consultar una ejecución, abre el repositorio en GitHub, ve a **Actions** y selecciona **Academic Evaluation Feedback** o el workflow de Semana 06. No se publica aquí un enlace de ejecución porque depende del repositorio y del commit que se envíe.
-
-Antes de entregar, conserva el SHA completo del commit evaluado, el reporte de CI y `evidence/individual.md`. La entrega se realiza mediante el Pull Request indicado por el curso; los resultados deben corresponder al commit evaluado.
-
-El check público se puede ejecutar desde Bash en la raíz:
-
-```sh
-bash public-tests/check.sh
-```
+1. **Funciones puras sin dependencias adicionales:** Se implementó el saneamiento y validación en TypeScript puro para cumplir la restricción de no alterar `package-lock.json` y mantener tiempos de prueba sub-segundo.
+2. **CSP compatible con App Shell Offline:** Se eliminó `'unsafe-eval'`, pero se mantiene `'unsafe-inline'` en `script-src` y `style-src` porque los nonces dinámicos por petición obligarían a renderizado dinámico e inhabilitarían el caché offline estático del Service Worker.
+3. **Nota sobre `public-tests/check.sh`:** Ejecuta `bash public-tests/check.sh` desde un entorno Bash con `ripgrep` (`rg`). Su búsqueda textual `rg -n -i '(api[_-]?key|secret|password|token)'` inspecciona todos los archivos del repositorio y reporta coincidencias léxicas en la propia documentación del curso (`ASSIGNMENT.md`, `evaluation.json`), el lockfile (`js-tokens`) y los identificadores del detector de secretos, sin que exista ninguna credencial real ni archivo `.env` versionado.

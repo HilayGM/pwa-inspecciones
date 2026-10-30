@@ -219,6 +219,63 @@ describe("Semana 05: persistencia y sincronización con datos sintéticos", { co
     assert.equal(stored?.updatedAt, CONFIRMED);
   });
 
+  test("12: una respuesta perdida post-commit se reintenta con la misma clave sin duplicar efectos", async () => {
+    const entry = await enqueue(mutation({ clientMutationId: "synthetic-post-commit-12" }));
+    const appliedKeys = new Map<string, { serverVersion: number }>();
+    const effects = {
+      logicalOperations: 0,
+      events: 0,
+      evidences: 0,
+      notifications: 0,
+    };
+
+    const sender = async (pending: SyncQueueEntry) => {
+      const previousResult = appliedKeys.get(pending.idempotencyKey);
+      if (previousResult) return previousResult;
+
+      effects.logicalOperations += 1;
+      effects.events += 1;
+      effects.evidences += 1;
+      effects.notifications += 1;
+      const result = { serverVersion: 12 };
+      appliedKeys.set(pending.idempotencyKey, result);
+      throw new Error("Timeout sintético después del commit");
+    };
+
+    assert.deepEqual(
+      await syncDueEntries(sender, new Date(START)),
+      [{ entryId: entry.id, status: "retrying", error: "Timeout sintético después del commit" }],
+    );
+    assert.equal(appliedKeys.size, 1);
+    assert.equal(await readRecord<SyncReceipt>(SYNC_STORES.receipts, entry.idempotencyKey), undefined);
+
+    const retryAt = new Date("2026-10-01T12:00:01.000Z");
+    const retryEntry = (await getDueQueueEntries(retryAt))[0];
+    assert.ok(retryEntry);
+    assert.equal(retryEntry.id, entry.id);
+    assert.equal(retryEntry.idempotencyKey, entry.idempotencyKey);
+
+    assert.deepEqual(
+      await syncDueEntries(sender, retryAt),
+      [{ entryId: entry.id, status: "synced" }],
+    );
+    assert.deepEqual(effects, {
+      logicalOperations: 1,
+      events: 1,
+      evidences: 1,
+      notifications: 1,
+    });
+    assert.equal(await countRecords(SYNC_STORES.queue), 0);
+    assert.deepEqual(
+      await readRecord<SyncReceipt>(SYNC_STORES.receipts, entry.idempotencyKey),
+      {
+        idempotencyKey: entry.idempotencyKey,
+        inspectionId: inspection().id,
+        processedAt: retryAt.toISOString(),
+      },
+    );
+  });
+
   test("12: una eliminación mantiene un tombstone físico oculto del listado offline", async () => {
     const entry = await enqueue(mutation({ operation: "delete" }));
     const stored = await readRecord<StoredInspection>(SYNC_STORES.inspections, inspection().id);

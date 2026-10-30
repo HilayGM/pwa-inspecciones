@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "executionId": "w09-oscar-post-commit-response-lost-2026-10-29",
+  "executionDate": "2026-10-29",
+  "status": "passed",
+  "scenario": "Respuesta perdida después de aplicar una mutación sintética y reintento con la misma clave de idempotencia",
+  "objective": "Verificar que la cola local reintenta una operación post-commit sin duplicar la aplicación lógica ni los efectos contados por el servidor simulado.",
+  "environment": {
+    "project": "pwa-inspecciones-laboratorio",
+    "runtime": "Node.js 21.7.3",
+    "storage": "fake-indexeddb",
+    "testRunner": "node:test mediante tsx",
+    "network": "none"
+  },
+  "syntheticData": {
+    "inspectionId": "synthetic-inspection-05",
+    "operation": "create",
+    "clientMutationId": "synthetic-post-commit-12",
+    "idempotencyKey": "synthetic-inspection-05:create:synthetic-post-commit-12"
+  },
+  "sequence": [
+    {
+      "attempt": 1,
+      "request": "received",
+      "logicalOperation": "applied",
+      "effects": "registered once in the server double",
+      "response": "lost after simulated commit",
+      "clientState": "retrying"
+    },
+    {
+      "attempt": 2,
+      "request": "same queue entry and same idempotency key",
+      "logicalOperation": "server double returns previous result without reapplying",
+      "effects": "not registered again",
+      "response": "successful synthetic result",
+      "clientState": "synced"
+    }
+  ],
+  "commands": [
+    {
+      "command": "npm run test:sync",
+      "status": "passed",
+      "exitCode": 0,
+      "tests": 17,
+      "passed": 17,
+      "failed": 0,
+      "output": "17 pruebas, 17 aprobadas, 0 fallidas"
+    },
+    {
+      "command": "npm run build",
+      "status": "passed",
+      "exitCode": 0,
+      "output": "Build de producción completado correctamente"
+    },
+    {
+      "command": "JSON.parse de los tres artefactos JSON",
+      "status": "passed",
+      "exitCode": 0,
+      "output": "Los tres JSON fueron válidos"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed",
+      "exitCode": 0,
+      "output": "Sin errores"
+    }
+  ],
+  "expectedCounters": {
+    "logicalOperations": 1,
+    "events": 1,
+    "evidences": 1,
+    "notifications": 1
+  },
+  "observedCounters": {
+    "logicalOperations": 1,
+    "events": 1,
+    "evidences": 1,
+    "notifications": 1,
+    "source": "La aserción effects de la prueba 12 confirma que cada contador termina en 1; appliedKeys.size también termina en 1."
+  },
+  "testAssertionEvidence": {
+    "test": "12: una respuesta perdida post-commit se reintenta con la misma clave sin duplicar efectos",
+    "sameIdempotencyKey": true,
+    "firstAttempt": "retrying",
+    "secondAttempt": "synced",
+    "queueEntriesAfterRetry": 0,
+    "receiptCreatedAfterRetry": true
+  },
+  "result": "passed",
+  "historicalAttempts": [
+    {
+      "command": "npm run test:sync",
+      "status": "failed_before_test_execution",
+      "exitCode": 1,
+      "output": "SystemError: uv_os_get_passwd returned ENOMEM (not enough memory); Node.js v21.7.3",
+      "supersededBy": "La ejecución del 2026-10-29 con 17 pruebas aprobadas"
+    }
+  ],
+  "limitations": [
+    "Los contadores representan únicamente el comportamiento del doble de servidor en memoria, no modelos existentes del producto.",
+    "El repositorio no tiene un endpoint real de resolución/cierre, persistencia remota, modelo de eventos, modelo de evidencias ni idempotencia de notificaciones remotas."
+  ]
+}
