@@ -52,10 +52,33 @@
 ---
 
 ## Felipe Mora López — Semana 08: Lead de Pruebas de Integración y Adaptadores/API
-- **Estudiante:** Felipe Mora López (Matrícula: 3523110443)
+- **Estudiante:** Felipe Mora López (Matrícula: `3523***443`, enmascarada)
 - **Commit SHA evaluado:** 9562d78e96ade5fba0846bdff948ff35023ea509
 - **Decisión técnica:** Añadí pruebas de integración para IndexedDB y la cola de mutaciones usando `fake-indexeddb`, para el endpoint sintético de inspecciones y para el cliente de notificaciones con APIs de navegador simuladas.
 - **Pruebas ejecutadas y resultado:** Integración ejecutada sin fallos.
+
+## Felipe Mora López — Semana 09: Lead de Modelado de Amenazas y Privacidad
+
+- **Estudiante:** Felipe Mora López (Matrícula: `3523110443`, enmascarada).
+- **Commit SHA de esta evidencia:**f0b6079d9bbd536cadbaf49eae2acb1effeb689f 
+- **Alcance del aporte:** Elaboración y actualización de `docs/threat-model.md` y `docs/privacy-data-inventory.md`, y registro de la evidencia individual en este archivo. No se modificaron fuentes de la aplicación ni otros archivos.
+- **Decisión técnica que puedo explicar:** Organicé el análisis con STRIDE y diferencié los controles presentes en código de los que no están integrados o no pudieron verificarse. Documenté IndexedDB, Service Worker, cámara y GPS como activos; los riesgos de XSS, manipulación offline y exposición de datos sintéticos; y el ciclo de vida de inspecciones, cola y recibos. Para minimizar datos, registré la lectura puntual de GPS redondeada a tres decimales y el stream de video sin audio, fotos persistidas ni subida observada. Declaré como sintéticos los fixtures revisados y dejé explícitos los riesgos residuales, incluido el acceso al almacenamiento por código del mismo origen.
+
+### Matriz del aporte
+
+| Criterio asignado | Evidencia revisada | Estado | Motivo |
+|---|---|---|---|
+| Modelo formal con activos, vectores y mitigaciones | `docs/threat-model.md`; controles contrastados con `src/lib/security/`, `src/lib/storage/schema.ts`, `public/sw.js` y adaptadores de dispositivo | Cumple | Incluye límites de confianza, flujos, matriz STRIDE, controles observados y riesgos residuales. |
+| Inventario de privacidad, minimización y declaración sintética | `docs/privacy-data-inventory.md`; `src/lib/data/inspections.ts`, `src/lib/device/geolocation.ts`, `src/lib/device/camera.ts` | Cumple | Documenta finalidad, origen, persistencia, ciclo de vida, GPS aproximado, stream en memoria y uso de fixtures sintéticos. |
+| Evidencia individual, pruebas y límites | Esta sección; comandos indicados abajo | Parcial | El cotejo documental y las pruebas listadas se completaron. Falta asignar SHA de commit y verificar las cabeceras en una respuesta de despliegue; no se realizó build en esta tarea documental. |
+
+- **Verificaciones ejecutadas:**
+  - `npm run test:security` — correcto; 27 pruebas aprobadas, 0 fallidas.
+  - `npm run test:unit` — correcto; 28 pruebas aprobadas, 0 fallidas, incluidas las de redondeo GPS y adaptadores.
+  - `npm run test:service-worker` — correcto; `service-worker.spec.ts: PASS`.
+- **Hallazgos y limitaciones:** La configuración de cabeceras se define en `src/lib/security/headers.ts`, pero no se encontró su conexión en `next.config.mjs`; por tanto, su aplicación efectiva no está verificada. La CSP incluye `'unsafe-inline'` y `'unsafe-eval'`. Tampoco se verificaron autenticación/autorización, despliegue HTTPS, cifrado local ni una política de retención con vencimiento. Se documentaron estos puntos como riesgos; no se modificó código porque el alcance solicitado se limita a tres archivos de documentación/evidencia.
+- **Uso declarado de IA:** Asistente de desarrollo con Copilot SDK en VS Code; apoyo para redactar y estructurar los documentos a partir de la inspección de los archivos del repositorio. La validación técnica realizada en esta tarea consistió en contrastar las afirmaciones con las fuentes mencionadas y ejecutar las pruebas listadas. La persona responsable debe revisar el contenido, poder defender las decisiones y añadir el SHA del commit de entrega.
+- **Siguiente paso recomendado:** Revisar y aprobar personalmente el contenido, confirmar las cabeceras en un entorno servido y completar el SHA antes de entregar.
 
 ---
 # Inyección de fallas, idempotencia y decisión de ingeniería — Oscar Martínez Martínez - semana 09
