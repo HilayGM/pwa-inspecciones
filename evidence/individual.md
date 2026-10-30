@@ -58,6 +58,36 @@
 - **Pruebas ejecutadas y resultado:** Integración ejecutada sin fallos.
 
 ---
+# Inyección de fallas, idempotencia y decisión de ingeniería — Oscar Martínez Martínez - semana 09
+
+- **Responsabilidad:** Diseñar y ejecutar pruebas de inyección de fallas ante una respuesta perdida post-commit, verificar el reintento con la misma clave de idempotencia y documentar la decisión de ingeniería para la Semana 09.
+- **Matrícula:** `3523110806`.
+- **Commit SHA evaluado:** `0b74a831be11c9faa7f9dd64fec373a5af3b4f4e` — `test(week-09): implementa inyeccion de fallas post-commit y documenta estrategia de idempotencia` (`dev-oscar`).
+- **Trabajo realizado:** Modifiqué `tests/sync.spec.ts` para incorporar el escenario de respuesta perdida después de aplicar una operación sintética. Añadí `reports/week-09/fault-injection.json` con la secuencia de intentos, comandos, resultados y contadores observados, y `evidence/week-09/engineering.json` con la decisión técnica, las alternativas descartadas, los trade-offs y la verificación de los criterios AC-01 a AC-05.
+
+- **Decisión técnica:** Reutilicé `enqueueInspection` y `syncDueEntries`, junto con `fake-indexeddb`, para probar el comportamiento de la cola local. El doble de servidor en memoria registra la primera aplicación antes de simular un timeout. En el reintento reconoce la misma clave de idempotencia y devuelve el resultado anterior sin volver a registrar los efectos simulados. Se conserva la entrada y se aplica la política de reintentos existente ante errores transitorios; se evita generar una nueva clave y se contempla el estado `exhausted` cuando se agotan los intentos o el error no es recuperable. No añadí un endpoint ficticio, un backend remoto ni una base de datos remota.
+
+- **Pruebas ejecutadas y resultados:**
+  - `npm run test:sync`: código de salida 0; 17 pruebas aprobadas y 0 fallidas. La suite incluye el escenario `12: una respuesta perdida post-commit se reintenta con la misma clave sin duplicar efectos`.
+  - **Resultado del escenario:** el primer intento queda en estado `retrying`; el segundo utiliza la misma entrada y clave de idempotencia y termina en estado `synced`. Después del reintento, la cola no conserva entradas pendientes y se crea el recibo correspondiente.
+  - **Contadores del doble de servidor:** una operación lógica, un evento, una evidencia y una notificación. Los cuatro contadores terminan en 1, sin duplicaciones dentro del escenario simulado.
+  - `npm run build`: completado correctamente con Next.js 14.2.35; validación de tipos aprobada y seis páginas estáticas generadas.
+  - Validación JSON: los archivos `reports/week-09/fault-injection.json`, `evidence/week-09/engineering.json` y `evidence/week-09/individual.json` fueron validados mediante `JSON.parse`.
+  - `git diff --cached --check`: terminó sin mostrar errores antes del primer commit.
+  - **Incidente histórico:** un intento inicial de `npm run test:sync` falló antes de ejecutar las pruebas con `uv_os_get_passwd returned ENOMEM`. El incidente se resolvió antes de la ejecución final satisfactoria.
+
+- **Verificación de criterios de aceptación:**
+  - **AC-01 — Parcial:** el build pasó, pero no se ejecutó `npm ci`; la instalación limpia no está verificada.
+  - **AC-02 — Verificado:** se confirmó la existencia de los artefactos y la validez estructural de los tres archivos JSON.
+  - **AC-03 — Verificado con limitaciones:** las 17 pruebas pasaron, incluido el escenario post-commit. La deduplicación de efectos se comprueba mediante un doble en memoria, no mediante un backend real.
+  - **AC-04 — Parcial:** el reporte de inyección de fallas, la decisión de ingeniería y la evidencia individual están presentes. La revisión humana final permanece pendiente.
+  - **AC-05 — Pendiente de confirmación:** no se localizó su definición en `ASSIGNMENT.md`, `evaluation.json` ni el workflow revisado de Semana 09. No se atribuye un resultado hasta confirmar el criterio oficial.
+
+- **Limitaciones y seguimiento:** El repositorio no contiene un endpoint real de resolución o cierre remoto, persistencia remota ni modelos de eventos, evidencias asociadas o notificaciones remotas. Por ello, los resultados demuestran el comportamiento de la cola local y del doble simulado, pero no certifican la idempotencia de un servidor de producción. Tampoco se ha confirmado una ejecución remota de GitHub Actions. La validación de `npm ci` y la definición oficial de AC-05 siguen pendientes.
+
+- **Uso de IA:** Utilicé Codex como apoyo para implementar el escenario de prueba y actualizar los artefactos de evidencia y documentación técnica.
+
+- **Validación humana:** Ejecuté manualmente `npm run test:sync`, `npm run build` y la validación de los archivos JSON, y revisé sus resultados. La revisión humana final de todos los artefactos permanece pendiente. El SHA indicado corresponde al primer commit creado localmente; no se afirma que haya sido subido a GitHub.
 
 ## Oscar Martinez Martinez — Semana 08: Lead de Pruebas E2E, Pipeline de CI y Documentación Operativa
 - **Estudiante:** Oscar Martinez Martinez (Matrícula: 3523110806)
