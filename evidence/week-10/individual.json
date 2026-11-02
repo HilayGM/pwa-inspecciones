@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "owner": "Martin Moreno Libreros",
+  "studentId": "3523110349",
+  "role": "Integrante 1",
+  "week": 10,
+  "responsibility": "Build reproducible, contenedor Docker multi-etapa y automatización en Makefile.",
+  "branch": "martin-dev",
+  "commitSha": "7463fa84b9da1dcd8bd7cb49fd92510a4f74c451",
+  "criteria": "Instalación limpia y build (2 pts)",
+  "workCompleted": [
+    "Creación de Dockerfile multi-etapa (base node:20-alpine, deps con npm ci, build con npm run build, runner con next start y usuario no privilegiado nextjs:nodejs UID 1001).",
+    "Integración de HEALTHCHECK activo con wget y etiqueta OCI org.opencontainers.image.version sincronizada con package.json.",
+    "Creación de .dockerignore excluyendo node_modules, .next, .git, evidence, reports y .env*.",
+    "Ampliación del Makefile con los objetivos docker-build, docker-run y release conservando verify, test y build.",
+    "Actualización del README.md con las secciones de Setup y Ejecución tanto local como con Docker."
+  ],
+  "verifications": {
+    "npmCi": {
+      "command": "npm ci",
+      "status": "passed",
+      "packagesAdded": 418
+    },
+    "build": {
+      "command": "npm run build",
+      "status": "passed",
+      "details": "Next.js 14.2.35 compilado con éxito (6 rutas optimizadas, types validados)."
+    },
+    "verify": {
+      "command": "make verify",
+      "status": "passed",
+      "details": "Starter verificable: PASS"
+    },
+    "test": {
+      "command": "npm test",
+      "status": "passed",
+      "details": "Todas las suites unitarias, integración, capacidades, seguridad, service-worker y rendering aprobadas."
+    }
+  },
+  "limitations": [
+    "La verificación de build y ejecución en contenedor en ambientes CI requiere Docker Engine disponible.",
+    "El Service Worker opera de manera desacoplada en public/sw.js sin sobrescribir el runtime de Next.js."
+  ],
+  "aiUsage": "Antigravity (Gemini) utilizado para la estructuración multi-etapa del Dockerfile, reglas de .dockerignore y recetas del Makefile. Validación humana mediante ejecución completa de npm ci, npm run build, make verify y npm test."
+}
