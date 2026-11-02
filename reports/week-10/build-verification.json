@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "activity": "w10-release-rollback",
+  "evaluatedStudent": "3523110349",
+  "timestamp": "2026-11-02T17:52:00.000Z",
+  "cleanInstall": {
+    "command": "npm ci",
+    "exitCode": 0,
+    "packagesAdded": 418,
+    "status": "PASS"
+  },
+  "build": {
+    "command": "npm run build",
+    "exitCode": 0,
+    "routes": [
+      "/",
+      "/_not-found",
+      "/api/inspecciones",
+      "/inspecciones",
+      "/inspecciones/[id]"
+    ],
+    "typeCheck": "PASS",
+    "status": "PASS"
+  },
+  "starterVerification": {
+    "command": "make verify",
+    "exitCode": 0,
+    "status": "PASS"
+  },
+  "fullTestSuite": {
+    "command": "npm test",
+    "exitCode": 0,
+    "suites": [
+      "starter.spec.mjs",
+      "manifest.spec.ts",
+      "test:unit",
+      "test:integration",
+      "test:capabilities",
+      "test:security",
+      "test:service-worker",
+      "test:rendering"
+    ],
+    "status": "PASS"
+  }
+}
+

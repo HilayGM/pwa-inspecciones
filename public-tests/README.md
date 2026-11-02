@@ -1,4 +1,4 @@
-# Public tests: w09-security-privacy
+# Public tests: w10-release-rollback
 
 Ejecuta `bash public-tests/check.sh` desde la raíz del repositorio. Estos checks comprueban el contrato mínimo sin revelar los casos privados.
 

@@ -8,8 +8,9 @@ Tu trabajo sera dividir la tarea entre 3 personas para poder entregar todo compl
 
 
 Actividad:
+[Semana 10] Release reproducible, smoke test y rollback · 8 puntos
 PROPÓSITO
-Modelar amenazas y aplicar controles de validación, secretos, CSP, permisos y privacidad.
+Automatizar build, smoke test, versionado, actualización y recuperación ante una versión defectuosa.
 
 QUÉ DEBES HACER
 1. Trabaja sobre el repositorio del proyecto integrador de la PWA de inspecciones y mantenimiento de laboratorios, usando únicamente datos sintéticos.
@@ -17,11 +18,11 @@ QUÉ DEBES HACER
 3. Escribe pruebas reproducibles y ejecuta GitHub Actions antes de entregar.
 
 ENTREGABLES OBLIGATORIOS
-- docs/threat-model.md
-- docs/privacy-data-inventory.md
-- src/lib/security/
-- tests/security.spec.ts
-- public/robots.txt
+- Dockerfile
+- docs/release-process.md
+- docs/runbook.md
+- tests/smoke.spec.ts
+- .github/workflows/academic-evaluation.yml
 - README.md con setup, ejecución, verificación y evidencia.
 - evidence/individual.md con tu commit SHA, decisión técnica, prueba ejecutada, limitación y uso declarado de IA.
 
@@ -39,5 +40,4 @@ REGLAS
 - IA permitida en esta actividad si declaras herramienta, propósito y validación humana.
 - El quiz semanal es presencial, en papel, de 3 preguntas y no permite IA.
 - Los checks públicos dan feedback; la calificación final usa commit fijado y checks privados.
-
 
