@@ -3,7 +3,7 @@
 ## Martin Moreno Libreros — Semana 10: Lead de Contenedores y Automatización de Build
 
 - **Estudiante:** Martin Moreno Libreros (Matrícula: `352***349`, enmascarada)
-- **Commit SHA evaluado:** `8b70a5f15463783b4da87870b231f2bfc0a9c26a`
+- **Commit SHA evaluado:** `7463fa84b9da1dcd8bd7cb49fd92510a4f74c451`
 - **Decisión técnica que puedo explicar:** Diseñé un `Dockerfile` multi-etapa (`base`, `deps`, `build`, `runner`) basado en `node:20-alpine` para garantizar reproducibilidad determinista, aislamiento de dependencias de desarrollo y un runtime mínimo sin privilegios. En la etapa `deps`, ejecuté `npm ci` con `libc6-compat`. En `build`, aislé la compilación de Next.js (`npm run build`). En `runner`, configuré las variables `NODE_ENV=production`, `PORT=3000` y `HOSTNAME="0.0.0.0"`, creando un usuario y grupo de sistema sin privilegios (`nextjs:nodejs`, UID 1001) para ejecutar `next start` mediante `npm start` y no exponer la raíz del contenedor. Incluí metadatos OCI (`org.opencontainers.image.version`) parametrizados mediante `ARG VERSION` y `HEALTHCHECK` activo con `wget` en `http://127.0.0.1:3000/`. Añadí `.dockerignore` para excluir `node_modules`, `.next`, `.git`, `evidence`, `reports` y `.env*`, y extendí el `Makefile` con los objetivos `docker-build`, `docker-run` y `release` extrayendo dinámicamente la versión de `package.json` y el SHA corto de git sin alterar los objetivos preexistentes.
 - **Prueba que ejecuté y resultado:**
   - `npm ci`: Completado limpiamente sin errores (418 paquetes agregados).

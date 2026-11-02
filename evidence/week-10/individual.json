@@ -6,7 +6,7 @@
   "week": 10,
   "responsibility": "Build reproducible, contenedor Docker multi-etapa y automatización en Makefile.",
   "branch": "martin-dev",
-  "commitSha": "8b70a5f15463783b4da87870b231f2bfc0a9c26a",
+  "commitSha": "7463fa84b9da1dcd8bd7cb49fd92510a4f74c451",
   "criteria": "Instalación limpia y build (2 pts)",
   "workCompleted": [
     "Creación de Dockerfile multi-etapa (base node:20-alpine, deps con npm ci, build con npm run build, runner con next start y usuario no privilegiado nextjs:nodejs UID 1001).",
