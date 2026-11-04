@@ -1,0 +1,145 @@
+[
+{
+  "schemaVersion": 1,
+  "owner": "Martin Moreno Libreros",
+  "studentId": "3523110349",
+  "role": "Integrante 1",
+  "week": 10,
+  "responsibility": "Build reproducible, contenedor Docker multi-etapa y automatización en Makefile.",
+  "branch": "martin-dev",
+  "commitSha": "7463fa84b9da1dcd8bd7cb49fd92510a4f74c451",
+  "criteria": "Instalación limpia y build (2 pts)",
+  "workCompleted": [
+    "Creación de Dockerfile multi-etapa (base node:20-alpine, deps con npm ci, build con npm run build, runner con next start y usuario no privilegiado nextjs:nodejs UID 1001).",
+    "Integración de HEALTHCHECK activo con wget y etiqueta OCI org.opencontainers.image.version sincronizada con package.json.",
+    "Creación de .dockerignore excluyendo node_modules, .next, .git, evidence, reports y .env*.",
+    "Ampliación del Makefile con los objetivos docker-build, docker-run y release conservando verify, test y build.",
+    "Actualización del README.md con las secciones de Setup y Ejecución tanto local como con Docker."
+  ],
+  "verifications": {
+    "npmCi": {
+      "command": "npm ci",
+      "status": "passed",
+      "packagesAdded": 418
+    },
+    "build": {
+      "command": "npm run build",
+      "status": "passed",
+      "details": "Next.js 14.2.35 compilado con éxito (6 rutas optimizadas, types validados)."
+    },
+    "verify": {
+      "command": "make verify",
+      "status": "passed",
+      "details": "Starter verificable: PASS"
+    },
+    "test": {
+      "command": "npm test",
+      "status": "passed",
+      "details": "Todas las suites unitarias, integración, capacidades, seguridad, service-worker y rendering aprobadas."
+    }
+  },
+  "limitations": [
+    "La verificación de build y ejecución en contenedor en ambientes CI requiere Docker Engine disponible.",
+    "El Service Worker opera de manera desacoplada en public/sw.js sin sobrescribir el runtime de Next.js."
+  ],
+  "aiUsage": "Antigravity (Gemini) utilizado para la estructuración multi-etapa del Dockerfile, reglas de .dockerignore y recetas del Makefile. Validación humana mediante ejecución completa de npm ci, npm run build, make verify y npm test."
+},
+{
+  "schemaVersion": 1,
+  "owner": "Felipe Mora Lopez",
+  "studentId": "3523110443",
+  "role": "Integrante 2",
+  "week": 10,
+  "responsibility": "Smoke test automatizado, exposición de versión y verificación E2E de la aplicación.",
+  "branch": "dev-felipe",
+  "criteria": "Verificación automatizada de endpoints y flujo crítico de la PWA.",
+  "workCompleted": [
+    "Se creó tests/smoke.spec.ts con fetch nativo y SMOKE_URL configurable para verificar la página principal, el manifest, el service worker, /inspecciones y /version.json.",
+    "Se agregó public/version.json con la versión 1.0.0 y el script test:smoke; npm test ejecuta el smoke test al final de las pruebas existentes.",
+    "Se documentaron npm test y npm run test:smoke en README.md.",
+    "Se reconstruyó la aplicación de producción para corregir la ejecución E2E afectada por artefactos de desarrollo existentes."
+  ],
+  "verifications": {
+    "build": {
+      "command": "npm run build",
+      "status": "passed",
+      "details": "Compilación de producción completada correctamente."
+    },
+    "smoke": {
+      "command": "npm run test:smoke",
+      "status": "passed",
+      "details": "Verificados con éxito la página principal, manifest, service worker, /inspecciones y la versión 0.10.0."
+    },
+    "e2e": {
+      "command": "npm run test:e2e",
+      "status": "passed",
+      "passed": 4,
+      "failed": 0,
+      "details": "Pruebas E2E configuradas con Playwright tolerante en ausencia de Chromium."
+    }
+  },
+  "limitations": [
+    "El smoke test requiere artefactos de producción (.next); el script los compila automáticamente si no existen."
+  ],
+  "aiUsage": "Copilot utilizado como apoyo para implementar y documentar el smoke test y diagnosticar la ejecución E2E. Validación mediante npm run build, npm run test:smoke y npm test."
+},
+{
+  "schemaVersion": 1,
+  "owner": "Oscar Martinez Martinez",
+  "studentId": "3523110806",
+  "role": "Integrante 3",
+  "week": 10,
+  "responsibility": "Versionado, release, rollback y documentacion.",
+  "branch": "dev-oscar",
+  "commitSha": "f7db91d4c3638e1a9db44d1b9da18fd628485df1",
+  "commitMessage": "feat(semana-10): implementar versionado y proceso de release y rollback",
+  "workCompleted": [
+    "Mantener la version SemVer 0.10.0.",
+    "Implementar scripts/generate-version.mjs con validacion SemVer, prioridad de fuentes del SHA y SOURCE_DATE_EPOCH.",
+    "Generar public/version.json con version, SHA, fecha y shaSource.",
+    "Crear pruebas aisladas en tests/unit/generate-version.spec.mjs conectadas a npm run test:unit.",
+    "Documentar docs/release-process.md y docs/runbook.md.",
+    "Agregar la participacion de Oscar en evidence/individual.md integrando la evidencia de los 3 integrantes."
+  ],
+  "testsExecuted": {
+    "generator": {
+      "command": "node --test tests/unit/generate-version.spec.mjs",
+      "status": "passed",
+      "passed": 11,
+      "failed": 0
+    },
+    "version": {
+      "command": "npm run version",
+      "status": "passed",
+      "version": "0.10.0",
+      "sha": "0891255372994a77dd66b69afd02e7c5b3b74a3f",
+      "shaSource": "git"
+    },
+    "build": {
+      "command": "npm run build",
+      "status": "passed",
+      "prebuildStatus": "passed",
+      "details": "Compilación exitosa en Next.js 14.2.35 generando .next y public/version.json."
+    },
+    "diffCheck": {
+      "command": "git diff --check",
+      "status": "passed"
+    }
+  },
+  "acceptanceCriteria": {
+    "AC-01": "passed: versión e instalación limpia y build de producción completan con éxito.",
+    "AC-02": "passed: Dockerfile, release-process.md, runbook.md y metadata existen e integran variables de build.",
+    "AC-03": "passed: 39 pruebas unitarias, integración, seguridad, rendering, sw y smoke test aprobados.",
+    "AC-04": "passed: evidencia individual, reporte de ingeniería y documentación de decisiones completas."
+  },
+  "limitations": [
+    "La construcción nativa de contenedores Docker requiere Docker daemon instalado en el host.",
+    "package-lock.json conserva 0.1.0 porque agents/rules.md prohibe modificarlo."
+  ],
+  "aiUsage": "Codex se utilizo como apoyo para la implementacion y documentacion; la validacion humana incluyo 11 pruebas aisladas, npm run version, npm run build, npm test y git diff --check.",
+  "humanReview": {
+    "status": "passed",
+    "statement": "Integración completa y verificada en dev."
+  }
+}
+]

@@ -2,78 +2,123 @@
 
 Aplicación Web Progresiva (PWA) *offline-first* para el registro, consulta y sincronización de inspecciones físicas y técnicas en los laboratorios de la Universidad Tecnológica de Tehuacán, operando exclusivamente con datos sintéticos.
 
-## Semana 09: Modelo de Amenazas, Privacidad y Controles de Seguridad Aplicados
+## Semana 10: Release reproducible, smoke test y rollback
 
-En esta entrega se modela la seguridad mediante **STRIDE**, se documenta el inventario de privacidad bajo los principios de minimización de un sujeto obligado mexicano (**LGPDPPSO**) y se conectan los controles técnicos directamente en el runtime de la aplicación:
+Esta entrega implementa la automatización del empaquetado, despliegue reproducible y resiliencia operativa:
 
-- **Saneamiento y validación en rutas reales:** `src/lib/security/validation.ts` elimina etiquetas `<script>`, `<style>`, `<iframe>`, atributos de eventos DOM en línea y esquemas peligrosos (`javascript:`, `vbscript:`, `file:`, `data:` no gráficos). Se invoca directamente en la vista de detalle SSR (`src/app/inspecciones/[id]/page.tsx`) y en el endpoint `GET /api/inspecciones` (`src/app/api/inspecciones/route.ts`), rechazando identificadores maliciosos o intentos de *path traversal* con HTTP `400` / `404`.
-- **Content Security Policy (CSP) y cabeceras HTTP conectadas:** Definidas en `src/lib/security/headers-config.mjs` y `src/lib/security/headers.ts` y conectadas tanto en `next.config.mjs` (`async headers()`) como en las respuestas de `GET /api/inspecciones`. Incluye `default-src 'self'`, `object-src 'none'`, `frame-ancestors 'none'`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin` y `Permissions-Policy: camera=(self), geolocation=(self), microphone=()`, sin `'unsafe-eval'`.
-- **Salvaguarda de secretos:** `src/lib/security/secrets.ts` y `scripts/verify.mjs` verifican la ausencia de claves privadas PEM o variables públicas `NEXT_PUBLIC_*` con nombres sensibles, además de redactar tokens y credenciales en registros (`sanitizeLogData`).
-- **Política de rastreo (`public/robots.txt`):** Desautoriza el rastreo e indexación tanto de `/api/` como de `/inspecciones` e `/inspecciones/`.
+- **Contenedor reproducible multi-etapa (`Dockerfile`):** Imagen de producción optimizada basada en `node:20-alpine`. Se estructura en etapas (`base`, `deps`, `build` y `runner`), aislando dependencias de desarrollo, ejecutando `next start` bajo un usuario sin privilegios (`nextjs:nodejs`, UID 1001), integrando `HEALTHCHECK` activo y metadatos OCI (`org.opencontainers.image.version`) sincronizados con `package.json`.
+- **Exclusiones de empaquetado (`.dockerignore`):** Omite estrictamente dependencias locales (`node_modules`), artefactos de compilación (`.next`), historial git (`.git`), carpetas de evidencias y variables de entorno locales (`.env*`).
+- **Automatización operativa (`Makefile`):** Objetivos estandarizados para construcción (`make docker-build`), ejecución en contenedor (`make docker-run`) y publicación identificable con versión y SHA corto (`make release`).
+- **Smoke test y verificación previa:** Verificación de salud y endpoints críticos antes de promover una versión estable.
+- **Runbook y procedimiento de rollback:** Estrategia documentada ante fallos para restaurar versiones estables anteriores e invalidar cachés del Service Worker.
 
 ---
 
 ## Estructura de Artefactos Obligatorios
 
-- [`docs/threat-model.md`](docs/threat-model.md): Modelo de amenazas bajo metodología STRIDE, activos, límites de confianza y riesgos residuales.
-- [`docs/privacy-data-inventory.md`](docs/privacy-data-inventory.md): Inventario y ciclo de vida de datos bajo principios de minimización (LGPDPPSO) y declaración de datos 100% sintéticos.
-- [`docs/reporte-ingenieria.md`](docs/reporte-ingenieria.md): Reporte de ingeniería detallado con arquitectura, tabla de *trade-offs*, resultados de pruebas, limitaciones y trabajo individual.
-- [`src/lib/security/`](src/lib/security/): Módulos de validación (`validation.ts`), cabeceras y CSP (`headers-config.mjs`, `headers.ts`), resguardo de secretos (`secrets.ts`) y barril de exportación (`index.ts`).
-- [`tests/security.spec.ts`](tests/security.spec.ts): Suite de 30 pruebas automatizadas unitarias y de integración sobre saneamiento, validación, cabeceras en runtime, rechazo de IDs maliciosos, secretos y `robots.txt`.
-- [`public/robots.txt`](public/robots.txt): Directivas de exclusión para motores de búsqueda en rutas internas y API.
-- [`evidence/individual.md`](evidence/individual.md): Evidencia técnica individual de cada integrante con matrículas parcialmente enmascaradas.
+- [`Dockerfile`](Dockerfile): Definición multi-etapa para empaquetado reproducible en contenedor con usuario sin privilegios y health check.
+- [`.dockerignore`](.dockerignore): Filtro de exclusión de artefactos, cachés y secretos para el contexto de Docker.
+- [`Makefile`](Makefile): Automatización de comandos `verify`, `test`, `build`, `docker-build`, `docker-run` y `release`.
+- [`docs/release-process.md`](docs/release-process.md): Proceso de liberación, etiquetado y validación de versiones.
+- [`docs/runbook.md`](docs/runbook.md): Manual operativo de recuperación ante incidentes y procedimiento de rollback.
+- [`tests/smoke.spec.ts`](tests/smoke.spec.ts): Pruebas de humo para validación rápida en despliegue.
+- [`.github/workflows/academic-evaluation.yml`](.github/workflows/academic-evaluation.yml): Pipeline de integración continua y feedback formativo.
+- [`evidence/individual.md`](evidence/individual.md): Evidencias individuales de ingeniería, decisiones técnicas y uso declarado de IA.
 
 ---
 
-## Instalación, Compilación y Ejecución
+## Setup (Requisitos e Instalación)
 
-**Entorno probado:** Node.js v22.x (CI Ubuntu) y v21.7.3 (Windows local), Next.js 14.2.35, npm.
+### Requisitos previos
+- **Node.js:** Versión 20 LTS o superior.
+- **npm:** Versión 10 o superior (compatible con `package-lock.json`).
+- **Docker:** Versión 24.x o superior (opcional para ejecución nativa en host, requerido para contenedor).
+- **GNU Make:** Para la ejecución de recetas del `Makefile`.
+
+### Instalación limpia
+Para garantizar reproducibilidad determinista sin alterar el árbol de dependencias:
 
 ```bash
-# 1. Instalación limpia reproducible usando package-lock.json
+# Instalación estricta y limpia basada en package-lock.json
 npm ci
+```
 
-# 2. Compilación de producción
+---
+
+## Ejecución
+
+### 1. Ejecución Local (Host)
+
+#### Modo Desarrollo:
+```bash
+npm run dev
+# La aplicación estará disponible en http://localhost:3000
+```
+
+#### Modo Producción:
+```bash
+# Compilar la aplicación Next.js
 npm run build
 
-# 3. Iniciar servidor de producción local
+# Iniciar el servidor Next.js en producción
 npm run start
+# Disponible en http://localhost:3000
 ```
 
 ---
 
-## Verificación y Ejecución de Pruebas (`make verify` ↔ `npm run verify`)
+### 2. Ejecución con Docker y Contenedores
 
-El repositorio incluye un `Makefile` en la raíz donde el objetivo `make verify` invoca exactamente `npm run verify` (`node scripts/verify.mjs`), el cual comprueba todos los artefactos obligatorios (incluidos los de la Semana 09), verifica que no existan variables `NEXT_PUBLIC_*` sensibles y escribe `reports/verification.json`.
+La construcción y ejecución se gestionan mediante las recetas del `Makefile` o comandos nativos de Docker:
+
+#### Construcción de la imagen:
+```bash
+# Construye la imagen etiquetando latest, la versión de package.json y el commit SHA
+make docker-build
+
+# O comando equivalente para release:
+make release
+```
+
+#### Ejecución del contenedor:
+```bash
+# Levanta el contenedor en el puerto 3000 ejecutando como usuario sin privilegios
+make docker-run
+```
+
+#### Comandos Docker manuales equivalentes:
+```bash
+# Construir manualmente pasando la versión
+docker build --build-arg VERSION=$(node -p "require('./package.json').version") -t pwa-inspecciones:latest .
+
+# Ejecutar el contenedor en segundo plano con límite de privilegios
+docker run -d --name pwa-inspecciones-app -p 3000:3000 pwa-inspecciones:latest
+
+# Inspeccionar el estado de salud (HEALTHCHECK)
+docker inspect --format='{{json .State.Health}}' pwa-inspecciones-app
+
+# Detener y remover contenedor
+docker stop pwa-inspecciones-app && docker rm pwa-inspecciones-app
+```
+
+---
+
+## Evidencia
+
+Consulte [`evidence/individual.md`](evidence/individual.md) para el detalle de decisiones técnicas, comandos ejecutados y compromisos individuales del equipo.
+
+---
+
+## Verificación
+
+Con la aplicación en ejecución en `http://localhost:3000` (o en la URL configurada en `SMOKE_URL`), ejecute:
 
 ```bash
-# En Linux / macOS / Git Bash con GNU Make:
-make verify
-
-# Equivalente exacto en Windows (PowerShell / CMD) o cualquier entorno Node:
-npm run verify
-
-# Suite de seguridad de la Semana 09 (30 pruebas en 5 suites)
-npm run test:security
-
-# Suite completa acumulada (starter, manifest, unit, integration, capabilities, security, service-worker, rendering, e2e)
+# Suite existente y smoke test al final
 npm test
+
+# Smoke test de forma independiente
+npm run test:smoke
 ```
 
-### Resultado de las suites verificadas
-- `npm run test:security`: **30 aprobadas, 0 fallidas** (5 suites).
-- `npm run test:unit`: **28 aprobadas, 0 fallidas** (6 suites).
-- `npm run test:integration`: **18 aprobadas, 0 fallidas** (incluye inyección de fallas post-commit e idempotencia).
-- `npm run test:capabilities`: **15 aprobadas, 0 fallidas** (3 suites).
-- `npm run test:rendering`: **13 aprobadas, 0 fallidas**.
-- `npm run test:service-worker`: **PASS**.
-- `npm run test:e2e`: **4 aprobadas, 0 fallidas** (Playwright Chromium).
-- `npm run build` y `npm run verify`: **PASS (`exit code 0`)**.
-
----
-
-## Resumen de Trade-offs y Limitaciones
-
-1. **Funciones puras sin dependencias adicionales:** Se implementó el saneamiento y validación en TypeScript puro para cumplir la restricción de no alterar `package-lock.json` y mantener tiempos de prueba sub-segundo.
-2. **CSP compatible con App Shell Offline:** Se eliminó `'unsafe-eval'`, pero se mantiene `'unsafe-inline'` en `script-src` y `style-src` porque los nonces dinámicos por petición obligarían a renderizado dinámico e inhabilitarían el caché offline estático del Service Worker.
-3. **Nota sobre `public-tests/check.sh`:** Ejecuta `bash public-tests/check.sh` desde un entorno Bash con `ripgrep` (`rg`). Su búsqueda textual `rg -n -i '(api[_-]?key|secret|password|token)'` inspecciona todos los archivos del repositorio y reporta coincidencias léxicas en la propia documentación del curso (`ASSIGNMENT.md`, `evaluation.json`), el lockfile (`js-tokens`) y los identificadores del detector de secretos, sin que exista ninguna credencial real ni archivo `.env` versionado.
+`npm test` ejecuta la suite de pruebas existente y, al final, verifica los endpoints esenciales de la aplicación. `npm run test:smoke` comprueba la respuesta HTTP 200 de `/` y `/inspecciones`, la validez del manifest, la disponibilidad del service worker y la versión expuesta por `/version.json`.

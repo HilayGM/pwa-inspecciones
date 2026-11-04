@@ -1,4 +1,4 @@
-# Actividad 9: Modelo de amenazas y privacidad aplicada
+# Actividad 10: Release reproducible, smoke test y rollback
 
 ## Scenario
 
@@ -6,27 +6,27 @@ La Universidad Tecnológica de Tehuacán necesita una PWA para registrar inspecc
 
 ## Objective
 
-Modelar amenazas y aplicar controles de mínimo privilegio, secretos, transporte, almacenamiento, CSP y validación para un sujeto obligado mexicano.
+Automatizar una entrega reproducible con smoke test, versionado, actualización segura y recuperación ante una versión defectuosa.
 
 ## Competencies
 
-**Primaria:** C13. **Acumulativas:** C06, C07.
+**Primaria:** C07. **Acumulativas:** C09, C15.
 
 ## Engineering uplift traceability
 
-**Mínimo oficial:** Capacidad derivada: implementar esquemas de seguridad para privacidad y confidencialidad cumpliendo leyes y regulaciones aplicables.
+**Mínimo oficial:** Unidad II: pruebas, publicación, instalación y actualización; capacidades de liberar unidades estables.
 
-**Elevación Engineering Target:** Modelar amenazas y aplicar controles de mínimo privilegio, secretos, transporte, almacenamiento, CSP y validación para un sujeto obligado mexicano.
+**Elevación Engineering Target:** Automatizar una entrega reproducible con smoke test, versionado, actualización segura y recuperación ante una versión defectuosa.
 
-**Evidencia de la elevación:** Identifica activos, amenazas y controles; valida entradas, evita secretos, restringe permisos y documenta datos tratados y finalidades. La solución se juzga por comportamiento, decisiones justificadas, pruebas y reproducibilidad, no solo por una demo.
+**Evidencia de la elevación:** Genera artefacto, publica una versión identificable, ejecuta smoke tests y documenta rollback o recuperación del service worker. La solución se juzga por comportamiento, decisiones justificadas, pruebas y reproducibilidad, no solo por una demo.
 
 ## Prerequisites
 
-Continuar el repositorio personal creado en las semanas anteriores. No descargues un starter nuevo: analiza y endurece la aplicación acumulada.
+Continuar el repositorio personal creado en las semanas anteriores. No descargues un starter nuevo: libera la aplicación acumulada y demuestra recuperación.
 
 ## Schedule and one-week submission window
 
-Semana 9 del calendario de 14 semanas; trabajo individual preferente. Inicio en lunes y entrega a más tardar el domingo de esa misma semana. La duración máxima de la actividad es 7 días y no se aceptan extensiones implícitas de calendario.
+Semana 10 del calendario de 14 semanas; trabajo individual preferente. Inicio en lunes y entrega a más tardar el domingo de esa misma semana. La duración máxima de la actividad es 7 días y no se aceptan extensiones implícitas de calendario.
 
 ## Difficulty
 
@@ -34,22 +34,22 @@ Nivel 8/10. La dificultad proviene de integrar restricciones, justificar trade-o
 
 ## Requirements
 
-1. Continuar el mismo repositorio de inspecciones y aplicar el análisis de seguridad y privacidad solicitado.
+1. Continuar el mismo repositorio de inspecciones y preparar la release y el rollback solicitados.
 2. Entregar los archivos indicados y datos exclusivamente sintéticos.
 3. Explicar decisiones, límites, riesgos y evidencia de prueba.
 4. Ejecutar los comandos de verificación localmente antes de enviar.
 
-**Funcionalidad mínima:** Identifica activos, amenazas y controles; valida entradas, evita secretos, restringe permisos y documenta datos tratados y finalidades.
+**Funcionalidad mínima:** Genera artefacto, publica una versión identificable, ejecuta smoke tests y documenta rollback o recuperación del service worker.
 
-**No funcionales:** Usa datos sintéticos, HTTPS en despliegue, headers/CSP razonables, dependencias auditables y fallback seguro.
+**No funcionales:** El build debe ser reproducible, no incluir secretos, tener health check y conservar evidencia de versión.
 
 ## Deliverables
 
-- `docs/threat-model.md`
-- `docs/privacy-data-inventory.md`
-- `src/lib/security/`
-- `tests/security.spec.ts`
-- `public/robots.txt`
+- `Dockerfile`
+- `docs/release-process.md`
+- `docs/runbook.md`
+- `tests/smoke.spec.ts`
+- `.github/workflows/academic-evaluation.yml`
 - `README.md` con ejecución, supuestos y evidencia.
 - Reporte de verificación generado por CI o localmente.
 
@@ -107,7 +107,7 @@ Objetivo de automatización: 90% o más. El workflow instala, compila, ejecuta p
 
 ## Hidden tests
 
-`private-evaluator/w09-security-privacy/check.sh` y su contrato JSON son solo del instructor. Cubren invariantes, regresiones, seguridad, idempotencia, accesibilidad o trazabilidad que no deben poder ajustarse mirando el caso público.
+`private-evaluator/w10-release-rollback/check.sh` y su contrato JSON son solo del instructor. Cubren invariantes, regresiones, seguridad, idempotencia, accesibilidad o trazabilidad que no deben poder ajustarse mirando el caso público.
 
 ## Manual review
 

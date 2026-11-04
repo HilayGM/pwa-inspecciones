@@ -21,7 +21,13 @@ const required = [
   "tests/starter.spec.mjs",
   "tests/security.spec.ts",
   "public/robots.txt",
-  "evidence/individual.md"
+  "evidence/individual.md",
+  "Dockerfile",
+  ".dockerignore",
+  "docs/release-process.md",
+  "docs/runbook.md",
+  "tests/smoke.spec.ts",
+  ".github/workflows/academic-evaluation.yml"
 ];
 
 const missing = required.filter((file) => !existsSync(resolve(root, file)));
