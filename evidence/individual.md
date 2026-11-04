@@ -17,6 +17,23 @@
   - *Propósito:* Asistencia en la estructuración multi-etapa del Dockerfile para Next.js, reglas de `.dockerignore` y objetivos del `Makefile`.
   - *Validación humana:* Ejecución y comprobación manual de `npm ci`, `npm run build`, `make verify` y `npm test`, validación de sintaxis de Dockerfile y verificación de permisos de usuario.
 
+## Felipe Mora Lopez — Semana 10: Smoke test y Verificación E2E
+
+- **Estudiante:** Felipe Mora Lopez (Matrícula: `3523110443`)
+- **Rama:** `dev-felipe`
+- **Decisión técnica que puedo explicar:** Implementé `tests/smoke.spec.ts` con `fetch` nativo para comprobar los endpoints críticos, usando `SMOKE_URL` configurable y `http://localhost:3000` como valor predeterminado. Añadí `public/version.json` para exponer la versión `1.0.0`, incorporé `test:smoke` a `package.json` y conecté el smoke test al final de `npm test`, sin añadir dependencias. Documenté ambos comandos y sus validaciones en el README.
+- **Pruebas que ejecuté y resultado:**
+  - `npm run build`: Compilación de producción exitosa.
+  - `npm run test:smoke`: Aprobado; verificó `/`, `/manifest.webmanifest`, `/sw.js`, `/inspecciones` y `/version.json`.
+  - `npm run test:e2e`: Aprobado, 4 pruebas y 0 fallos.
+  - `npm test`: Suite aprobada; en esa ejecución Playwright omitió E2E porque Chromium no estaba instalado. Posteriormente, ejecuté E2E por separado con Chromium disponible.
+- **Limitación o fallo diagnosticado:** La primera ejecución E2E falló porque se estaban sirviendo artefactos de desarrollo cuyo runtime de React Refresh era bloqueado por la Content Security Policy. Reconstruí los artefactos de producción con `npm run build` y repetí E2E con las cuatro pruebas aprobadas.
+- **Cambio que podría defender o modificar en vivo:** Puedo ampliar las comprobaciones del smoke test o ajustar la URL del servidor mediante `SMOKE_URL`, y demostrar tanto la validación directa como la integración del smoke test con `npm test`.
+- **Uso declarado de IA (herramienta, propósito, validación):**
+  - *Herramienta:* Copilot.
+  - *Propósito:* Apoyo en la implementación y documentación del smoke test y el diagnóstico de las pruebas E2E.
+  - *Validación humana:* Ejecución de `npm run build`, `npm run test:smoke` y `npm run test:e2e`; las cuatro pruebas E2E pasaron tras reconstruir la aplicación.
+
 ## Oscar Martínez — Semana 10: Versionado, release, rollback y documentación
 
 - **Estudiante:** Oscar Martínez Martínez (Matrícula: `352***806`, enmascarada)
