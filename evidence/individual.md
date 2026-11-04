@@ -33,3 +33,24 @@
   - *Herramienta:* Copilot.
   - *Propósito:* Apoyo en la implementación y documentación del smoke test y el diagnóstico de las pruebas E2E.
   - *Validación humana:* Ejecución de `npm run build`, `npm run test:smoke` y `npm run test:e2e`; las cuatro pruebas E2E pasaron tras reconstruir la aplicación.
+
+## Oscar Martínez — Semana 10: Versionado, release, rollback y documentación
+
+- **Estudiante:** Oscar Martínez Martínez (Matrícula: `352***806`, enmascarada)
+- **Integrante:** 3
+- **Rama:** `dev-oscar`
+- **Primer commit:** `f7db91d4c3638e1a9db44d1b9da18fd628485df1`
+- **Responsabilidad:** Versionado SemVer, generación de versión, proceso de release, estrategia de rollback y documentación.
+- **Decisión técnica:** Mantener la versión `0.10.0`, generar `public/version.json` mediante `scripts/generate-version.mjs` y conservar la procedencia de la fuente del SHA mediante `shaSource`.
+- **Versionado:** Se valida SemVer para versiones normales, prerelease y metadata. Las etiquetas Git previstas siguen el formato `vX.Y.Z` y deben crearse manualmente.
+- **Generación de versión:** El generador prioriza `GIT_COMMIT_SHA`, después `VERSION_SHA` y finalmente `git rev-parse HEAD`. También acepta `SOURCE_DATE_EPOCH` para generar una fecha ISO 8601 reproducible.
+- **Archivos de mi alcance:** `package.json`, `scripts/generate-version.mjs`, `tests/unit/generate-version.spec.mjs`, `public/version.json`, `docs/release-process.md`, `docs/runbook.md` y la evidencia individual separada de Semana 10.
+- **Pruebas ejecutadas:**
+  - `node --test tests/unit/generate-version.spec.mjs`: 11 aprobadas, 0 fallos.
+  - `npm run version`: correcto; versión `0.10.0`, SHA `f7db91d4c3638e1a9db44d1b9da18fd628485df1`, `shaSource: git`.
+  - `git diff --check`: correcto.
+  - `npm run build`: falló al cargar `next.config.mjs` por `EPERM` al acceder a `C:\Users\oscar` desde `node_modules/temp-dir`; el `prebuild` sí se ejecutó correctamente.
+- **Release y rollback:** La documentación distingue rollback de imagen, `git revert` y recuperación de una etiqueta anterior. También protege IndexedDB y la cola de sincronización offline.
+- **Limitaciones reales:** La integración Docker queda pendiente porque Dockerfile y Makefile necesitan cambios compartidos para transmitir `GIT_COMMIT_SHA` y `SOURCE_DATE_EPOCH`. `package-lock.json` conserva `0.1.0` porque `agents/rules.md` prohíbe modificarlo. El simulacro de rollback no se ejecutó.
+- **Separación de responsabilidades:** La implementación de Dockerfile, Makefile, HEALTHCHECK y empaquetado pertenece a Martin y no se atribuye a este aporte.
+- **Uso declarado de IA:** Codex se utilizó para estructurar el generador, las pruebas aisladas y la documentación. La validación humana consistió en ejecutar las 11 pruebas, `npm run version`, `npm run build` y `git diff --check`, registrando también el fallo real del build.

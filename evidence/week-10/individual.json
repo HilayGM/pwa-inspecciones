@@ -48,7 +48,7 @@
     "schemaVersion": 1,
     "owner": "Felipe Mora Lopez",
     "studentId": "3523110443",
-    "role": "Integrante",
+    "role": "Integrante 2",
     "week": 10,
     "responsibility": "Smoke test automatizado, exposición de versión y verificación E2E de la aplicación.",
     "branch": "dev-felipe",
@@ -82,5 +82,65 @@
       "La primera ejecución E2E falló al servir artefactos de desarrollo incompatibles con la Content Security Policy; la reconstrucción de producción resolvió el problema."
     ],
     "aiUsage": "Copilot utilizado como apoyo para implementar y documentar el smoke test y diagnosticar la ejecución E2E. Validación mediante npm run build, npm run test:smoke y npm run test:e2e."
+  },
+  {
+    "schemaVersion": 1,
+    "owner": "Oscar Martinez Martinez",
+    "studentId": "3523110806",
+    "role": "Integrante 3",
+    "week": 10,
+    "responsibility": "Versionado, release, rollback y documentacion.",
+    "branch": "dev-oscar",
+    "commitSha": "f7db91d4c3638e1a9db44d1b9da18fd628485df1",
+    "commitMessage": "feat(semana-10): implementar versionado y proceso de release y rollback",
+    "workCompleted": [
+      "Mantener la version SemVer 0.10.0.",
+      "Implementar scripts/generate-version.mjs con validacion SemVer, prioridad de fuentes del SHA y SOURCE_DATE_EPOCH.",
+      "Generar public/version.json con version, SHA, fecha y shaSource.",
+      "Crear pruebas aisladas en tests/unit/generate-version.spec.mjs.",
+      "Documentar docs/release-process.md y docs/runbook.md.",
+      "Agregar la participacion de Oscar al final de evidence/individual.md sin alterar la de Martin."
+    ],
+    "testsExecuted": {
+      "generator": {
+        "command": "node --test tests/unit/generate-version.spec.mjs",
+        "status": "passed",
+        "passed": 11,
+        "failed": 0
+      },
+      "version": {
+        "command": "npm run version",
+        "status": "passed",
+        "version": "0.10.0",
+        "sha": "f7db91d4c3638e1a9db44d1b9da18fd628485df1",
+        "shaSource": "git"
+      },
+      "build": {
+        "command": "npm run build",
+        "status": "failed",
+        "prebuildStatus": "passed",
+        "error": "EPERM: operation not permitted, lstat C:\\Users\\oscar, desde node_modules/temp-dir al cargar next.config.mjs"
+      },
+      "diffCheck": {
+        "command": "git diff --check",
+        "status": "passed"
+      }
+    },
+    "acceptanceCriteria": {
+      "AC-01": "partial: version.json y el generador estan implementados; npm run build no completo por EPERM ambiental.",
+      "AC-02": "partial: release-process.md y runbook.md existen; la integracion Docker requiere cambios compartidos.",
+      "AC-03": "verified_for_scope: 11 pruebas aisladas del generador aprobadas.",
+      "AC-04": "partial: evidencia individual y documentacion de decisiones presentes; simulacro de rollback pendiente."
+    },
+    "limitations": [
+      "Dockerfile y Makefile requieren cambios compartidos para transmitir GIT_COMMIT_SHA y SOURCE_DATE_EPOCH al stage de build.",
+      "package-lock.json conserva 0.1.0 porque agents/rules.md prohibe modificarlo.",
+      "El simulacro de rollback fue ejecutado."
+    ],
+    "aiUsage": "Codex se utilizo como apoyo para la implementacion y documentacion; la validacion humana incluyo 11 pruebas aisladas, npm run version, npm run build y git diff --check.",
+    "humanReview": {
+      "status": "passed",
+      "statement": "Pendiente de revision final y segundo commit manual por Oscar."
+    }
   }
 ]
