@@ -103,18 +103,22 @@ docker stop pwa-inspecciones-app && docker rm pwa-inspecciones-app
 
 ---
 
-## Verificación
-
-```bash
-# Verificación de integridad de artefactos y políticas del starter
-make verify
-
-# Ejecución de la suite completa de pruebas
-npm test
-```
-
----
-
 ## Evidencia
 
 Consulte [`evidence/individual.md`](evidence/individual.md) para el detalle de decisiones técnicas, comandos ejecutados y compromisos individuales del equipo.
+
+---
+
+## Verificación
+
+Con la aplicación en ejecución en `http://localhost:3000` (o en la URL configurada en `SMOKE_URL`), ejecute:
+
+```bash
+# Suite existente y smoke test al final
+npm test
+
+# Smoke test de forma independiente
+npm run test:smoke
+```
+
+`npm test` ejecuta la suite de pruebas existente y, al final, verifica los endpoints esenciales de la aplicación. `npm run test:smoke` comprueba la respuesta HTTP 200 de `/` y `/inspecciones`, la validez del manifest, la disponibilidad del service worker y la versión expuesta por `/version.json`.
