@@ -85,7 +85,7 @@ ejecuciones.
 - `version`: versión SemVer.
 - `sha`: SHA Git completo o SHA recibido explícitamente por entorno.
 - `date`: instante UTC de generación en ISO 8601.
-- `shaSource`: `git`, `environment` o `unavailable`.
+- `shaSource`: `GIT_COMMIT_SHA`, `VERSION_SHA`, `git` o `unavailable`.
 
 `npm run build` ejecuta primero `npm run version:generate` mediante el hook
 `prebuild`. En un checkout Git local el SHA proviene de `git rev-parse HEAD`.
