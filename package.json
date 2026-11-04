@@ -12,7 +12,7 @@
     "test": "node tests/starter.spec.mjs && tsx tests/manifest.spec.ts && npm run test:unit && npm run test:integration && npm run test:capabilities && npm run test:security && npm run test:service-worker && npm run test:rendering && npm run test:e2e && npm run test:smoke",
     "test:smoke": "tsx tests/smoke.spec.ts",
     "verify": "node scripts/verify.mjs",
-    "test:unit": "tsx --test tests/unit/sync-logic.spec.ts tests/unit/device-adapters.spec.ts",
+    "test:unit": "tsx --test tests/unit/sync-logic.spec.ts tests/unit/device-adapters.spec.ts tests/unit/generate-version.spec.mjs",
     "test:integration": "tsx --test tests/sync.spec.ts tests/integration/inspections-api.spec.ts",
     "test:security": "tsx --test tests/security.spec.ts",
     "test:e2e": "node scripts/run-e2e.mjs tests/e2e/ tests/offline.spec.ts",

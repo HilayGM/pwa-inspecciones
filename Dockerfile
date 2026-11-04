@@ -15,6 +15,10 @@ FROM base AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+ARG GIT_COMMIT_SHA
+ARG SOURCE_DATE_EPOCH
+ENV GIT_COMMIT_SHA=${GIT_COMMIT_SHA}
+ENV SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 RUN npm run build
@@ -23,7 +27,7 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-ARG VERSION=0.1.0
+ARG VERSION=0.10.0
 LABEL org.opencontainers.image.title="pwa-inspecciones-laboratorio" \
       org.opencontainers.image.description="PWA de inspecciones y mantenimiento de laboratorios" \
       org.opencontainers.image.version="${VERSION}" \

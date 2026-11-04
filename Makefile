@@ -14,7 +14,7 @@ build:
 	npm run build
 
 docker-build:
-	docker build --build-arg VERSION=$(VERSION) -t $(IMAGE_NAME):latest -t $(IMAGE_NAME):$(VERSION) -t $(IMAGE_NAME):$(COMMIT_SHA) .
+	docker build --build-arg VERSION=$(VERSION) --build-arg GIT_COMMIT_SHA=$(shell git rev-parse HEAD 2>/dev/null || echo "$$COMMIT_SHA") -t $(IMAGE_NAME):latest -t $(IMAGE_NAME):$(VERSION) -t $(IMAGE_NAME):$(COMMIT_SHA) .
 
 docker-run:
 	docker run --rm -it -p 3000:3000 --name $(IMAGE_NAME) $(IMAGE_NAME):$(VERSION)

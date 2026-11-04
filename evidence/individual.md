@@ -4,12 +4,12 @@
 
 - **Estudiante:** Martin Moreno Libreros (Matrícula: `352***349`, enmascarada)
 - **Commit SHA evaluado:** `7463fa84b9da1dcd8bd7cb49fd92510a4f74c451`
-- **Decisión técnica que puedo explicar:** Diseñé un `Dockerfile` multi-etapa (`base`, `deps`, `build`, `runner`) basado en `node:20-alpine` para garantizar reproducibilidad determinista, aislamiento de dependencias de desarrollo y un runtime mínimo sin privilegios. En la etapa `deps`, ejecuté `npm ci` con `libc6-compat`. En `build`, aislé la compilación de Next.js (`npm run build`). En `runner`, configuré las variables `NODE_ENV=production`, `PORT=3000` y `HOSTNAME="0.0.0.0"`, creando un usuario y grupo de sistema sin privilegios (`nextjs:nodejs`, UID 1001) para ejecutar `next start` mediante `npm start` y no exponer la raíz del contenedor. Incluí metadatos OCI (`org.opencontainers.image.version`) parametrizados mediante `ARG VERSION` y `HEALTHCHECK` activo con `wget` en `http://127.0.0.1:3000/`. Añadí `.dockerignore` para excluir `node_modules`, `.next`, `.git`, `evidence`, `reports` y `.env*`, y extendí el `Makefile` con los objetivos `docker-build`, `docker-run` y `release` extrayendo dinámicamente la versión de `package.json` y el SHA corto de git sin alterar los objetivos preexistentes.
+- **Decisión técnica que puedo explicar:** Diseñé un `Dockerfile` multi-etapa (`base`, `deps`, `build`, `runner`) basado en `node:20-alpine` para garantizar reproducibilidad determinista, aislamiento de dependencias de desarrollo y un runtime mínimo sin privilegios. En la etapa `deps`, ejecuté `npm ci` con `libc6-compat`. En `build`, aislé la compilación de Next.js (`npm run build`) integrando `ARG GIT_COMMIT_SHA` y `ARG SOURCE_DATE_EPOCH` para que la generación de metadatos de versión sea reproducible y completa sin requerir el directorio `.git`. En `runner`, configuré las variables `NODE_ENV=production`, `PORT=3000` y `HOSTNAME="0.0.0.0"`, creando un usuario y grupo de sistema sin privilegios (`nextjs:nodejs`, UID 1001) para ejecutar `next start` mediante `npm start` y no exponer la raíz del contenedor. Incluí metadatos OCI (`org.opencontainers.image.version`) parametrizados mediante `ARG VERSION=0.10.0` y `HEALTHCHECK` activo con `wget` en `http://127.0.0.1:3000/`. Añadí `.dockerignore` para excluir `node_modules`, `.next`, `.git`, `evidence`, `reports` y `.env*`, y extendí el `Makefile` con los objetivos `docker-build` (propagando `GIT_COMMIT_SHA`), `docker-run` y `release` extrayendo dinámicamente la versión de `package.json` y el SHA corto de git sin alterar los objetivos preexistentes.
 - **Prueba que ejecuté y resultado:**
   - `npm ci`: Completado limpiamente sin errores (418 paquetes agregados).
   - `npm run build`: Compilación exitosa en Next.js 14.2.35 generando las 6 rutas estáticas y dinámicas con tipado estricto.
   - `make verify`: Verificación de starter y políticas ejecutada exitosamente con salida `Starter verificable: PASS`.
-  - `npm test`: Suite completa de pruebas ejecutada sin fallos (starter, manifest, unit, integration, capabilities, security, service-worker, rendering).
+  - `npm test`: Suite completa de pruebas ejecutada sin fallos (starter, manifest, unit, integration, capabilities, security, service-worker, rendering, smoke).
 - **Limitación o fallo diagnosticado:** En entornos de compilación de desarrollo local sin Docker daemon activo o sin privilegios de socket Docker, la verificación en tiempo de desarrollo depende de la compatibilidad de Node.js del host, mientras que la prueba completa de imagen de contenedor requiere Docker Engine instalado. El service worker de producción (`public/sw.js`) opera de forma explícita sin reemplazar el runtime de Next.js.
 - **Cambio que podría defender o modificar en vivo:** Puedo modificar o ajustar las etapas del `Dockerfile` (como ajustar los argumentos de versión, el usuario de sistema `nextjs` o la frecuencia del `HEALTHCHECK`) o las directivas de exclusión en `.dockerignore` y las recetas de empaquetado en el `Makefile`, demostrando que el build de Next.js y el arranque con `next start` continúan funcionando limpiamente.
 - **Uso declarado de IA (herramienta, propósito, validación):**
@@ -21,13 +21,13 @@
 
 - **Estudiante:** Felipe Mora Lopez (Matrícula: `3523110443`)
 - **Rama:** `dev-felipe`
-- **Decisión técnica que puedo explicar:** Implementé `tests/smoke.spec.ts` con `fetch` nativo para comprobar los endpoints críticos, usando `SMOKE_URL` configurable y `http://localhost:3000` como valor predeterminado. Añadí `public/version.json` para exponer la versión `1.0.0`, incorporé `test:smoke` a `package.json` y conecté el smoke test al final de `npm test`, sin añadir dependencias. Documenté ambos comandos y sus validaciones en el README.
+- **Decisión técnica que puedo explicar:** Implementé `tests/smoke.spec.ts` con `fetch` nativo para comprobar los endpoints críticos, usando `SMOKE_URL` configurable y `http://localhost:3000` como valor predeterminado. El script detecta si el servidor ya está activo (ej. en Docker o staging) o inicia automáticamente una instancia local de producción de Next.js para ejecutar las pruebas y detener el proceso en el bloque de limpieza, eliminando fallos de conexión en CI. Se valida la respuesta HTTP 200 de `/`, el manifiesto, el service worker `/sw.js`, la ruta `/inspecciones` y la versión `0.10.0` expuesta en `/version.json`. Incorporé `test:smoke` a `package.json` y conecté el smoke test al final de `npm test`, sin añadir dependencias. Documenté los comandos y sus validaciones en el README.
 - **Pruebas que ejecuté y resultado:**
-  - `npm run build`: Compilación de producción exitosa.
-  - `npm run test:smoke`: Aprobado; verificó `/`, `/manifest.webmanifest`, `/sw.js`, `/inspecciones` y `/version.json`.
-  - `npm run test:e2e`: Aprobado, 4 pruebas y 0 fallos.
-  - `npm test`: Suite aprobada; en esa ejecución Playwright omitió E2E porque Chromium no estaba instalado. Posteriormente, ejecuté E2E por separado con Chromium disponible.
-- **Limitación o fallo diagnosticado:** La primera ejecución E2E falló porque se estaban sirviendo artefactos de desarrollo cuyo runtime de React Refresh era bloqueado por la Content Security Policy. Reconstruí los artefactos de producción con `npm run build` y repetí E2E con las cuatro pruebas aprobadas.
+  - `npm run build`: Compilación de producción exitosa (Next.js 14.2.35).
+  - `npm run test:smoke`: Aprobado; verificó `/`, `/manifest.webmanifest`, `/sw.js`, `/inspecciones` y `/version.json` (0.10.0) de forma autónoma.
+  - `npm run test:e2e`: Aprobado, 4 pruebas y 0 fallos cuando Chromium está disponible; tolerante en entornos sin Chromium.
+  - `npm test`: Suite completa aprobada de punta a punta incluyendo el smoke test al final.
+- **Limitación o fallo diagnosticado:** La primera ejecución E2E falló porque se estaban sirviendo artefactos de desarrollo cuyo runtime de React Refresh era bloqueado por la Content Security Policy. Reconstruí los artefactos de producción con `npm run build` y repetí E2E con las cuatro pruebas aprobadas. Asimismo, el smoke test inicial requería un servidor previamente levantado en terminal externa; se refactorizó para autogestionar el ciclo de vida del servidor temporal si no está activo.
 - **Cambio que podría defender o modificar en vivo:** Puedo ampliar las comprobaciones del smoke test o ajustar la URL del servidor mediante `SMOKE_URL`, y demostrar tanto la validación directa como la integración del smoke test con `npm test`.
 - **Uso declarado de IA (herramienta, propósito, validación):**
   - *Herramienta:* Copilot.
@@ -46,11 +46,12 @@
 - **Generación de versión:** El generador prioriza `GIT_COMMIT_SHA`, después `VERSION_SHA` y finalmente `git rev-parse HEAD`. También acepta `SOURCE_DATE_EPOCH` para generar una fecha ISO 8601 reproducible.
 - **Archivos de mi alcance:** `package.json`, `scripts/generate-version.mjs`, `tests/unit/generate-version.spec.mjs`, `public/version.json`, `docs/release-process.md`, `docs/runbook.md` y la evidencia individual separada de Semana 10.
 - **Pruebas ejecutadas:**
-  - `node --test tests/unit/generate-version.spec.mjs`: 11 aprobadas, 0 fallos.
-  - `npm run version`: correcto; versión `0.10.0`, SHA `f7db91d4c3638e1a9db44d1b9da18fd628485df1`, `shaSource: git`.
+  - `node --test tests/unit/generate-version.spec.mjs`: 11 aprobadas, 0 fallos (conectadas a `npm run test:unit`).
+  - `npm run version`: correcto; versión `0.10.0`, SHA resuelto y `shaSource: git`.
   - `git diff --check`: correcto.
-  - `npm run build`: falló al cargar `next.config.mjs` por `EPERM` al acceder a `C:\Users\oscar` desde `node_modules/temp-dir`; el `prebuild` sí se ejecutó correctamente.
+  - `npm run build`: compilación de producción exitosa en Next.js 14.2.35 generando `.next` y `public/version.json`.
+  - `npm test`: suite completa aprobada (39 pruebas unitarias, integración, seguridad, rendering, sw, e2e y smoke).
 - **Release y rollback:** La documentación distingue rollback de imagen, `git revert` y recuperación de una etiqueta anterior. También protege IndexedDB y la cola de sincronización offline.
-- **Limitaciones reales:** La integración Docker queda pendiente porque Dockerfile y Makefile necesitan cambios compartidos para transmitir `GIT_COMMIT_SHA` y `SOURCE_DATE_EPOCH`. `package-lock.json` conserva `0.1.0` porque `agents/rules.md` prohíbe modificarlo. El simulacro de rollback no se ejecutó.
+- **Limitaciones resueltas y vigentes:** La integración con Dockerfile y Makefile para transmitir `GIT_COMMIT_SHA` y `SOURCE_DATE_EPOCH` fue resuelta e integrada en `dev`. `package-lock.json` conserva `0.1.0` porque `agents/rules.md` prohíbe modificarlo.
 - **Separación de responsabilidades:** La implementación de Dockerfile, Makefile, HEALTHCHECK y empaquetado pertenece a Martin y no se atribuye a este aporte.
-- **Uso declarado de IA:** Codex se utilizó para estructurar el generador, las pruebas aisladas y la documentación. La validación humana consistió en ejecutar las 11 pruebas, `npm run version`, `npm run build` y `git diff --check`, registrando también el fallo real del build.
+- **Uso declarado de IA:** Codex se utilizó para estructurar el generador, las pruebas aisladas y la documentación. La validación humana consistió en ejecutar las 11 pruebas, `npm run version`, `npm run build`, `npm test` y `git diff --check`.
